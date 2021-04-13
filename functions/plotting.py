@@ -168,10 +168,10 @@ def plot_pcolormesh(fig, ax, ttl, lon_data, lat_data, var_data, var_min, var_max
     cax = divider.new_horizontal(size='5%', pad=0.1, axes_class=plt.Axes)
     fig.add_axes(cax)
 
-    h = ax.pcolormesh(lon_data, lat_data, var_data, shading='gouraud', cmap=cmap, transform=ccrs.PlateCarree())
-    #h = ax.pcolormesh(lon_data, lat_data, var_data, vmin=var_min, vmax=var_max, shading='gouraud', cmap=cmap, transform=ccrs.PlateCarree())
+    h = ax.pcolormesh(lon_data, lat_data, var_data, vmin=var_min, vmax=var_max, shading='gouraud', cmap=cmap,
+                      transform=ccrs.PlateCarree())
 
-    cb = plt.colorbar(h, cax=cax)
+    cb = plt.colorbar(h, cax=cax, extend='both')
     cb.set_label(label=clab, fontsize=14)
 
 

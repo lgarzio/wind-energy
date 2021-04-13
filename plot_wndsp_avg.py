@@ -26,8 +26,8 @@ def main(sDir, sdate, edate, intvl):
     quiver_subset = dict(_3km=dict(_10m=11, _80m=12, _160m=13))
 
     # define the vmin and vmax based on height
-    hlims = dict(_10m=dict(vmin=0, vmax=10),
-                 _160m=dict(vmin=0, vmax=10))
+    hlims = dict(_10m=dict(vmin=2, vmax=10),
+                 _160m=dict(vmin=4, vmax=14))
 
     axis_limits = [-79.79, -69.2, 34.5, 43]  # axis limits for the 3km model
     xticks = [-78, -76, -74, -72, -70]
@@ -54,6 +54,7 @@ def main(sDir, sdate, edate, intvl):
             start.append((dr + dt.timedelta(days=1)))
             end.append(edate)
 
+    summary = []
     # grab the WRF data for each interval
     for sd, ed in zip(start, end):
         # sd = dt.datetime(2019, 9, 1, 0, 0)  # for debugging
@@ -75,7 +76,7 @@ def main(sDir, sdate, edate, intvl):
             v_mean = v.mean('time')
             sname = 'meanws_{}m_{}_{}'.format(height, intvl, sd.strftime('%Y%m%d'))
             sfile = os.path.join(savedir, sname)
-            ttl = 'Average Wind Speed: {}m \n{} to {}'.format(height, sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
+            ttl = 'Average Wind Speed {}m: {}'.format(height, sd.strftime('%b %Y'))
             qs = quiver_subset['_3km']['_{}m'.format(height)]
 
             # set up the map
@@ -86,18 +87,26 @@ def main(sDir, sdate, edate, intvl):
 
             # plot data
             # pcolormesh: coarser resolution, shows the actual resolution of the model data
-            pf.plot_pcolormesh(fig, ax, ttl, lon, lat, mws, 0, 40, 'BuPu', color_label)
+            vmin = hlims['_{}m'.format(height)]['vmin']
+            vmax = hlims['_{}m'.format(height)]['vmax']
+            pf.plot_pcolormesh(fig, ax, ttl, lon, lat, mws, vmin, vmax, 'BuPu', color_label)
 
             # subset the quivers and add as a layer
             ax.quiver(lon[::qs, ::qs], lat[::qs, ::qs], u_mean.values[::qs, ::qs], v_mean.values[::qs, ::qs],
-                      scale=1000, width=.002, headlength=4, transform=ccrs.PlateCarree())
+                      scale=100, width=.002, headlength=4, transform=ccrs.PlateCarree())
 
             plt.savefig(sfile, dpi=200)
             plt.close()
 
+            summary.append([sd.strftime('%Y-%d-%mT%H'), ed.strftime('%Y-%d-%mT%H'), height, np.nanmin(mws), np.nanmax(mws)])
+
+    df = pd.DataFrame(summary, columns=['start', 'end', 'height_m', 'min_avgws', 'max_avgws'])
+    df.to_csv(os.path.join(savedir, 'meanws_summary_{}_{}.csv'.format(intvl, sd.strftime('%Y%m%d'))), index=False)
+
 
 if __name__ == '__main__':
-    save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
+    # save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
+    save_dir = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 9, 1, 0, 0)
     interval = 'monthly'
