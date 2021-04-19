@@ -71,13 +71,19 @@ def main(sDir, sdate, edate, intvl):
 
             ws = cf.wind_uv_to_spd(u, v)
             mws = ws.mean('time')
-            print('{} {}m: min = {}, max = {}'.format(sd.strftime('%Y%m%d'), height, np.nanmin(mws), np.nanmax(mws)))
+
+            # u_standardize = u / ws
+            # v_standardize = v / ws
+            # u_mean = u_standardize.mean('time')
+            # v_mean = v_standardize.mean('time')
+
+            u_mean = u.mean('time')
+            v_mean = v.mean('time')
 
             # standardize the vectors so they only represent direction
-            u_standardize = u / ws
-            v_standardize = v / ws
-            u_mean = u_standardize.mean('time')
-            v_mean = v_standardize.mean('time')
+            u_mean_standardize = u_mean / mws
+            v_mean_standardize = v_mean / mws
+
             sname = 'meanws_{}m_{}_{}'.format(height, intvl, sd.strftime('%Y%m%d'))
             sfile = os.path.join(savedir, sname)
             ttl = 'Average Wind Speed {}m: {}'.format(height, sd.strftime('%b %Y'))
@@ -96,7 +102,7 @@ def main(sDir, sdate, edate, intvl):
             pf.plot_pcolormesh(fig, ax, ttl, lon, lat, mws, vmin, vmax, 'BuPu', color_label)
 
             # subset the quivers and add as a layer
-            ax.quiver(lon[::qs, ::qs], lat[::qs, ::qs], u_mean.values[::qs, ::qs], v_mean.values[::qs, ::qs],
+            ax.quiver(lon[::qs, ::qs], lat[::qs, ::qs], u_mean_standardize.values[::qs, ::qs], v_mean_standardize.values[::qs, ::qs],
                       scale=100, width=.002, headlength=4, transform=ccrs.PlateCarree())
 
             plt.savefig(sfile, dpi=200)
