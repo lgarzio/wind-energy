@@ -26,8 +26,8 @@ def main(sDir, sdate, edate, intvl):
     quiver_subset = dict(_3km=dict(_10m=11, _80m=12, _160m=13))
 
     # define the vmin and vmax based on height
-    hlims = dict(_10m=dict(vmin=2, vmax=10),
-                 _160m=dict(vmin=4, vmax=14))
+    hlims = dict(_10m=dict(vmin=4, vmax=10),
+                 _160m=dict(vmin=8, vmax=14))
 
     axis_limits = [-79.79, -69.2, 34.5, 43]  # axis limits for the 3km model
     xticks = [-78, -76, -74, -72, -70]
@@ -72,8 +72,12 @@ def main(sDir, sdate, edate, intvl):
             ws = cf.wind_uv_to_spd(u, v)
             mws = ws.mean('time')
             print('{} {}m: min = {}, max = {}'.format(sd.strftime('%Y%m%d'), height, np.nanmin(mws), np.nanmax(mws)))
-            u_mean = u.mean('time')
-            v_mean = v.mean('time')
+
+            # standardize the vectors so they only represent direction
+            u_standardize = u / ws
+            v_standardize = v / ws
+            u_mean = u_standardize.mean('time')
+            v_mean = v_standardize.mean('time')
             sname = 'meanws_{}m_{}_{}'.format(height, intvl, sd.strftime('%Y%m%d'))
             sfile = os.path.join(savedir, sname)
             ttl = 'Average Wind Speed {}m: {}'.format(height, sd.strftime('%b %Y'))
