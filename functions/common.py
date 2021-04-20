@@ -2,11 +2,34 @@
 
 """
 Author: Lori Garzio on 8/17/2020
-Last modified: 4/13/2021
+Last modified: 4/20/2021
 """
 
 import numpy as np
+import pandas as pd
+import datetime as dt
 import xml.etree.ElementTree as ET  # for parsing kml files
+
+
+def daterange_interval(interval, start_date, end_date):
+    """
+    Break up date range into the plotting interval specified
+    """
+    if interval == 'monthly':
+        daterange = pd.date_range(start_date, end_date, freq='M')
+        start = []
+        end = []
+        for i, dr in enumerate(daterange):
+            if i == 0:
+                start.append(start_date)
+            else:
+                start.append((daterange[i - 1] + dt.timedelta(days=1)))
+            end.append(dr)
+        if dr + dt.timedelta(days=1) != end_date:
+            start.append((dr + dt.timedelta(days=1)))
+            end.append(end_date)
+
+    return start, end
 
 
 def extract_lease_areas():
@@ -47,6 +70,23 @@ def find_coords(elem, findstr):
             coordlist.append([np.float(splitter[0]), np.float(splitter[1])])
 
     return coordlist
+
+
+def nyserda_buoys():
+    """
+    Return dictionary of NYSERDA buoy information
+    """
+    # locations of NYSERDA LIDAR buoys
+    nb = dict(
+        nyserda_north=dict(coords=dict(lon=-72.7173, lat=39.9686),
+                           name='NYSERDA North',
+                           code='NYNE05'),
+        nyserda_south=dict(coords=dict(lon=-73.4295, lat=39.5465),
+                           name='NYSERDA South',
+                           code='NYNE06')
+    )
+
+    return nb
 
 
 def subset_grid(data, model):

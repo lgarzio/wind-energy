@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/12/2021
-Last modified: 4/13/2021
+Last modified: 4/20/2021
 Plot average WRF windspeeds at 10m and 160m at user-defined grouping intervals
 """
 
@@ -40,19 +40,7 @@ def main(sDir, sdate, edate, intvl):
     os.makedirs(savedir, exist_ok=True)
 
     # break up date range into the plotting interval specified
-    if intvl == 'monthly':
-        daterange = pd.date_range(sdate, edate, freq='M')
-        start = []
-        end = []
-        for i, dr in enumerate(daterange):
-            if i == 0:
-                start.append(sdate)
-            else:
-                start.append((daterange[i - 1] + dt.timedelta(days=1)))
-            end.append(dr)
-        if dr + dt.timedelta(days=1) != edate:
-            start.append((dr + dt.timedelta(days=1)))
-            end.append(edate)
+    start, end = cf.daterange_interval(intvl, sdate, edate)
 
     ds = xr.open_dataset(wrf)
     summary = []
