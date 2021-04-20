@@ -76,8 +76,8 @@ def main(sDir, sdate, edate, intvl):
             v_mean = v.mean('time')
 
             # standardize the vectors so they only represent direction
-            u_mean_standardize = u_mean / mws
-            v_mean_standardize = v_mean / mws
+            u_mean_standardize = u_mean / cf.wind_uv_to_spd(u_mean, v_mean)
+            v_mean_standardize = v_mean / cf.wind_uv_to_spd(u_mean, v_mean)
 
             sname = 'meanws_{}m_{}_{}'.format(height, intvl, sd.strftime('%Y%m%d'))
             sfile = os.path.join(savedir, sname)
