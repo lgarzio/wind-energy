@@ -65,16 +65,16 @@ def main(sDir, sdate, edate, intvl):
                 i, j = np.unravel_index(a.argmin(), a.shape)
 
                 # grab the data just at that location
-                u = u[:, i, j]
-                v = v[:, i, j]
+                usub = u[:, i, j]
+                vsub = v[:, i, j]
 
                 ax = new_axes()
                 plt_title = 'RU-WRF 4.1 at {}\n{}: {}m'.format(binfo['name'], sd.strftime('%b %Y'), str(height))
                 sname = 'WRF_windrose_{}_{}m_{}.png'.format(binfo['code'], height, sd.strftime('%Y%m%d'))
                 sfile = os.path.join(savedir, sname)
 
-                ws = cf.wind_uv_to_spd(u.values, v.values)
-                wdir = cf.wind_uv_to_dir(u.values, v.values)
+                ws = cf.wind_uv_to_spd(usub.values, vsub.values)
+                wdir = cf.wind_uv_to_dir(usub.values, vsub.values)
 
                 pf.plot_windrose(ax, ws, wdir, plt_title)
 
