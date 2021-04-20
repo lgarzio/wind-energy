@@ -54,28 +54,23 @@ def main(sDir, sdate, edate, intvl):
             start.append((dr + dt.timedelta(days=1)))
             end.append(edate)
 
+    ds = xr.open_dataset(wrf)
     summary = []
     # grab the WRF data for each interval
     for sd, ed in zip(start, end):
         # sd = dt.datetime(2019, 9, 1, 0, 0)  # for debugging
-        # ed = dt.datetime(2019, 9, 1, 0, 0)  # for debugging
-        ds = xr.open_dataset(wrf)
-        ds = ds.sel(time=slice(sd, ed + dt.timedelta(hours=23)))
+        # ed = dt.datetime(2019, 9, 2, 0, 0)  # for debugging
+        dst = ds.sel(time=slice(sd, ed + dt.timedelta(hours=23)))
         for height in heights:
             if height == 10:
-                u = ds['U10']
-                v = ds['V10']
+                u = dst['U10']
+                v = dst['V10']
             else:
-                u = ds.sel(height=height)['U']
-                v = ds.sel(height=height)['V']
+                u = dst.sel(height=height)['U']
+                v = dst.sel(height=height)['V']
 
             ws = cf.wind_uv_to_spd(u, v)
             mws = ws.mean('time')
-
-            # u_standardize = u / ws
-            # v_standardize = v / ws
-            # u_mean = u_standardize.mean('time')
-            # v_mean = v_standardize.mean('time')
 
             u_mean = u.mean('time')
             v_mean = v.mean('time')
@@ -102,8 +97,11 @@ def main(sDir, sdate, edate, intvl):
             pf.plot_pcolormesh(fig, ax, ttl, lon, lat, mws, vmin, vmax, 'BuPu', color_label)
 
             # subset the quivers and add as a layer
-            ax.quiver(lon[::qs, ::qs], lat[::qs, ::qs], u_mean_standardize.values[::qs, ::qs], v_mean_standardize.values[::qs, ::qs],
-                      scale=100, width=.002, headlength=4, transform=ccrs.PlateCarree())
+            # ax.quiver(lon[::qs, ::qs], lat[::qs, ::qs], u_mean_standardize.values[::qs, ::qs], v_mean_standardize.values[::qs, ::qs],
+            #           scale=100, width=.002, headlength=4, transform=ccrs.PlateCarree())
+
+            ax.quiver(lon[::qs, ::qs], lat[::qs, ::qs], u_mean_standardize.values[::qs, ::qs],
+                      v_mean_standardize.values[::qs, ::qs], transform=ccrs.PlateCarree())
 
             plt.savefig(sfile, dpi=200)
             plt.close()
