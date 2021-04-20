@@ -10,3 +10,4 @@ dependencies:
   - cartopy=0.18.0
   - cmocean=2.0
   - geopandas=0.9.0
+  - windrose=1.6.8

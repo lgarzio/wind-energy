@@ -2,12 +2,13 @@
 
 """
 Author: Lori Garzio on 8/17/2020
-Last modified: 4/13/2021
+Last modified: 4/20/2021
 """
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
+import matplotlib.cm as cm
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -173,6 +174,30 @@ def plot_pcolormesh(fig, ax, ttl, lon_data, lat_data, var_data, var_min, var_max
 
     cb = plt.colorbar(h, cax=cax, extend='both')
     cb.set_label(label=clab, fontsize=14)
+
+
+def plot_windrose(axis, wspd, wdir, ttl):
+    # set the bins for wind speeds
+    b = [0, 5, 10, 15, 20, 25, 30]
+    axis.bar(wdir, wspd, normed=True, bins=b, opening=1, edgecolor='black', cmap=cm.jet, nsector=36)
+
+    # add % to y-axis labels
+    newticks = ['{:.0%}'.format(x / 100) for x in axis.get_yticks()]
+    axis.set_yticklabels(newticks)
+
+    # format legend
+    # move legend
+    al = axis.legend(borderaxespad=-7, title='Wind Speed (m/s)')
+
+    # replace the text in the legend
+    text_str = ['0$\leq$ ws <5', '5$\leq$ ws <10', '10$\leq$ ws <15', '15$\leq$ ws <20', '20$\leq$ ws <25',
+                '25$\leq$ ws <30', 'ws $\geq$30']
+    for i, txt in enumerate(al.get_texts()):
+        txt.set_text(text_str[i])
+    plt.setp(al.get_texts(), fontsize=10)
+
+    # add title
+    axis.set_title(ttl, fontsize=14)
 
 
 def set_map(data):
