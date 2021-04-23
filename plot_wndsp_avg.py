@@ -27,7 +27,7 @@ def main(sDir, sdate, edate, intvl):
 
     # define the vmin and vmax based on height
     hlims = dict(_10m=dict(vmin=4, vmax=10),
-                 _160m=dict(vmin=8, vmax=14))
+                 _160m=dict(vmin=6, vmax=14))
 
     axis_limits = [-79.79, -69.2, 34.5, 43]  # axis limits for the 3km model
     xticks = [-78, -76, -74, -72, -70]
