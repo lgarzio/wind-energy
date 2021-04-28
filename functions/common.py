@@ -72,6 +72,44 @@ def find_coords(elem, findstr):
     return coordlist
 
 
+def plot_regions():
+    regions = dict(
+        full_grid=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14)),
+                       quiver_subset=dict(_10m=11, _160m=13),
+                       quiver_scale=45,
+                       extent=[-79.79, -69.2, 34.5, 43],
+                       xticks=[-78, -76, -74, -72, -70],
+                       yticks=[36, 38, 40, 42],
+                       subset=False,
+                       lease_area=False),
+        mab=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14)),
+                 quiver_subset=dict(_10m=7, _160m=8),
+                 quiver_scale=40,
+                 extent=[-77.2, -69.6, 36, 41.8],
+                 xticks=[-75, -73, -71],
+                 yticks=[37, 39, 41],
+                 subset=True,
+                 lease_area=True),
+        nj=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14)),
+                quiver_subset=dict(_10m=4, _160m=5),
+                quiver_scale=40,
+                extent=[-75.7, -71.5, 38.1, 41.2],
+                xticks=[-75, -74, -73, -72],
+                yticks=[39, 40, 41],
+                subset=True,
+                lease_area=True),
+        southern_nj=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14)),
+                         quiver_subset=dict(_10m=3, _160m=3),
+                         quiver_scale=40,
+                         extent=[-75.6, -73, 38.6, 40.5],
+                         xticks=[-75, -74.5, -74, -73.5],
+                         yticks=[39, 39.5, 40],
+                         subset=True,
+                         lease_area=True)
+    )
+    return regions
+
+
 def nyserda_buoys():
     """
     Return dictionary of NYSERDA buoy information
@@ -89,39 +127,23 @@ def nyserda_buoys():
     return nb
 
 
-def subset_grid(data, model):
+def subset_grid(ds, extent):
     """
     Subset the data according to defined latitudes and longitudes, and define the axis limits for the plots
-    :param data: data from the netcdf file to be plotted, including latitude and longitude coordinates
-    :param model: the model version that is being plotted, e.g. 3km, 9km, or bight (to plot just NY Bight region)
-    :returns data: data subset to the desired grid region
-    :returns axis_limits: axis limits to be used in the plotting function
     """
-    if model == '3km':
-        axis_limits = [-79.79, -69.2, 34.5, 43]
-        model_lims = dict(minlon=-79.9, maxlon=-69, minlat=34.5, maxlat=43)
-    elif model == '9km':
-        axis_limits = [-80, -67.9, 33.05, 44]
-        model_lims = dict(minlon=-80.05, maxlon=-67.9, minlat=33, maxlat=44.05)
-    elif model == 'bight':
-        axis_limits = [-77.5, -72, 37.5, 42.05]
-        model_lims = dict(minlon=-77.55, maxlon=-71.95, minlat=37.45, maxlat=42.05)
-    else:
-        print('Model not recognized')
-
-    mlon = data['XLONG']
-    mlat = data['XLAT']
-    lon_ind = np.logical_and(mlon > model_lims['minlon'], mlon < model_lims['maxlon'])
-    lat_ind = np.logical_and(mlat > model_lims['minlat'], mlat < model_lims['maxlat'])
+    mlon = ds['XLONG']
+    mlat = ds['XLAT']
+    lon_ind = np.logical_and(mlon > extent[0], mlon < extent[1])
+    lat_ind = np.logical_and(mlat > extent[2], mlat < extent[3])
 
     # find i and j indices of lon/lat in boundaries
     ind = np.where(np.logical_and(lon_ind, lat_ind))
 
     # subset data from min i,j corner to max i,j corner
     # there will be some points outside of defined boundaries because grid is not rectangular
-    data = np.squeeze(data)[:, range(np.min(ind[0]), np.max(ind[0]) + 1), range(np.min(ind[1]), np.max(ind[1]) + 1)]
+    sub = np.squeeze(ds)[range(np.min(ind[0]), np.max(ind[0]) + 1), range(np.min(ind[1]), np.max(ind[1]) + 1)]
 
-    return data, axis_limits
+    return sub
 
 
 def wind_uv_to_dir(u, v):
