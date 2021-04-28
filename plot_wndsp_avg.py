@@ -81,7 +81,7 @@ def main(sDir, sdate, edate, intvl):
 
                 # add lease areas
                 if items['lease_area']:
-                    pf.add_lease_area_polygon(ax, la_polygon, 'magenta')
+                    pf.add_lease_area_polygon(ax, la_polygon, 'gray')
 
                 lon = mws.XLONG.values
                 lat = mws.XLAT.values
