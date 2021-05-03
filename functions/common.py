@@ -32,13 +32,13 @@ def daterange_interval(interval, start_date, end_date):
     return start, end
 
 
-def extract_lease_areas():
+def extract_lease_area_outlines():
     """
-    Extracts polygon coordinates from a .kml file.
+    Extracts outlines of wind energy area polygon coordinates from a .kml file.
     :returns dictionary containing lat/lon coordinates for wind energy lease area polygons, separated by company
     """
-    # boem_lease_areas = '/Users/garzio/Documents/rucool/bpu/wrf/boem_lease_area_full.kml'  # on local machine
-    # boem_lease_areas = '/Users/garzio/Documents/rucool/bpu/wrf/boem_lease_areas_AS_OW_split.kml'  # on local machine
+    # boem_lease_areas = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/boem_lease_area_full.kml'  # on local machine
+    # boem_lease_areas = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/boem_lease_areas_AS_OW_split.kml'  # on local machine
     boem_lease_areas = '/home/coolgroup/bpu/mapdata/shapefiles/RU-WRF_Plotting_Shapefiles/boem_lease_areas_AS_OW_split.kml'
     nmsp = '{http://www.opengis.net/kml/2.2}'
     doc = ET.parse(boem_lease_areas)
