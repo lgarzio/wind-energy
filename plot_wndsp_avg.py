@@ -20,7 +20,7 @@ plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise
 def main(sDir, sdate, edate, intvl):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
     heights = [160, 10]
-    mingray = dict(_10m=5, _160m=6)  # minimum average value for making the state/coastlines and quivers gray
+    mingray = dict(_10m=5, _160m=7)  # minimum average value for making the state/coastlines and quivers gray
 
     plt_regions = cf.plot_regions()
     color_label = 'Average Wind Speed (m/s)'
@@ -76,7 +76,7 @@ def main(sDir, sdate, edate, intvl):
                 fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
                 if np.nanmean(mws) < mingray['_{}m'.format(height)]:
                     pf.add_map_features(ax, items['extent'], items['xticks'], items['yticks'], ecolor='#525252')
-                    quiver_color = '#525252'
+                    quiver_color = 'lightgray'
                 else:
                     pf.add_map_features(ax, items['extent'], items['xticks'], items['yticks'])
                     quiver_color = 'k'
