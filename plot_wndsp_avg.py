@@ -23,14 +23,19 @@ def main(sDir, sdate, edate, intvl):
     mingray = dict(_10m=5, _160m=7)  # minimum average value for making the state/coastlines and quivers gray
 
     plt_regions = cf.plot_regions()
-    color_label = 'Average Wind Speed (m/s)'
+    plt_vars = dict(meanws=dict(color_label='Average Wind Speed (m/s)',
+                                title='Average Wind Speed',
+                                cmap=plt.get_cmap('viridis')),
+                    sdwind=dict(color_label='Wind Speed Variance',
+                                title='Variance',
+                                cmap='BuPu'))
 
     # boem_rootdir = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM_Renewable_Energy_Areas_Shapefile_3_29_2021'
     # leasing_areas, planning_areas = cf.boem_shapefiles(boem_rootdir)
 
     la_polygon = cf.extract_lease_area_outlines()
 
-    savedir = os.path.join(sDir, '{}_{}-{}-withquiver'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    savedir = os.path.join(sDir, '{}_{}-{}-withquiver-test'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     # break up date range into the plotting interval specified
@@ -51,8 +56,6 @@ def main(sDir, sdate, edate, intvl):
                 u = dst.sel(height=height)['U']
                 v = dst.sel(height=height)['V']
 
-            ttl = 'Average Wind Speed {}m: {}'.format(height, sd.strftime('%b %Y'))
-
             ws = cf.wind_uv_to_spd(u, v)
             mws = ws.mean('time')
 
@@ -63,59 +66,78 @@ def main(sDir, sdate, edate, intvl):
             u_mean_standardize = u_mean / cf.wind_uv_to_spd(u_mean, v_mean)
             v_mean_standardize = v_mean / cf.wind_uv_to_spd(u_mean, v_mean)
 
-            for pr, items in plt_regions.items():
-                region_savedir = os.path.join(savedir, pr)
-                os.makedirs(region_savedir, exist_ok=True)
+            # calculate the variance
+            u_variance = np.square(u.std('time'))
+            v_variance = np.square(v.std('time'))
 
-                sname = '{}_meanws_{}m_{}_{}'.format(pr, height, intvl, sd.strftime('%Y%m%d'))
-                sfile = os.path.join(region_savedir, sname)
-                #sfile = os.path.join(savedir, sname)  # for debugging
+            sdwind = np.sqrt(u_variance + v_variance)
 
-                # set up the map
-                lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
-                fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
-                if np.nanmean(mws) < mingray['_{}m'.format(height)]:
-                    pf.add_map_features(ax, items['extent'], items['xticks'], items['yticks'], ecolor='gray')
-                    quiver_color = 'lightgray'
-                else:
-                    pf.add_map_features(ax, items['extent'], items['xticks'], items['yticks'])
-                    quiver_color = 'k'
+            plt_vars['meanws']['data'] = mws
+            plt_vars['sdwind']['data'] = sdwind
 
-                # subset grid
-                if items['subset']:
-                    extent = np.add(items['extent'], [-.5, .5, -.5, .5]).tolist()
-                    mws = cf.subset_grid(mws, extent)
-                    u_mean_standardize = cf.subset_grid(u_mean_standardize, extent)
-                    v_mean_standardize = cf.subset_grid(v_mean_standardize, extent)
+            for pv, plt_info in plt_vars.items():
+                for pr, region_info in plt_regions.items():
+                    region_savedir = os.path.join(savedir, pr)
+                    os.makedirs(region_savedir, exist_ok=True)
 
-                # add lease areas
-                if items['lease_area']:
-                    pf.add_lease_area_polygon(ax, la_polygon, 'magenta')
-                    #leasing_areas.plot(ax=ax, color='none', edgecolor='magenta', transform=ccrs.PlateCarree(), zorder=10)
-                    #planning_areas.plot(ax=ax, color='none', edgecolor='dimgray', transform=ccrs.PlateCarree())
+                    sname = '{}_{}_{}m_{}_{}'.format(pr, pv, height, intvl, sd.strftime('%Y%m%d'))
+                    sfile = os.path.join(region_savedir, sname)
+                    #sfile = os.path.join(savedir, sname)  # for debugging
 
-                lon = mws.XLONG.values
-                lat = mws.XLAT.values
+                    # set up the map
+                    lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
+                    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
+                    if pv == 'meanws':
+                        if np.nanmean(plt_info['data']) < mingray['_{}m'.format(height)]:
+                            pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'],
+                                                ecolor='gray')
+                            quiver_color = 'lightgray'
+                        else:
+                            pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'])
+                            quiver_color = 'k'
+                    else:
+                        pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'])
 
-                # plot data
-                # pcolormesh: coarser resolution, shows the actual resolution of the model data
-                vmin = items['limits']['_{}m'.format(height)]['vmin']
-                vmax = items['limits']['_{}m'.format(height)]['vmax']
-                pf.plot_pcolormesh(fig, ax, ttl, lon, lat, mws, vmin, vmax, plt.get_cmap('viridis'), color_label)
+                    data = plt_info['data']
 
-                # subset the quivers and add as a layer
-                if items['quiver_subset']:
-                    quiver_scale = items['quiver_scale']
-                    qs = items['quiver_subset']['_{}m'.format(height)]
-                    ax.quiver(lon[::qs, ::qs], lat[::qs, ::qs], u_mean_standardize.values[::qs, ::qs],
-                              v_mean_standardize.values[::qs, ::qs], scale=quiver_scale, color=quiver_color,
-                              transform=ccrs.PlateCarree())
-                else:
-                    ax.quiver(lon, lat, u_mean_standardize.values, v_mean_standardize.values, scale=quiver_scale,
-                              color=quiver_color, transform=ccrs.PlateCarree())
+                    # subset grid
+                    if region_info['subset']:
+                        extent = np.add(region_info['extent'], [-.5, .5, -.5, .5]).tolist()
+                        data = cf.subset_grid(data, extent)
+                        if pv == 'meanws':
+                            u_mean_standardize = cf.subset_grid(u_mean_standardize, extent)
+                            v_mean_standardize = cf.subset_grid(v_mean_standardize, extent)
 
-                plt.savefig(sfile, dpi=200)
-                plt.close()
+                    # add lease areas
+                    if region_info['lease_area']:
+                        pf.add_lease_area_polygon(ax, la_polygon, 'magenta')
+                        #leasing_areas.plot(ax=ax, color='none', edgecolor='magenta', transform=ccrs.PlateCarree(), zorder=10)
+                        #planning_areas.plot(ax=ax, color='none', edgecolor='dimgray', transform=ccrs.PlateCarree())
+
+                    lon = data.XLONG.values
+                    lat = data.XLAT.values
+
+                    # plot data
+                    # pcolormesh: coarser resolution, shows the actual resolution of the model data
+                    vmin = region_info[pv]['limits']['_{}m'.format(height)]['vmin']
+                    vmax = region_info[pv]['limits']['_{}m'.format(height)]['vmax']
+                    ttl = '{} {}m: {}'.format(plt_info['title'], height, sd.strftime('%b %Y'))
+                    pf.plot_pcolormesh(fig, ax, ttl, lon, lat, data, vmin, vmax, plt_info['cmap'], plt_info['color_label'])
+
+                    # subset the quivers and add as a layer for meanws only
+                    if pv == 'meanws':
+                        if region_info['quiver_subset']:
+                            quiver_scale = region_info['quiver_scale']
+                            qs = region_info['quiver_subset']['_{}m'.format(height)]
+                            ax.quiver(lon[::qs, ::qs], lat[::qs, ::qs], u_mean_standardize.values[::qs, ::qs],
+                                      v_mean_standardize.values[::qs, ::qs], scale=quiver_scale, color=quiver_color,
+                                      transform=ccrs.PlateCarree())
+                        else:
+                            ax.quiver(lon, lat, u_mean_standardize.values, v_mean_standardize.values, scale=quiver_scale,
+                                      color=quiver_color, transform=ccrs.PlateCarree())
+
+                    plt.savefig(sfile, dpi=200)
+                    plt.close()
 
 
 if __name__ == '__main__':
