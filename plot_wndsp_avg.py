@@ -26,8 +26,8 @@ def main(sDir, sdate, edate, intvl):
     plt_vars = dict(meanws=dict(color_label='Average Wind Speed (m/s)',
                                 title='Average Wind Speed',
                                 cmap=plt.get_cmap('viridis')),
-                    sdwind=dict(color_label='Wind Speed Variance',
-                                title='Variance',
+                    sdwind=dict(color_label='Variance',
+                                title='Wind Speed Variance',
                                 cmap='BuPu'))
 
     # boem_rootdir = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM_Renewable_Energy_Areas_Shapefile_3_29_2021'
