@@ -75,7 +75,7 @@ def main(sDir, sdate, edate, intvl):
                 lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
                 fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
                 if np.nanmean(mws) < mingray['_{}m'.format(height)]:
-                    pf.add_map_features(ax, items['extent'], items['xticks'], items['yticks'], ecolor='#525252')
+                    pf.add_map_features(ax, items['extent'], items['xticks'], items['yticks'], ecolor='gray')
                     quiver_color = 'lightgray'
                 else:
                     pf.add_map_features(ax, items['extent'], items['xticks'], items['yticks'])
