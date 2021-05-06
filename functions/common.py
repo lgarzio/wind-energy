@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 8/17/2020
-Last modified: 4/20/2021
+Last modified: 5/6/2021
 """
 
 import numpy as np
@@ -75,7 +75,7 @@ def find_coords(elem, findstr):
 def plot_regions():
     regions = dict(
         full_grid=dict(meanws=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14))),
-                       sdwind=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14))),
+                       sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12), _160m=dict(vmin=6, vmax=12))),
                        quiver_subset=dict(_10m=11, _160m=13),
                        quiver_scale=45,
                        extent=[-79.79, -69.2, 34.5, 43],
@@ -84,7 +84,7 @@ def plot_regions():
                        subset=False,
                        lease_area=False),
         mab=dict(meanws=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14))),
-                 sdwind=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14))),
+                 sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12), _160m=dict(vmin=6, vmax=12))),
                  quiver_subset=dict(_10m=7, _160m=8),
                  quiver_scale=40,
                  extent=[-77.2, -69.6, 36, 41.8],
@@ -93,7 +93,7 @@ def plot_regions():
                  subset=True,
                  lease_area=True),
         nj=dict(meanws=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14))),
-                sdwind=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14))),
+                sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12), _160m=dict(vmin=6, vmax=12))),
                 quiver_subset=dict(_10m=4, _160m=5),
                 quiver_scale=40,
                 extent=[-75.7, -71.5, 38.1, 41.2],
@@ -102,7 +102,7 @@ def plot_regions():
                 subset=True,
                 lease_area=True),
         southern_nj=dict(meanws=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14))),
-                         sdwind=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14))),
+                         sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12), _160m=dict(vmin=6, vmax=12))),
                          quiver_subset=dict(_10m=3, _160m=3),
                          quiver_scale=40,
                          extent=[-75.6, -73, 38.6, 40.5],

@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/12/2021
-Last modified: 5/3/2021
+Last modified: 5/6/2021
 Plot average WRF windspeeds at 10m and 160m at user-defined grouping intervals
 """
 
@@ -23,10 +23,13 @@ def main(sDir, sdate, edate, intvl):
     mingray = dict(_10m=5, _160m=7)  # minimum average value for making the state/coastlines and quivers gray
 
     plt_regions = cf.plot_regions()
-    plt_vars = dict(meanws=dict(color_label='Average Wind Speed (m/s)',
-                                title='Average Wind Speed',
-                                cmap=plt.get_cmap('viridis')),
-                    sdwind=dict(color_label='Variance',
+    # plt_vars = dict(meanws=dict(color_label='Average Wind Speed (m/s)',
+    #                             title='Average Wind Speed',
+    #                             cmap=plt.get_cmap('viridis')),
+    #                 sdwind=dict(color_label='Variance',
+    #                             title='Wind Speed Variance',
+    #                             cmap='BuPu'))
+    plt_vars = dict(sdwind=dict(color_label='Variance',
                                 title='Wind Speed Variance',
                                 cmap='BuPu'))
 
