@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/12/2021
-Last modified: 5/6/2021
+Last modified: 5/10/2021
 Plot average WRF windspeeds at 10m and 160m at user-defined grouping intervals
 """
 
@@ -119,10 +119,15 @@ def main(sDir, sdate, edate, intvl):
 
                     # plot data
                     # pcolormesh: coarser resolution, shows the actual resolution of the model data
+                    # contourf: smooths the resolution of the model data, plots are less pixelated, can define discrete levels
                     vmin = region_info[pv]['limits']['_{}m'.format(height)]['vmin']
                     vmax = region_info[pv]['limits']['_{}m'.format(height)]['vmax']
                     ttl = '{} {}m: {}'.format(plt_info['title'], height, sd.strftime('%b %Y'))
-                    pf.plot_pcolormesh(fig, ax, ttl, lon, lat, data, vmin, vmax, plt_info['cmap'], plt_info['color_label'])
+                    kwargs = dict()
+                    kwargs['levels'] = list(np.arange(vmin, vmax + .5, .5))
+                    kwargs['ttl'] = ttl
+                    kwargs['clab'] = plt_info['color_label']
+                    pf.plot_contourf(fig, ax, lon, lat, data, plt_info['cmap'], **kwargs)
 
                     # subset the quivers and add as a layer for meanws only
                     if pv == 'meanws':

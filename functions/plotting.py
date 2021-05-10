@@ -105,46 +105,46 @@ def add_map_features(ax, axes_limits, xticks=None, yticks=None, landcolor=None, 
     ax.add_feature(state_lines, zorder=7, edgecolor=ec)
 
 
-def plot_contourf(fig, ax, ttl, lon_data, lat_data, var_data, clevs, cmap, clab, var_min, var_max, normalize,
-                  cbar_ticks=None):
+def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar_ticks=None, extend=None):
     """
     Create a filled contour plot with user-defined levels and colors
     :param fig: figure object
     :param ax: plotting axis object
-    :param ttl: plot title
-    :param lon_data: longitude data
-    :param lat_data: latitude data
-    :param var_data: variable data
-    :param clevs: list of colorbar level demarcations
+    :param x: x-axis data
+    :param y: y-axis data
+    :param c: color data
     :param cmap: colormap
-    :param clab: colorbar label
-    :param var_min: optional, minimum value for plotting (for fixed colorbar)
-    :param var_max: optional, maximum value for plotting (for fixed colorbar)
-    :param normalize: optional, object that normalizes the colorbar level demarcations
+    :param levels: optional list of data levels
+    :param ttl: optional plot title
+    :param clab: optional colorbar label
     :param cbar_ticks: optional, specify colorbar ticks
     :returns fig, ax objects
     """
+    ttl = ttl or None
+    levels = levels or None
+    clab = clab or None
+    cbar_ticks = cbar_ticks or None
+    extend = extend or 'both'
+
     plt.subplots_adjust(right=0.88)
-    plt.title(ttl, fontsize=17)
+    if ttl:
+        plt.title(ttl, fontsize=17)
     divider = make_axes_locatable(ax)
     cax = divider.new_horizontal(size='5%', pad=0.1, axes_class=plt.Axes)
     fig.add_axes(cax)
 
-    if normalize == 'yes':
-        #norm = mpl.colors.BoundaryNorm(clevs, 15)
-        norm = mpl.colors.BoundaryNorm(clevs, len(clevs)-1)
-        cs = ax.contourf(lon_data, lat_data, var_data, clevs, cmap=cmap, norm=norm, transform=ccrs.PlateCarree(),
-                         alpha=.9)
+    if levels:
+        cs = ax.contourf(x, y, c, levels=levels, cmap=cmap, extend=extend, transform=ccrs.PlateCarree())
     else:
-        cs = ax.contourf(lon_data, lat_data, var_data, clevs, vmin=var_min, vmax=var_max, cmap=cmap,
-                         transform=ccrs.PlateCarree(), alpha=.9)
+        cs = ax.contourf(x, y, c, cmap=cmap, extend=extend, transform=ccrs.PlateCarree())
 
-    if cbar_ticks is not None:
+    if cbar_ticks:
         cb = plt.colorbar(cs, cax=cax, ticks=cbar_ticks)
     else:
         cb = plt.colorbar(cs, cax=cax)
 
-    cb.set_label(label=clab, fontsize=14)
+    if clab:
+        cb.set_label(label=clab, fontsize=14)
 
     return fig, ax
 
