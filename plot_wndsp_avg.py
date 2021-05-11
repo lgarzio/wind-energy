@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/12/2021
-Last modified: 5/10/2021
+Last modified: 5/11/2021
 Plot average WRF windspeeds at 10m and 160m at user-defined grouping intervals
 """
 
@@ -10,6 +10,7 @@ import datetime as dt
 import os
 import xarray as xr
 import numpy as np
+from sklearn.preprocessing import normalize
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import functions.common as cf
@@ -28,14 +29,15 @@ def main(sDir, sdate, edate, intvl):
                                 cmap=plt.get_cmap('viridis')),
                     sdwind=dict(color_label='Variance (m/s)',
                                 title='Wind Speed Variance',
-                                cmap='BuPu'))
-
-    # boem_rootdir = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM_Renewable_Energy_Areas_Shapefile_3_29_2021'
-    # leasing_areas, planning_areas = cf.boem_shapefiles(boem_rootdir)
+                                cmap='BuPu'),
+                    sdwind_norm=dict(color_label='Normalized Variance (m/s)',
+                                     title='Normalized Wind Speed Variance',
+                                     cmap='BuPu')
+                    )
 
     la_polygon = cf.extract_lease_area_outlines()
 
-    savedir = os.path.join(sDir, '{}_{}-{}-withquiver-test'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    savedir = os.path.join(sDir, '{}_{}-{}-withquiver'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     # break up date range into the plotting interval specified
@@ -72,8 +74,12 @@ def main(sDir, sdate, edate, intvl):
 
             sdwind = np.sqrt(u_variance + v_variance)
 
+            sdwind_norm = normalize(sdwind, axis=1, norm='max')
+            da = xr.DataArray(sdwind_norm, coords=sdwind.coords, dims=sdwind.dims)
+
             plt_vars['meanws']['data'] = mws
             plt_vars['sdwind']['data'] = sdwind
+            plt_vars['sdwind_norm']['data'] = da
 
             for pv, plt_info in plt_vars.items():
                 for pr, region_info in plt_regions.items():
@@ -111,20 +117,25 @@ def main(sDir, sdate, edate, intvl):
                     # add lease areas
                     if region_info['lease_area']:
                         pf.add_lease_area_polygon(ax, la_polygon, 'magenta')
-                        #leasing_areas.plot(ax=ax, color='none', edgecolor='magenta', transform=ccrs.PlateCarree(), zorder=10)
-                        #planning_areas.plot(ax=ax, color='none', edgecolor='dimgray', transform=ccrs.PlateCarree())
 
                     lon = data.XLONG.values
                     lat = data.XLAT.values
 
+                    # initialize keyword arguments for plotting
+                    kwargs = dict()
+
                     # plot data
                     # pcolormesh: coarser resolution, shows the actual resolution of the model data
                     # contourf: smooths the resolution of the model data, plots are less pixelated, can define discrete levels
-                    vmin = region_info[pv]['limits']['_{}m'.format(height)]['vmin']
-                    vmax = region_info[pv]['limits']['_{}m'.format(height)]['vmax']
+                    try:
+                        vmin = region_info[pv]['limits']['_{}m'.format(height)]['vmin']
+                        vmax = region_info[pv]['limits']['_{}m'.format(height)]['vmax']
+                        levels = list(np.arange(vmin, vmax + .5, .5))
+                    except KeyError:
+                        levels = list(np.arange(0, 1.1, .1))  # for normalized plots
+                        kwargs['extend'] = 'neither'
                     ttl = '{} {}m: {}'.format(plt_info['title'], height, sd.strftime('%b %Y'))
-                    kwargs = dict()
-                    kwargs['levels'] = list(np.arange(vmin, vmax + .5, .5))
+                    kwargs['levels'] = levels
                     kwargs['ttl'] = ttl
                     kwargs['clab'] = plt_info['color_label']
                     pf.plot_contourf(fig, ax, lon, lat, data, plt_info['cmap'], **kwargs)
