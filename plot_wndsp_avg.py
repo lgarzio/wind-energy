@@ -32,12 +32,11 @@ def main(sDir, sdate, edate, intvl):
                                 cmap='BuPu'),
                     sdwind_norm=dict(color_label='Normalized Variance (m/s)',
                                      title='Normalized Wind Speed Variance',
-                                     cmap='BuPu')
-                    )
+                                     cmap='BuPu'))
 
     la_polygon = cf.extract_lease_area_outlines()
 
-    savedir = os.path.join(sDir, '{}_{}-{}-withquiver'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     # break up date range into the plotting interval specified
