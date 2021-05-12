@@ -130,7 +130,7 @@ def main(sDir, sdate, edate, intvl):
                         vmax = region_info[pv]['limits']['_{}m'.format(height)]['vmax']
                         levels = list(np.arange(vmin, vmax + .5, .5))
                     except KeyError:
-                        levels = list(np.arange(.9, 1.3, .05))  # for normalized variance plots
+                        levels = list(np.arange(.9, 1.25, .05))  # for normalized variance plots
                     ttl = '{} {}m: {}'.format(plt_info['title'], height, sd.strftime('%b %Y'))
                     kwargs['levels'] = levels
                     kwargs['ttl'] = ttl
