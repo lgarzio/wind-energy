@@ -10,7 +10,6 @@ import datetime as dt
 import os
 import xarray as xr
 import numpy as np
-from sklearn.preprocessing import normalize
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import functions.common as cf
@@ -30,7 +29,7 @@ def main(sDir, sdate, edate, intvl):
                     sdwind=dict(color_label='Variance (m/s)',
                                 title='Wind Speed Variance',
                                 cmap='BuPu'),
-                    sdwind_norm=dict(color_label='Normalized Variance (m/s)',
+                    sdwind_norm=dict(color_label='Normalized Variance',
                                      title='Normalized Wind Speed Variance',
                                      cmap='BuPu'))
 
@@ -73,12 +72,12 @@ def main(sDir, sdate, edate, intvl):
 
             sdwind = np.sqrt(u_variance + v_variance)
 
-            sdwind_norm = normalize(sdwind, axis=1, norm='max')
-            da = xr.DataArray(sdwind_norm, coords=sdwind.coords, dims=sdwind.dims)
+            # variance normalized to mean wind speed
+            sdwind_norm = sdwind / mws
 
             plt_vars['meanws']['data'] = mws
             plt_vars['sdwind']['data'] = sdwind
-            plt_vars['sdwind_norm']['data'] = da
+            plt_vars['sdwind_norm']['data'] = sdwind_norm
 
             for pv, plt_info in plt_vars.items():
                 for pr, region_info in plt_regions.items():
@@ -129,12 +128,11 @@ def main(sDir, sdate, edate, intvl):
                     try:
                         vmin = region_info[pv]['limits']['_{}m'.format(height)]['vmin']
                         vmax = region_info[pv]['limits']['_{}m'.format(height)]['vmax']
-                        levels = list(np.arange(vmin, vmax + .5, .5))
+                        kwargs['levels'] = list(np.arange(vmin, vmax + .5, .5))
                     except KeyError:
                         levels = list(np.arange(0, 1.1, .1))  # for normalized plots
-                        kwargs['extend'] = 'neither'
                     ttl = '{} {}m: {}'.format(plt_info['title'], height, sd.strftime('%b %Y'))
-                    kwargs['levels'] = levels
+                    #kwargs['levels'] = levels
                     kwargs['ttl'] = ttl
                     kwargs['clab'] = plt_info['color_label']
                     pf.plot_contourf(fig, ax, lon, lat, data, plt_info['cmap'], **kwargs)
