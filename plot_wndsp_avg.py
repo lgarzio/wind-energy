@@ -128,11 +128,11 @@ def main(sDir, sdate, edate, intvl):
                     try:
                         vmin = region_info[pv]['limits']['_{}m'.format(height)]['vmin']
                         vmax = region_info[pv]['limits']['_{}m'.format(height)]['vmax']
-                        kwargs['levels'] = list(np.arange(vmin, vmax + .5, .5))
+                        levels = list(np.arange(vmin, vmax + .5, .5))
                     except KeyError:
-                        levels = list(np.arange(0, 1.1, .1))  # for normalized plots
+                        levels = list(np.arange(.9, 1.3, .05))  # for normalized variance plots
                     ttl = '{} {}m: {}'.format(plt_info['title'], height, sd.strftime('%b %Y'))
-                    #kwargs['levels'] = levels
+                    kwargs['levels'] = levels
                     kwargs['ttl'] = ttl
                     kwargs['clab'] = plt_info['color_label']
                     pf.plot_contourf(fig, ax, lon, lat, data, plt_info['cmap'], **kwargs)
