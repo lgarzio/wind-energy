@@ -18,7 +18,10 @@ import functions.plotting as pf
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
 
 
-def plot_averages(ds_sub, save_dir, interval_name, t0=None):
+def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1str=None):
+    t0 = t0 or None
+    sb_t0str = sb_t0str or None
+    sb_t1str = sb_t1str or None
     heights = [160, 10]
     mingray = dict(_10m=5, _160m=7)  # minimum average value for making the state/coastlines and quivers gray
 
@@ -70,7 +73,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None):
                 region_savedir = os.path.join(save_dir, pr)
                 os.makedirs(region_savedir, exist_ok=True)
 
-                if t0:
+                if 'monthly' in interval_name:
                     sname = '{}_{}_{}m_{}_{}'.format(pr, pv, height, interval_name, t0.strftime('%Y%m%d'))
                     ttl = '{} {}m: {}'.format(plt_info['title'], height, t0.strftime('%b %Y'))
                 else:
@@ -79,7 +82,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None):
                         nm = 'Sea breeze days'
                     elif interval_name == 'noseabreezes':
                         nm = 'Non-sea breeze days'
-                    ttl = '{} {}m: {}'.format(plt_info['title'], height, nm)
+                    ttl = '{} {}m: {}\n{} to {}'.format(plt_info['title'], height, nm, sb_t0str, sb_t1str)
                 sfile = os.path.join(region_savedir, sname)
 
                 # set up the map
@@ -159,6 +162,8 @@ def main(sDir, sdate, edate, intvl):
     # break up dates into the plotting interval specified
     if intvl == 'seabreezes':
         ds = ds.sel(time=slice(sdate, edate))
+        dst0 = pd.to_datetime(ds.time.values[0]).strftime('%Y-%m-%d')
+        dst1 = pd.to_datetime(ds.time.values[-1]).strftime('%Y-%m-%d')
         df = pd.read_csv(os.path.join(sDir, 'radar_seabreezes_2020.csv'))
         df = df[df['Seabreeze'] == 'y']
         sb_dates = np.array(pd.to_datetime(df['Date']))
@@ -175,8 +180,11 @@ def main(sDir, sdate, edate, intvl):
         # ds_sb = ds_sb.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 5, 0)))  # for debugging
         # ds_nosb = ds_nosb.sel(time=slice(dt.datetime(2020, 6, 2, 0, 0), dt.datetime(2020, 6, 2, 5, 0)))  # for debugging
 
-        plot_averages(ds_sb, savedir, 'seabreezes')
-        plot_averages(ds_nosb, savedir, 'noseabreezes')
+        kwargs = dict()
+        kwargs['sb_t0str'] = dst0
+        kwargs['sb_t1str'] = dst1
+        plot_averages(ds_sb, savedir, 'seabreezes', **kwargs)
+        plot_averages(ds_nosb, savedir, 'noseabreezes', **kwargs)
     else:
         start, end = cf.daterange_interval(intvl, sdate, edate)
 
@@ -186,14 +194,15 @@ def main(sDir, sdate, edate, intvl):
             # ed = dt.datetime(2019, 9, 1, 5, 0)  # for debugging
             # dst = ds.sel(time=slice(sd, ed))  # for debugging
             dst = ds.sel(time=slice(sd, ed + dt.timedelta(hours=23)))
-            starttime = pd.to_datetime(dst.time.values[0])
-            plot_averages(dst, savedir, intvl, starttime)
+            kwargs = dict()
+            kwargs['t0'] = pd.to_datetime(dst.time.values[0])
+            plot_averages(dst, savedir, intvl, **kwargs)
 
 
 if __name__ == '__main__':
     # save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
-    start_date = dt.datetime(2019, 9, 1, 0, 0)  # dt.datetime(2020, 6, 1, 0, 0)
-    end_date = dt.datetime(2020, 9, 1, 0, 0)  # dt.datetime(2020, 8, 1, 0, 0)
-    interval = 'monthly'  # 'seabreezes'
+    start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)  #
+    end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
+    interval = 'seabreezes'  # 'monthly'
     main(save_directory, start_date, end_date, interval)
