@@ -72,38 +72,30 @@ def find_coords(elem, findstr):
     return coordlist
 
 
-def plot_regions():
+def plot_regions(plot_version):
     regions = dict(
-        full_grid=dict(meanws=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14))),
-                       sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12), _160m=dict(vmin=6, vmax=12))),
-                       quiver_subset=dict(_10m=11, _160m=13),
+        full_grid=dict(quiver_subset=dict(_10m=11, _160m=13),
                        quiver_scale=45,
                        extent=[-79.79, -69.2, 34.5, 43],
                        xticks=[-78, -76, -74, -72, -70],
                        yticks=[36, 38, 40, 42],
                        subset=False,
                        lease_area=False),
-        mab=dict(meanws=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14))),
-                 sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12), _160m=dict(vmin=6, vmax=12))),
-                 quiver_subset=dict(_10m=7, _160m=8),
+        mab=dict(quiver_subset=dict(_10m=7, _160m=8),
                  quiver_scale=40,
                  extent=[-77.2, -69.6, 36, 41.8],
                  xticks=[-75, -73, -71],
                  yticks=[37, 39, 41],
                  subset=True,
                  lease_area=True),
-        nj=dict(meanws=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14))),
-                sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12), _160m=dict(vmin=6, vmax=12))),
-                quiver_subset=dict(_10m=4, _160m=5),
+        nj=dict(quiver_subset=dict(_10m=4, _160m=5),
                 quiver_scale=40,
                 extent=[-75.7, -71.5, 38.1, 41.2],
                 xticks=[-75, -74, -73, -72],
                 yticks=[39, 40, 41],
                 subset=True,
                 lease_area=True),
-        southern_nj=dict(meanws=dict(limits=dict(_10m=dict(vmin=4, vmax=10), _160m=dict(vmin=6, vmax=14))),
-                         sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12), _160m=dict(vmin=6, vmax=12))),
-                         quiver_subset=dict(_10m=3, _160m=3),
+        southern_nj=dict(quiver_subset=dict(_10m=3, _160m=3),
                          quiver_scale=40,
                          extent=[-75.6, -73, 38.6, 40.5],
                          xticks=[-75, -74.5, -74, -73.5],
@@ -111,6 +103,31 @@ def plot_regions():
                          subset=True,
                          lease_area=True)
     )
+
+    full_grid = regions['full_grid']
+    mab = regions['mab']
+    nj = regions['nj']
+    snj = regions['southern_nj']
+    if 'monthly' in plot_version:
+        full_grid.update(
+            meanws=dict(limits=dict(_10m=dict(vmin=4, vmax=10, rint=.5), _160m=dict(vmin=6, vmax=14, rint=.5))))
+        full_grid.update(
+            sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12, rint=.5), _160m=dict(vmin=6, vmax=12, rint=.5))))
+        full_grid.update(
+            sdwind_norm=dict(limits=dict(_10m=dict(vmin=.9, vmax=1.2, rint=.05), _160m=dict(vmin=.9, vmax=1.2, rint=.05))))
+
+        mab.update(meanws=dict(limits=dict(_10m=dict(vmin=4, vmax=10, rint=.5), _160m=dict(vmin=6, vmax=14, rint=.5))))
+        mab.update(sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12, rint=.5), _160m=dict(vmin=6, vmax=12, rint=.5))))
+        mab.update(sdwind_norm=dict(limits=dict(_10m=dict(vmin=.9, vmax=1.2, rint=.05), _160m=dict(vmin=.9, vmax=1.2, rint=.05))))
+
+        nj.update(meanws=dict(limits=dict(_10m=dict(vmin=4, vmax=10, rint=.5), _160m=dict(vmin=6, vmax=14, rint=.5))))
+        nj.update(sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12, rint=.5), _160m=dict(vmin=6, vmax=12, rint=.5))))
+        nj.update(sdwind_norm=dict(limits=dict(_10m=dict(vmin=.9, vmax=1.2, rint=.05), _160m=dict(vmin=.9, vmax=1.2, rint=.05))))
+
+        snj.update(meanws=dict(limits=dict(_10m=dict(vmin=4, vmax=10, rint=.5), _160m=dict(vmin=6, vmax=14, rint=.5))))
+        snj.update(sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12, rint=.5), _160m=dict(vmin=6, vmax=12, rint=.5))))
+        snj.update(sdwind_norm=dict(limits=dict(_10m=dict(vmin=.9, vmax=1.2, rint=.05), _160m=dict(vmin=.9, vmax=1.2, rint=.05))))
+
     return regions
 
 
