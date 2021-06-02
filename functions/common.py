@@ -142,7 +142,7 @@ def nyserda_buoys():
                            code='NYNE05'),
         nyserda_south=dict(coords=dict(lon=-73.4295, lat=39.5465),
                            name='NYSERDA South',
-                           code='NYNE06')
+                           code='NYSE06')
     )
 
     return nb

@@ -2,8 +2,8 @@
 
 """
 Author: Lori Garzio on 4/12/2021
-Last modified: 5/19/2021
-Plot average WRF windspeeds at 10m and 160m at user-defined grouping intervals
+Last modified: 6/2/2021
+Plot average WRF windspeeds at 10m and 160m at user-defined grouping intervals (monthly and seabreeze vs non-seabreeze days)
 """
 
 import datetime as dt
@@ -36,7 +36,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                                      title='Normalized Wind Speed Variance',
                                      cmap='BuPu'))
 
-    la_polygon = cf.extract_lease_area_outlines()
+    #la_polygon = cf.extract_lease_area_outlines()
     for height in heights:
         if height == 10:
             u = ds_sub['U10']
@@ -110,8 +110,16 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                         v_mean_standardize = cf.subset_grid(v_mean_standardize, extent)
 
                 # add lease areas
-                if region_info['lease_area']:
-                    pf.add_lease_area_polygon(ax, la_polygon, 'magenta')
+                # if region_info['lease_area']:
+                #     pf.add_lease_area_polygon(ax, la_polygon, 'magenta')
+
+                # add NYSERDA buoy locations
+                nyserda_buoys = cf.nyserda_buoys()
+                for nb, binfo, in nyserda_buoys.items():
+                    ax.plot(binfo['coords']['lon'], binfo['coords']['lat'], c='magenta', mec='k', marker='o', ms=8,
+                            linestyle='none', transform=ccrs.PlateCarree(), zorder=11)
+                    ax.text(binfo['coords']['lon'] + .3, binfo['coords']['lat'], binfo['code'],
+                            bbox=dict(facecolor='lightgray', alpha=0.6), fontsize=7, transform=ccrs.PlateCarree())
 
                 lon = data.XLONG.values
                 lat = data.XLAT.values
@@ -154,7 +162,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
 def main(sDir, sdate, edate, intvl):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
 
-    savedir = os.path.join(sDir, '{}_{}-{}-testing'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    savedir = os.path.join(sDir, '{}_{}-{}-buoy_locs-withlabel'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
@@ -202,7 +210,7 @@ def main(sDir, sdate, edate, intvl):
 if __name__ == '__main__':
     # save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
-    start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)  #
-    end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'seabreezes'  # 'monthly'
+    start_date = dt.datetime(2019, 9, 1, 0, 0)  # dt.datetime(2020, 6, 1, 0, 0)
+    end_date = dt.datetime(2020, 9, 1, 0, 0)  # dt.datetime(2020, 7, 31, 23, 0)
+    interval = 'monthly'  # 'monthly' 'seabreezes
     main(save_directory, start_date, end_date, interval)
