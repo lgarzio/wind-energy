@@ -152,6 +152,30 @@ def plot_regions(plot_version):
         snj.update(sdwind_norm=dict(
             limits=dict(_10m=dict(vmin=.8, vmax=1.2, rint=.05), _160m=dict(vmin=.8, vmax=1.2, rint=.05))))
 
+    elif plot_version in ['seabreeze_morning', 'seabreeze_afternoon']:
+        full_grid.update(
+            meanws=dict(limits=dict(_10m=dict(vmin=2, vmax=8, rint=.5), _160m=dict(vmin=2, vmax=8, rint=.5))))
+        full_grid.update(
+            sdwind=dict(limits=dict(_10m=dict(vmin=2, vmax=8, rint=.5), _160m=dict(vmin=2, vmax=8, rint=.5))))
+        full_grid.update(
+            sdwind_norm=dict(
+                limits=dict(_10m=dict(vmin=.4, vmax=1.2, rint=.1), _160m=dict(vmin=.4, vmax=1.2, rint=.1))))
+
+        mab.update(meanws=dict(limits=dict(_10m=dict(vmin=2, vmax=8, rint=.5), _160m=dict(vmin=2, vmax=8, rint=.5))))
+        mab.update(sdwind=dict(limits=dict(_10m=dict(vmin=2, vmax=8, rint=.5), _160m=dict(vmin=2, vmax=8, rint=.5))))
+        mab.update(sdwind_norm=dict(
+            limits=dict(_10m=dict(vmin=.5, vmax=1.2, rint=.1), _160m=dict(vmin=.5, vmax=1.2, rint=.1))))
+
+        nj.update(meanws=dict(limits=dict(_10m=dict(vmin=1.5, vmax=7, rint=.5), _160m=dict(vmin=1.5, vmax=7, rint=.5))))
+        nj.update(sdwind=dict(limits=dict(_10m=dict(vmin=2, vmax=8, rint=.5), _160m=dict(vmin=2, vmax=8, rint=.5))))
+        nj.update(sdwind_norm=dict(
+            limits=dict(_10m=dict(vmin=.6, vmax=1.2, rint=.05), _160m=dict(vmin=.6, vmax=1.2, rint=.05))))
+
+        snj.update(meanws=dict(limits=dict(_10m=dict(vmin=1.5, vmax=7.5, rint=.5), _160m=dict(vmin=1.5, vmax=7.5, rint=.5))))
+        snj.update(sdwind=dict(limits=dict(_10m=dict(vmin=2, vmax=7.5, rint=.5), _160m=dict(vmin=2, vmax=7.5, rint=.5))))
+        snj.update(sdwind_norm=dict(
+            limits=dict(_10m=dict(vmin=.6, vmax=1.2, rint=.05), _160m=dict(vmin=.6, vmax=1.2, rint=.05))))
+
     return regions
 
 
