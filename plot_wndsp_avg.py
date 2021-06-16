@@ -78,9 +78,9 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                     ttl = '{} {}m: {}'.format(plt_info['title'], height, t0.strftime('%b %Y'))
                 else:
                     sname = '{}_{}_{}m_{}'.format(pr, pv, height, interval_name)
-                    if interval_name == 'seabreezes':
+                    if interval_name == 'seabreeze_days':
                         nm = 'Sea breeze days'
-                    elif interval_name == 'noseabreezes':
+                    elif interval_name == 'noseabreeze_days':
                         nm = 'Non-sea breeze days'
                     ttl = '{} {}m: {}\n{} to {}'.format(plt_info['title'], height, nm, sb_t0str, sb_t1str)
                 sfile = os.path.join(region_savedir, sname)
@@ -168,7 +168,7 @@ def main(sDir, sdate, edate, intvl):
     ds = xr.open_dataset(wrf)
 
     # break up dates into the plotting interval specified
-    if intvl == 'seabreezes':
+    if 'seabreeze' in intvl:
         ds = ds.sel(time=slice(sdate, edate))
         dst0 = pd.to_datetime(ds.time.values[0]).strftime('%Y-%m-%d')
         dst1 = pd.to_datetime(ds.time.values[-1]).strftime('%Y-%m-%d')
@@ -191,8 +191,8 @@ def main(sDir, sdate, edate, intvl):
         kwargs = dict()
         kwargs['sb_t0str'] = dst0
         kwargs['sb_t1str'] = dst1
-        plot_averages(ds_sb, savedir, 'seabreezes', **kwargs)
-        plot_averages(ds_nosb, savedir, 'noseabreezes', **kwargs)
+        plot_averages(ds_sb, savedir, 'seabreeze_days', **kwargs)
+        plot_averages(ds_nosb, savedir, 'noseabreeze_days', **kwargs)
     else:
         start, end = cf.daterange_interval(intvl, sdate, edate)
 
@@ -212,5 +212,5 @@ if __name__ == '__main__':
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'seabreezes'  # 'monthly' 'seabreezes'
+    interval = 'seabreeze_days'  # 'monthly' 'seabreeze_days'
     main(save_directory, start_date, end_date, interval)
