@@ -23,7 +23,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
     sb_t0str = sb_t0str or None
     sb_t1str = sb_t1str or None
     heights = [160, 10]
-    mingray = dict(_10m=5, _160m=7.5)  # minimum average value for making the state/coastlines and quivers gray
+    mingray = dict(_10m=5, _160m=8)  # minimum average value for making the state/coastlines and quivers gray
 
     plt_regions = cf.plot_regions(interval_name)
     plt_vars = dict(meanws=dict(color_label='Average Wind Speed (m/s)',

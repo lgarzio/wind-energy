@@ -152,7 +152,7 @@ def plot_regions(plot_version):
         snj.update(sdwind_norm=dict(
             limits=dict(_10m=dict(vmin=.8, vmax=1.2, rint=.05), _160m=dict(vmin=.8, vmax=1.2, rint=.05))))
 
-    elif plot_version in ['seabreeze_morning', 'seabreeze_afternoon']:
+    elif plot_version in ['seabreeze_morning', 'seabreeze_afternoon', 'noseabreeze_morning', 'noseabreeze_afternoon']:
         full_grid.update(
             meanws=dict(limits=dict(_10m=dict(vmin=2, vmax=8, rint=.5), _160m=dict(vmin=2, vmax=8, rint=.5))))
         full_grid.update(
