@@ -23,7 +23,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
     sb_t0str = sb_t0str or None
     sb_t1str = sb_t1str or None
     heights = [160, 10]
-    mingray = dict(_10m=5, _160m=7)  # minimum average value for making the state/coastlines and quivers gray
+    mingray = dict(_10m=5, _160m=7.5)  # minimum average value for making the state/coastlines and quivers gray
 
     plt_regions = cf.plot_regions(interval_name)
     plt_vars = dict(meanws=dict(color_label='Average Wind Speed (m/s)',
@@ -86,6 +86,10 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                         nm = 'Sea breeze days (00Z - 13Z)'
                     elif interval_name == 'seabreeze_afternoon':
                         nm = 'Sea breeze days (14Z - 23Z)'
+                    elif interval_name == 'noseabreeze_morning':
+                        nm = 'Non-sea breeze days (00Z - 13Z)'
+                    elif interval_name == 'noseabreeze_afternoon':
+                        nm = 'Non-sea breeze days (14Z - 23Z)'
                     ttl = '{} {}m\n{}\n{} to {}'.format(plt_info['title'], height, nm, sb_t0str, sb_t1str)
                 sfile = os.path.join(region_savedir, sname)
 
@@ -189,14 +193,14 @@ def main(sDir, sdate, edate, intvl):
 
         # grab the WRF data for the seabreeze dates
         ds_sb = ds.sel(time=sb_datetimes)
-        # ds_sb = ds_sb.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 5, 0)))  # for debugging
+        # ds_sb = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 5, 0)))  # for debugging
+
+        # grab the WRF data for the non-seabreeze dates
+        nosb_datetimes = [t for t in ds.time.values if t not in sb_datetimes]
+        ds_nosb = ds.sel(time=nosb_datetimes)
+        # ds_nosb = ds.sel(time=slice(dt.datetime(2020, 6, 2, 0, 0), dt.datetime(2020, 6, 2, 5, 0)))  # for debugging
 
         if intvl == 'seabreeze_days':
-            # grab the WRF data for the non-seabreeze dates
-            nosb_datetimes = [t for t in ds.time.values if t not in sb_datetimes]
-            ds_nosb = ds.sel(time=nosb_datetimes)
-            # ds_nosb = ds_nosb.sel(time=slice(dt.datetime(2020, 6, 2, 0, 0), dt.datetime(2020, 6, 2, 5, 0)))  # for debugging
-
             plot_averages(ds_sb, savedir, 'seabreeze_days', **kwargs)
             plot_averages(ds_nosb, savedir, 'noseabreeze_days', **kwargs)
         elif intvl == 'seabreeze_hours':
@@ -205,6 +209,12 @@ def main(sDir, sdate, edate, intvl):
             ds_sb_aft = ds_sb.isel(time=np.logical_and(hours >= 14, hours < 24))  # subset afternoon hours
             plot_averages(ds_sb_morn, savedir, 'seabreeze_morning', **kwargs)
             plot_averages(ds_sb_aft, savedir, 'seabreeze_afternoon', **kwargs)
+
+            hours = pd.to_datetime(ds_nosb.time.values).hour
+            ds_nosb_morn = ds_nosb.isel(time=np.logical_and(hours >= 0, hours < 14))  # subset morning hours
+            ds_nosb_aft = ds_nosb.isel(time=np.logical_and(hours >= 14, hours < 24))  # subset afternoon hours
+            plot_averages(ds_nosb_morn, savedir, 'noseabreeze_morning', **kwargs)
+            plot_averages(ds_nosb_aft, savedir, 'noseabreeze_afternoon', **kwargs)
 
     else:
         start, end = cf.daterange_interval(intvl, sdate, edate)
