@@ -22,8 +22,8 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
     t0 = t0 or None
     sb_t0str = sb_t0str or None
     sb_t1str = sb_t1str or None
-    heights = [160, 10]
-    mingray = dict(_10m=5, _160m=6.5)  # minimum average value for making the state/coastlines and quivers gray
+    heights = [250, 200, 160, 10]
+    mingray = dict(_10m=5, _160m=6.5, _200m=6.5, _250m=6.5)  # minimum average value for making the state/coastlines and quivers gray
 
     plt_regions = cf.plot_regions(interval_name)
     plt_vars = dict(meanws=dict(color_label='Average Wind Speed (m/s)',
@@ -170,7 +170,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
 def main(sDir, sdate, edate, intvl):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
 
-    savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    savedir = os.path.join(sDir, '{}_{}-{}-testing'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
