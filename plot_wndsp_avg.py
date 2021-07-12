@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/12/2021
-Last modified: 6/16/2021
+Last modified: 7/12/2021
 Plot average WRF windspeeds at 10m and 160m at user-defined grouping intervals (monthly and seabreeze vs non-seabreeze days)
 """
 
@@ -26,7 +26,10 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
     mingray = dict(_10m=5, _160m=6.5, _200m=6.5, _250m=6.5)  # minimum average value for making the state/coastlines and quivers gray
 
     plt_regions = cf.plot_regions(interval_name)
-    plt_vars = dict(meanws=dict(color_label='Average Wind Speed (m/s)',
+    plt_vars = dict(meanpower=dict(color_label='Average Estimated 8MW Wind Power (kW)',
+                                   title='Average Wind Power',
+                                   cmap='OrRd'),
+                    meanws=dict(color_label='Average Wind Speed (m/s)',
                                 title='Average Wind Speed',
                                 cmap=plt.get_cmap('viridis')),
                     sdwind=dict(color_label='Variance (m/s)',
@@ -37,6 +40,11 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                                      cmap='BuPu'))
 
     la_polygon = cf.extract_lease_area_outlines()
+
+    # for calculating power
+    power_curve = pd.read_csv('/home/lgarzio/rucool/bpu/wrf/wrf_lw8mw_power.csv')  # on server
+    #power_curve = pd.read_csv('/Users/garzio/Documents/rucool/bpu/wrf/wrf_lw8mw_power.csv')
+
     for height in heights:
         if height == 10:
             u = ds_sub['U10']
@@ -47,6 +55,10 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
 
         ws = cf.wind_uv_to_spd(u, v)
         mws = ws.mean('time')
+
+        # calculate wind power
+        power = xr.DataArray(np.interp(ws, power_curve['Wind Speed'], power_curve['Power']), coords=ws.coords)
+        meanpower = power.mean('time')
 
         u_mean = u.mean('time')
         v_mean = v.mean('time')
@@ -64,6 +76,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
         # variance normalized to mean wind speed
         sdwind_norm = sdwind / mws
 
+        plt_vars['meanpower']['data'] = meanpower
         plt_vars['meanws']['data'] = mws
         plt_vars['sdwind']['data'] = sdwind
         plt_vars['sdwind_norm']['data'] = sdwind_norm
@@ -138,14 +151,17 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                 # plot data
                 # pcolormesh: coarser resolution, shows the actual resolution of the model data
                 # contourf: smooths the resolution of the model data, plots are less pixelated, can define discrete levels
-                try:
-                    vmin = region_info[pv]['limits']['_{}m'.format(height)]['vmin']
-                    vmax = region_info[pv]['limits']['_{}m'.format(height)]['vmax']
-                    arange_interval = region_info[pv]['limits']['_{}m'.format(height)]['rint']
-                    levels = list(np.arange(vmin, vmax + arange_interval, arange_interval))
-                    kwargs['levels'] = levels
-                except KeyError:
-                    print('no levels specified')
+                if pv == 'meanpower':
+                    kwargs['levels'] = list(np.arange(0, 9000, 1000))
+                else:
+                    try:
+                        vmin = region_info[pv]['limits']['_{}m'.format(height)]['vmin']
+                        vmax = region_info[pv]['limits']['_{}m'.format(height)]['vmax']
+                        arange_interval = region_info[pv]['limits']['_{}m'.format(height)]['rint']
+                        levels = list(np.arange(vmin, vmax + arange_interval, arange_interval))
+                        kwargs['levels'] = levels
+                    except KeyError:
+                        print('no levels specified')
 
                 kwargs['ttl'] = ttl
                 kwargs['clab'] = plt_info['color_label']
