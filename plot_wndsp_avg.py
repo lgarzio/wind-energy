@@ -26,8 +26,8 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
     mingray = dict(_10m=5, _160m=6.5, _200m=6.5, _250m=6.5)  # minimum average value for making the state/coastlines and quivers gray
 
     plt_regions = cf.plot_regions(interval_name)
-    plt_vars = dict(meanpower=dict(color_label='Average Estimated 8MW Wind Power (kW)',
-                                   title='Average Wind Power',
+    plt_vars = dict(meanpower=dict(color_label='Average Estimated 15MW Wind Power (kW)',
+                                   title='Average Wind Power (15MW)',
                                    cmap='OrRd'),
                     meanws=dict(color_label='Average Wind Speed (m/s)',
                                 title='Average Wind Speed',
@@ -42,8 +42,8 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
     la_polygon = cf.extract_lease_area_outlines()
 
     # for calculating power
-    power_curve = pd.read_csv('/home/lgarzio/rucool/bpu/wrf/wrf_lw8mw_power.csv')  # on server
-    #power_curve = pd.read_csv('/Users/garzio/Documents/rucool/bpu/wrf/wrf_lw8mw_power.csv')
+    power_curve = pd.read_csv('/home/lgarzio/rucool/bpu/wrf/wrf_lw15mw_power.csv')  # on server
+    #power_curve = pd.read_csv('/Users/garzio/Documents/rucool/bpu/wrf/wrf_lw15mw_power.csv')
 
     for height in heights:
         if height == 10:
@@ -152,7 +152,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                 # pcolormesh: coarser resolution, shows the actual resolution of the model data
                 # contourf: smooths the resolution of the model data, plots are less pixelated, can define discrete levels
                 if pv == 'meanpower':
-                    kwargs['levels'] = list(np.arange(0, 9000, 1000))
+                    kwargs['levels'] = list(np.arange(0, 15001, 1000))
                 else:
                     try:
                         vmin = region_info[pv]['limits']['_{}m'.format(height)]['vmin']
@@ -186,7 +186,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
 def main(sDir, sdate, edate, intvl):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
 
-    savedir = os.path.join(sDir, '{}_{}-{}-testing'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
