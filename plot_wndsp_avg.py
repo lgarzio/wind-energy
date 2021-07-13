@@ -23,7 +23,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
     sb_t0str = sb_t0str or None
     sb_t1str = sb_t1str or None
     heights = [250, 200, 160, 10]
-    mingray = dict(_10m=5, _160m=6.5, _200m=6.5, _250m=6.5)  # minimum average value for making the state/coastlines and quivers gray
+    mingray = dict(_10m=5, _160m=6, _200m=6, _250m=6)  # minimum average value for making the state/coastlines and quivers gray
 
     plt_regions = cf.plot_regions(interval_name)
     plt_vars = dict(meanpower=dict(color_label='Average Estimated 15MW Wind Power (kW)',
