@@ -2,8 +2,9 @@
 
 """
 Author: Lori Garzio on 4/12/2021
-Last modified: 7/12/2021
-Plot average WRF windspeeds at 10m and 160m at user-defined grouping intervals (monthly and seabreeze vs non-seabreeze days)
+Last modified: 7/28/2021
+Plot average WRF windspeeds at 10m, 160m, 200m and 250m at user-defined grouping intervals (monthly and seabreeze vs
+non-seabreeze days)
 """
 
 import datetime as dt
@@ -23,7 +24,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
     sb_t0str = sb_t0str or None
     sb_t1str = sb_t1str or None
     heights = [250, 200, 160, 10]
-    mingray = dict(_10m=5, _160m=6, _200m=6, _250m=6)  # minimum average value for making the state/coastlines and quivers gray
+    mingray = dict(_10m=5, _160m=5.5, _200m=5.5, _250m=5.5)  # minimum average value for making the state/coastlines and quivers gray
 
     plt_regions = cf.plot_regions(interval_name)
     plt_vars = dict(meanpower=dict(color_label='Average Estimated 15MW Wind Power (kW)',
@@ -110,13 +111,16 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                 lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
                 fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
                 if pv == 'meanws':
-                    if np.nanmean(plt_info['data']) < mingray['_{}m'.format(height)]:
-                        pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'],
-                                            ecolor='gray')
-                        quiver_color = 'lightgray'
-                    else:
-                        pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'])
-                        quiver_color = 'k'
+                    pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'],
+                                        ecolor='#777777')
+                    quiver_color = '#777777'
+                    # if np.nanmean(plt_info['data']) < mingray['_{}m'.format(height)]:
+                    #     pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'],
+                    #                         ecolor='gray')
+                    #     quiver_color = 'lightgray'
+                    # else:
+                    #     pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'])
+                    #     quiver_color = 'k'
                 else:
                     pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'])
 
@@ -186,7 +190,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
 def main(sDir, sdate, edate, intvl):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
 
-    savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    savedir = os.path.join(sDir, '{}_{}-{}-testgray'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
