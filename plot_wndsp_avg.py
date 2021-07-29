@@ -27,22 +27,18 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
     mingray = dict(_10m=5, _160m=5.5, _200m=5.5, _250m=5.5)  # minimum average value for making the state/coastlines and quivers gray
 
     plt_regions = cf.plot_regions(interval_name)
-    # plt_vars = dict(meanpower=dict(color_label='Average Estimated 15MW Wind Power (kW)',
-    #                                title='Average Wind Power (15MW)',
-    #                                cmap='OrRd'),
-    #                 meanws=dict(color_label='Average Wind Speed (m/s)',
-    #                             title='Average Wind Speed',
-    #                             cmap=plt.get_cmap('viridis')),
-    #                 sdwind=dict(color_label='Variance (m/s)',
-    #                             title='Wind Speed Variance',
-    #                             cmap='BuPu'),
-    #                 sdwind_norm=dict(color_label='Normalized Variance',
-    #                                  title='Normalized Wind Speed Variance',
-    #                                  cmap='BuPu'))
-
-    plt_vars = dict(meanws=dict(color_label='Average Wind Speed (m/s)',
+    plt_vars = dict(meanpower=dict(color_label='Average Estimated 15MW Wind Power (kW)',
+                                   title='Average Wind Power (15MW)',
+                                   cmap='OrRd'),
+                    meanws=dict(color_label='Average Wind Speed (m/s)',
                                 title='Average Wind Speed',
-                                cmap=plt.get_cmap('BuPu')))
+                                cmap=plt.get_cmap('BuPu')),
+                    sdwind=dict(color_label='Variance (m/s)',
+                                title='Wind Speed Variance',
+                                cmap='BuPu'),
+                    sdwind_norm=dict(color_label='Normalized Variance',
+                                     title='Normalized Wind Speed Variance',
+                                     cmap='BuPu'))
 
     la_polygon = cf.extract_lease_area_outlines()
 
@@ -81,10 +77,10 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
         # variance normalized to mean wind speed
         sdwind_norm = sdwind / mws
 
-        #plt_vars['meanpower']['data'] = meanpower
+        plt_vars['meanpower']['data'] = meanpower
         plt_vars['meanws']['data'] = mws
-        #plt_vars['sdwind']['data'] = sdwind
-        #plt_vars['sdwind_norm']['data'] = sdwind_norm
+        plt_vars['sdwind']['data'] = sdwind
+        plt_vars['sdwind_norm']['data'] = sdwind_norm
 
         for pv, plt_info in plt_vars.items():
             for pr, region_info in plt_regions.items():
