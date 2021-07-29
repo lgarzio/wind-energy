@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/12/2021
-Last modified: 7/28/2021
+Last modified: 7/29/2021
 Plot average WRF windspeeds at 10m, 160m, 200m and 250m at user-defined grouping intervals (monthly and seabreeze vs
 non-seabreeze days)
 """
@@ -42,7 +42,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
 
     plt_vars = dict(meanws=dict(color_label='Average Wind Speed (m/s)',
                                 title='Average Wind Speed',
-                                cmap=plt.get_cmap('viridis')))
+                                cmap=plt.get_cmap('BuPu')))
 
     la_polygon = cf.extract_lease_area_outlines()
 
@@ -81,10 +81,10 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
         # variance normalized to mean wind speed
         sdwind_norm = sdwind / mws
 
-        plt_vars['meanpower']['data'] = meanpower
+        #plt_vars['meanpower']['data'] = meanpower
         plt_vars['meanws']['data'] = mws
-        plt_vars['sdwind']['data'] = sdwind
-        plt_vars['sdwind_norm']['data'] = sdwind_norm
+        #plt_vars['sdwind']['data'] = sdwind
+        #plt_vars['sdwind_norm']['data'] = sdwind_norm
 
         for pv, plt_info in plt_vars.items():
             for pr, region_info in plt_regions.items():
@@ -115,9 +115,11 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                 lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
                 fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
                 if pv == 'meanws':
-                    pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'],
-                                        ecolor='#777777')
-                    quiver_color = '#777777'
+                    pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'])
+                    quiver_color = 'k'
+                    # pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'],
+                    #                     ecolor='#777777')
+                    # quiver_color = '#777777'
                     # if np.nanmean(plt_info['data']) < mingray['_{}m'.format(height)]:
                     #     pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'],
                     #                         ecolor='gray')
@@ -194,7 +196,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
 def main(sDir, sdate, edate, intvl):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
 
-    savedir = os.path.join(sDir, '{}_{}-{}-gray7'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    savedir = os.path.join(sDir, '{}_{}-{}-purples'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
