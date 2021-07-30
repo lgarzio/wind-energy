@@ -159,7 +159,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                 # contourf: smooths the resolution of the model data, plots are less pixelated, can define discrete levels
                 if pv == 'meanpower':
                     kwargs['levels'] = list(np.arange(0, 15001, 1000))
-                    kwargs['extend'] = 'max'
+                    kwargs['extend'] = 'neither'
                 else:
                     try:
                         vmin = region_info[pv]['limits']['_{}m'.format(height)]['vmin']
