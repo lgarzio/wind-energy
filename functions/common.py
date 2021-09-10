@@ -200,6 +200,20 @@ def plot_regions(plot_version):
             limits=dict(_10m=dict(vmin=.6, vmax=1.2, rint=.05), _160m=dict(vmin=.6, vmax=1.2, rint=.05),
                         _200m=dict(vmin=.6, vmax=1.2, rint=.05), _250m=dict(vmin=.6, vmax=1.2, rint=.05))))
 
+    elif plot_version in ['seabreeze_diff']:
+        full_grid.update(
+            meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.25), _160m=dict(vmin=-3, vmax=3, rint=.25),
+                                    _200m=dict(vmin=-3, vmax=3, rint=.25), _250m=dict(vmin=-3, vmax=3, rint=.25))))
+
+        mab.update(meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.25), _160m=dict(vmin=-3, vmax=3, rint=.25),
+                                           _200m=dict(vmin=-3, vmax=3, rint=.25), _250m=dict(vmin=-3, vmax=3, rint=.25))))
+
+        nj.update(meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.25), _160m=dict(vmin=-3, vmax=3, rint=.25),
+                                          _200m=dict(vmin=-3, vmax=3, rint=.25), _250m=dict(vmin=-3, vmax=3, rint=.25))))
+
+        snj.update(meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.25), _160m=dict(vmin=-3, vmax=3, rint=.25),
+                                           _200m=dict(vmin=-3, vmax=3, rint=.25), _250m=dict(vmin=-3, vmax=3, rint=.25))))
+
     return regions
 
 
