@@ -190,6 +190,113 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                 plt.close()
 
 
+def plot_windspeed_differences(ds1, ds2, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1str=None):
+    t0 = t0 or None
+    sb_t0str = sb_t0str or None
+    sb_t1str = sb_t1str or None
+    heights = [250, 200, 160, 10]
+    mingray = dict(_10m=5, _160m=5.5, _200m=5.5, _250m=5.5)  # minimum average value for making the state/coastlines and quivers gray
+
+    plt_regions = cf.plot_regions(interval_name)
+    plt_vars = dict(meanws_diff=dict(color_label='Average Wind Speed Difference (m/s)',
+                                     title='Average Wind Speed Difference',
+                                     cmap=plt.get_cmap('RdBu')))
+
+    # la_polygon = cf.extract_lease_area_outlines()
+    # boem_rootdir = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM_shp_kmls/shapefiles'
+    # leasing_areas, planning_areas = cf.boem_shapefiles(boem_rootdir)
+
+    for height in heights:
+        if height == 10:
+            u1 = ds1['U10']
+            v1 = ds1['V10']
+            u2 = ds2['U10']
+            v2 = ds2['V10']
+        else:
+            u1 = ds1.sel(height=height)['U']
+            v1 = ds1.sel(height=height)['V']
+            u2 = ds2.sel(height=height)['U']
+            v2 = ds2.sel(height=height)['V']
+
+        ws1 = cf.wind_uv_to_spd(u1, v1)
+        ws2 = cf.wind_uv_to_spd(u2, v2)
+        mws1 = ws1.mean('time')
+        mws2 = ws2.mean('time')
+        mws_diff = mws1 - mws2
+
+        plt_vars['meanws_diff']['data'] = mws_diff
+
+        for pv, plt_info in plt_vars.items():
+            for pr, region_info in plt_regions.items():
+                region_savedir = os.path.join(save_dir, pr)
+                os.makedirs(region_savedir, exist_ok=True)
+
+                if 'monthly' in interval_name:
+                    sname = '{}_{}_{}m_{}_{}'.format(pr, pv, height, interval_name, t0.strftime('%Y%m%d'))
+                    ttl = '{} {}m: {}'.format(plt_info['title'], height, t0.strftime('%b %Y'))
+                else:
+                    sname = '{}_{}_{}m_{}'.format(pr, pv, height, interval_name)
+                    if interval_name == 'diff_morning':
+                        nm = 'Sea breeze minus Non-sea breeze (00Z - 13Z)'
+                    elif interval_name == 'diff_afternoon':
+                        nm = 'Sea breeze minus Non-sea breeze (14Z - 23Z)'
+                    ttl = '{} {}m\n{}\n{} to {}'.format(plt_info['title'], height, nm, sb_t0str, sb_t1str)
+                sfile = os.path.join(region_savedir, sname)
+
+                # set up the map
+                lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
+                fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
+                pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'])
+                data = plt_info['data']
+
+                # subset grid
+                if region_info['subset']:
+                    extent = np.add(region_info['extent'], [-.5, .5, -.5, .5]).tolist()
+                    data = cf.subset_grid(data, extent)
+
+                # add lease areas
+                #if region_info['lease_area']:
+                    #pf.add_lease_area_polygon_test(ax, la_polygon, 'magenta')
+                    #leasing_areas.plot(ax=ax, lw=.8, color='magenta', transform=ccrs.LambertConformal())
+
+                # add NYSERDA buoy locations
+                # nyserda_buoys = cf.nyserda_buoys()
+                # for nb, binfo, in nyserda_buoys.items():
+                #     ax.plot(binfo['coords']['lon'], binfo['coords']['lat'], c='magenta', mec='k', marker='o', ms=8,
+                #             linestyle='none', transform=ccrs.PlateCarree(), zorder=11)
+                #     ax.text(binfo['coords']['lon'] + .3, binfo['coords']['lat'], binfo['code'],
+                #             bbox=dict(facecolor='lightgray', alpha=0.6), fontsize=7, transform=ccrs.PlateCarree())
+
+                lon = data.XLONG.values
+                lat = data.XLAT.values
+
+                # initialize keyword arguments for plotting
+                kwargs = dict()
+
+                # plot data
+                # pcolormesh: coarser resolution, shows the actual resolution of the model data
+                # contourf: smooths the resolution of the model data, plots are less pixelated, can define discrete levels
+                if pv == 'meanpower':
+                    kwargs['levels'] = list(np.arange(0, 15001, 1000))
+                    kwargs['extend'] = 'neither'
+                else:
+                    try:
+                        vmin = region_info[pv]['limits']['_{}m'.format(height)]['vmin']
+                        vmax = region_info[pv]['limits']['_{}m'.format(height)]['vmax']
+                        arange_interval = region_info[pv]['limits']['_{}m'.format(height)]['rint']
+                        levels = list(np.arange(vmin, vmax + arange_interval, arange_interval))
+                        kwargs['levels'] = levels
+                    except KeyError:
+                        print('no levels specified')
+
+                kwargs['ttl'] = ttl
+                kwargs['clab'] = plt_info['color_label']
+                pf.plot_contourf(fig, ax, lon, lat, data, plt_info['cmap'], **kwargs)
+
+                plt.savefig(sfile, dpi=200)
+                plt.close()
+
+
 def main(sDir, sdate, edate, intvl):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
 
@@ -226,19 +333,23 @@ def main(sDir, sdate, edate, intvl):
         if intvl == 'seabreeze_days':
             plot_averages(ds_sb, savedir, 'seabreeze_days', **kwargs)
             plot_averages(ds_nosb, savedir, 'noseabreeze_days', **kwargs)
-        elif intvl == 'seabreeze_hours':
-            hours = pd.to_datetime(ds_sb.time.values).hour
-            ds_sb_morn = ds_sb.isel(time=np.logical_and(hours >= 0, hours < 14))  # subset morning hours
-            ds_sb_aft = ds_sb.isel(time=np.logical_and(hours >= 14, hours < 24))  # subset afternoon hours
-            plot_averages(ds_sb_morn, savedir, 'seabreeze_morning', **kwargs)
-            plot_averages(ds_sb_aft, savedir, 'seabreeze_afternoon', **kwargs)
+        else:
+            hours_sb = pd.to_datetime(ds_sb.time.values).hour
+            ds_sb_morn = ds_sb.isel(time=np.logical_and(hours_sb >= 0, hours_sb < 14))  # subset morning hours
+            ds_sb_aft = ds_sb.isel(time=np.logical_and(hours_sb >= 14, hours_sb < 24))  # subset afternoon hours
 
-            hours = pd.to_datetime(ds_nosb.time.values).hour
-            ds_nosb_morn = ds_nosb.isel(time=np.logical_and(hours >= 0, hours < 14))  # subset morning hours
-            ds_nosb_aft = ds_nosb.isel(time=np.logical_and(hours >= 14, hours < 24))  # subset afternoon hours
-            plot_averages(ds_nosb_morn, savedir, 'noseabreeze_morning', **kwargs)
-            plot_averages(ds_nosb_aft, savedir, 'noseabreeze_afternoon', **kwargs)
+            hours_nosb = pd.to_datetime(ds_nosb.time.values).hour
+            ds_nosb_morn = ds_nosb.isel(time=np.logical_and(hours_nosb >= 0, hours_nosb < 14))  # subset morning hours
+            ds_nosb_aft = ds_nosb.isel(time=np.logical_and(hours_nosb >= 14, hours_nosb < 24))  # subset afternoon hours
 
+            if intvl == 'seabreeze_hours':
+                plot_averages(ds_sb_morn, savedir, 'seabreeze_morning', **kwargs)
+                plot_averages(ds_sb_aft, savedir, 'seabreeze_afternoon', **kwargs)
+                plot_averages(ds_nosb_morn, savedir, 'noseabreeze_morning', **kwargs)
+                plot_averages(ds_nosb_aft, savedir, 'noseabreeze_afternoon', **kwargs)
+            elif intvl == 'seabreeze_diff':
+                # difference between seabreeze and non-seabreeze morning/afternoon
+                plot_windspeed_differences(ds_sb_morn, ds_nosb_morn, savedir, 'diff_morning', **kwargs)
     else:
         start, end = cf.daterange_interval(intvl, sdate, edate)
 
@@ -258,5 +369,5 @@ if __name__ == '__main__':
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'seabreeze_days'  # 'monthly' 'seabreeze_days' 'seabreeze_hours'
+    interval = 'seabreeze_diff'  # 'monthly' 'seabreeze_days' 'seabreeze_hours' 'seabreeze_diff
     main(save_directory, start_date, end_date, interval)
