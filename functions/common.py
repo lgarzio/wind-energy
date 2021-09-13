@@ -223,17 +223,17 @@ def plot_regions(plot_version):
 
     elif plot_version in ['diff_morning', 'diff_afternoon']:
         full_grid.update(
-            meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.25), _160m=dict(vmin=-3, vmax=3, rint=.25),
-                                    _200m=dict(vmin=-3, vmax=3, rint=.25), _250m=dict(vmin=-3, vmax=3, rint=.25))))
+            meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.5), _160m=dict(vmin=-3, vmax=3, rint=.5),
+                                    _200m=dict(vmin=-3, vmax=3, rint=.5), _250m=dict(vmin=-3, vmax=3, rint=.5))))
 
-        mab.update(meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.25), _160m=dict(vmin=-3, vmax=3, rint=.25),
-                                           _200m=dict(vmin=-3, vmax=3, rint=.25), _250m=dict(vmin=-3, vmax=3, rint=.25))))
+        mab.update(meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.5), _160m=dict(vmin=-3, vmax=3, rint=.5),
+                                           _200m=dict(vmin=-3, vmax=3, rint=.5), _250m=dict(vmin=-3, vmax=3, rint=.5))))
 
-        nj.update(meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.25), _160m=dict(vmin=-3, vmax=3, rint=.25),
-                                          _200m=dict(vmin=-3, vmax=3, rint=.25), _250m=dict(vmin=-3, vmax=3, rint=.25))))
+        nj.update(meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.5), _160m=dict(vmin=-3, vmax=3, rint=.5),
+                                          _200m=dict(vmin=-3, vmax=3, rint=.5), _250m=dict(vmin=-3, vmax=3, rint=.5))))
 
-        snj.update(meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.25), _160m=dict(vmin=-3, vmax=3, rint=.25),
-                                           _200m=dict(vmin=-3, vmax=3, rint=.25), _250m=dict(vmin=-3, vmax=3, rint=.25))))
+        snj.update(meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.5), _160m=dict(vmin=-3, vmax=3, rint=.5),
+                                           _200m=dict(vmin=-3, vmax=3, rint=.5), _250m=dict(vmin=-3, vmax=3, rint=.5))))
 
     return regions
 
