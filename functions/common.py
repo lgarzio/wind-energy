@@ -40,8 +40,27 @@ def extract_lease_area_outlines():
     # boem_lease_areas = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/boem_lease_area_full.kml'  # on local machine
     # boem_lease_areas = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/boem_lease_areas_AS_OW_split.kml'  # on local machine
     # boem_lease_areas = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM_shp_kmls/KMLs/wind_leases.kml' # on local machine
+    # boem_planning_areas = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM_shp_kmls/KMLs/planning_areas.kml'  # on local machine
     # boem_lease_areas = '/home/coolgroup/bpu/mapdata/shapefiles/RU-WRF_Plotting_Shapefiles/boem_lease_areas_AS_OW_split.kml'
     boem_lease_areas = '/home/coolgroup/bpu/mapdata/shapefiles/RU-WRF_Plotting_Shapefiles/wind_leases.kml'
+    boem_planning_areas = '/home/coolgroup/bpu/mapdata/shapefiles/RU-WRF_Plotting_Shapefiles/planning_areas.kml'
+    nmsp = '{http://www.opengis.net/kml/2.2}'
+    doc = ET.parse(boem_lease_areas)
+    doc_plan = ET.parse(boem_planning_areas)
+    findouter = './/{0}outerBoundaryIs/{0}LinearRing/{0}coordinates'.format(nmsp)
+    findinner = './/{0}innerBoundaryIs/{0}LinearRing/{0}coordinates'.format(nmsp)
+
+    lease_dict = dict()
+    for pm in doc.iterfind('.//{0}Placemark'.format(nmsp)):
+        add_coords(pm, findouter, lease_dict)
+        add_coords(pm, findinner, lease_dict)
+
+    plan_dict = dict()
+    for pm in doc_plan.iterfind('.//{0}Placemark'.format(nmsp)):
+        add_coords(pm, findouter, plan_dict)
+        add_coords(pm, findinner, plan_dict)
+
+    return lease_dict, plan_dict
     nmsp = '{http://www.opengis.net/kml/2.2}'
     doc = ET.parse(boem_lease_areas)
     findouter = './/{0}outerBoundaryIs/{0}LinearRing/{0}coordinates'.format(nmsp)
@@ -221,7 +240,7 @@ def plot_regions(plot_version):
             limits=dict(_10m=dict(vmin=.6, vmax=1.2, rint=.05), _160m=dict(vmin=.6, vmax=1.2, rint=.05),
                         _200m=dict(vmin=.6, vmax=1.2, rint=.05), _250m=dict(vmin=.6, vmax=1.2, rint=.05))))
 
-    elif plot_version in ['diff_morning', 'diff_afternoon']:
+    elif plot_version in ['diff_morning', 'diff_afternoon', 'diff_seabreeze', 'diff_noseabreeze']:
         full_grid.update(
             meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.5), _160m=dict(vmin=-3, vmax=3, rint=.5),
                                     _200m=dict(vmin=-3, vmax=3, rint=.5), _250m=dict(vmin=-3, vmax=3, rint=.5))))

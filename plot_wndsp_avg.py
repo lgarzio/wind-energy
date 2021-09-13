@@ -40,7 +40,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                                      title='Normalized Wind Speed Variance',
                                      cmap='BuPu'))
 
-    la_polygon = cf.extract_lease_area_outlines()
+    la_polygon, pa_polygon = cf.extract_lease_area_outlines()
 
     # for calculating power
     power_curve = pd.read_csv('/home/lgarzio/rucool/bpu/wrf/wrf_lw15mw_power.csv')  # on server
@@ -138,7 +138,8 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
 
                 # add lease areas
                 if region_info['lease_area']:
-                    pf.add_lease_area_polygon(ax, la_polygon, 'magenta')
+                    pf.add_lease_area_polygon(ax, la_polygon, 'darkgray')  # lease areas
+                    pf.add_lease_area_polygon(ax, pa_polygon, 'lightgray')  # planning areas
 
                 # add NYSERDA buoy locations
                 # nyserda_buoys = cf.nyserda_buoys()
@@ -200,11 +201,18 @@ def plot_windspeed_differences(ds1, ds2, save_dir, interval_name, t0=None, sb_t0
     plt_regions = cf.plot_regions(interval_name)
     plt_vars = dict(meanws_diff=dict(color_label='Average Wind Speed Difference (m/s)',
                                      title='Average Wind Speed Difference',
-                                     cmap=plt.get_cmap('RdBu')))
+                                     cmap=plt.get_cmap('RdBu')),
+                    meanpower_diff=dict(color_label='Average Estimated 15MW Wind Power Difference (kW)',
+                                        title='Average Wind Power Difference (15MW)',
+                                        cmap=plt.get_cmap('RdBu')))
 
-    la_polygon = cf.extract_lease_area_outlines()
+    la_polygon, pa_polygon = cf.extract_lease_area_outlines()
     # boem_rootdir = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM_shp_kmls/shapefiles'
     # leasing_areas, planning_areas = cf.boem_shapefiles(boem_rootdir)
+
+    # for calculating power
+    power_curve = pd.read_csv('/home/lgarzio/rucool/bpu/wrf/wrf_lw15mw_power.csv')  # on server
+    # power_curve = pd.read_csv('/Users/garzio/Documents/rucool/bpu/wrf/wrf_lw15mw_power.csv')
 
     for height in heights:
         if height == 10:
@@ -218,13 +226,22 @@ def plot_windspeed_differences(ds1, ds2, save_dir, interval_name, t0=None, sb_t0
             u2 = ds2.sel(height=height)['U']
             v2 = ds2.sel(height=height)['V']
 
+        # calculate windspeed difference
         ws1 = cf.wind_uv_to_spd(u1, v1)
         ws2 = cf.wind_uv_to_spd(u2, v2)
         mws1 = ws1.mean('time')
         mws2 = ws2.mean('time')
         mws_diff = mws1 - mws2
 
+        # calculate power difference
+        power1 = xr.DataArray(np.interp(ws1, power_curve['Wind Speed'], power_curve['Power']), coords=ws1.coords)
+        power2 = xr.DataArray(np.interp(ws2, power_curve['Wind Speed'], power_curve['Power']), coords=ws2.coords)
+        meanpower1 = power1.mean('time')
+        meanpower2 = power2.mean('time')
+        power_diff = meanpower1 - meanpower2
+
         plt_vars['meanws_diff']['data'] = mws_diff
+        plt_vars['meanpower_diff']['data'] = power_diff
 
         for pv, plt_info in plt_vars.items():
             for pr, region_info in plt_regions.items():
@@ -240,6 +257,10 @@ def plot_windspeed_differences(ds1, ds2, save_dir, interval_name, t0=None, sb_t0
                         nm = 'Sea breeze minus Non-sea breeze (00Z - 13Z)'
                     elif interval_name == 'diff_afternoon':
                         nm = 'Sea breeze minus Non-sea breeze (14Z - 23Z)'
+                    elif interval_name == 'diff_seabreeze':
+                        nm = 'Sea breeze days: Afternoon minus Morning'
+                    elif interval_name == 'diff_noseabreeze':
+                        nm = 'Non-ea breeze days: Afternoon minus Morning'
                     ttl = '{} {}m\n{}\n{} to {}'.format(plt_info['title'], height, nm, sb_t0str, sb_t1str)
                 sfile = os.path.join(region_savedir, sname)
 
@@ -256,7 +277,8 @@ def plot_windspeed_differences(ds1, ds2, save_dir, interval_name, t0=None, sb_t0
 
                 # add lease areas
                 if region_info['lease_area']:
-                    pf.add_lease_area_polygon(ax, la_polygon, 'magenta')
+                    pf.add_lease_area_polygon(ax, la_polygon, 'darkgray')  # lease areas
+                    pf.add_lease_area_polygon(ax, pa_polygon, 'lightgray')  # planning areas
                     #leasing_areas.plot(ax=ax, lw=.8, color='magenta', transform=ccrs.LambertConformal())
 
                 # add NYSERDA buoy locations
@@ -351,6 +373,10 @@ def main(sDir, sdate, edate, intvl):
                 # difference between seabreeze and non-seabreeze morning/afternoon
                 plot_windspeed_differences(ds_sb_morn, ds_nosb_morn, savedir, 'diff_morning', **kwargs)
                 plot_windspeed_differences(ds_sb_aft, ds_nosb_aft, savedir, 'diff_afternoon', **kwargs)
+
+                # difference between morning and afternoon on seabreeze and non-seabreeze days
+                plot_windspeed_differences(ds_sb_aft, ds_sb_morn, savedir, 'diff_seabreeze', **kwargs)
+                plot_windspeed_differences(ds_nosb_aft, ds_nosb_morn, savedir, 'diff_noseabreeze', **kwargs)
     else:
         start, end = cf.daterange_interval(intvl, sdate, edate)
 
@@ -370,5 +396,5 @@ if __name__ == '__main__':
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'seabreeze_diff'  # 'monthly' 'seabreeze_days' 'seabreeze_hours' 'seabreeze_diff
+    interval = 'seabreeze_diff'  # 'monthly' 'seabreeze_days' 'seabreeze_hours' 'seabreeze_diff'
     main(save_directory, start_date, end_date, interval)
