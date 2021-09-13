@@ -350,6 +350,7 @@ def main(sDir, sdate, edate, intvl):
             elif intvl == 'seabreeze_diff':
                 # difference between seabreeze and non-seabreeze morning/afternoon
                 plot_windspeed_differences(ds_sb_morn, ds_nosb_morn, savedir, 'diff_morning', **kwargs)
+                plot_windspeed_differences(ds_sb_aft, ds_nosb_aft, savedir, 'diff_afternoon', **kwargs)
     else:
         start, end = cf.daterange_interval(intvl, sdate, edate)
 
