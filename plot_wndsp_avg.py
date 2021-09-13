@@ -298,9 +298,8 @@ def plot_windspeed_differences(ds1, ds2, save_dir, interval_name, t0=None, sb_t0
                 # plot data
                 # pcolormesh: coarser resolution, shows the actual resolution of the model data
                 # contourf: smooths the resolution of the model data, plots are less pixelated, can define discrete levels
-                if pv == 'meanpower':
-                    kwargs['levels'] = list(np.arange(0, 15001, 1000))
-                    kwargs['extend'] = 'neither'
+                if pv == 'meanpower_diff':
+                    kwargs['levels'] = list(np.arange(-4000, 4000, 1000))
                 else:
                     try:
                         vmin = region_info[pv]['limits']['_{}m'.format(height)]['vmin']
