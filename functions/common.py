@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 8/17/2020
-Last modified: 5/6/2021
+Last modified: 9/13/2021
 """
 
 import numpy as np
@@ -39,7 +39,9 @@ def extract_lease_area_outlines():
     """
     # boem_lease_areas = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/boem_lease_area_full.kml'  # on local machine
     # boem_lease_areas = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/boem_lease_areas_AS_OW_split.kml'  # on local machine
-    boem_lease_areas = '/home/coolgroup/bpu/mapdata/shapefiles/RU-WRF_Plotting_Shapefiles/boem_lease_areas_AS_OW_split.kml'
+    # boem_lease_areas = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM_shp_kmls/KMLs/wind_leases.kml' # on local machine
+    # boem_lease_areas = '/home/coolgroup/bpu/mapdata/shapefiles/RU-WRF_Plotting_Shapefiles/boem_lease_areas_AS_OW_split.kml'
+    boem_lease_areas = '/home/coolgroup/bpu/mapdata/shapefiles/RU-WRF_Plotting_Shapefiles/wind_leases.kml'
     nmsp = '{http://www.opengis.net/kml/2.2}'
     doc = ET.parse(boem_lease_areas)
     findouter = './/{0}outerBoundaryIs/{0}LinearRing/{0}coordinates'.format(nmsp)
@@ -47,12 +49,31 @@ def extract_lease_area_outlines():
 
     polygon_dict = dict()
     for pm in doc.iterfind('.//{0}Placemark'.format(nmsp)):
-        for nm in pm.iterfind('{0}name'.format(nmsp)):  # find the company name
-            polygon_dict[nm.text] = dict(outer=[], inner=[])
-            polygon_dict[nm.text]['outer'] = find_coords(pm, findouter)
-            polygon_dict[nm.text]['inner'] = find_coords(pm, findinner)
+        add_coords(pm, findouter, polygon_dict)
+        add_coords(pm, findinner, polygon_dict)
 
     return polygon_dict
+
+
+def add_coords(elem, findstr, data):
+    """
+    Finds coordinates in an .xml file and appends them in pairs to a list
+    :param elem: element of an .xml file
+    :param findstr: string to find in the element
+    :param data: dictionary to which coordinates are appended
+    """
+    if len(data) == 0:
+        cnt = 0
+    else:
+        cnt = np.max(list(data.keys())) + 1
+    for ls in elem.iterfind(findstr):
+        coordlist = []
+        coord_strlst = [x for x in ls.text.split(' ')]
+        for coords in coord_strlst:
+            splitter = coords.split(',')
+            coordlist.append([np.float(splitter[0]), np.float(splitter[1])])
+        data[cnt] = coordlist
+        cnt += 1
 
 
 def find_coords(elem, findstr):

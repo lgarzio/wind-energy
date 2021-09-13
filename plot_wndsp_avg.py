@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/12/2021
-Last modified: 7/29/2021
+Last modified: 9/13/2021
 Plot average WRF windspeeds at 10m, 160m, 200m and 250m at user-defined grouping intervals (monthly and seabreeze vs
 non-seabreeze days)
 """
@@ -202,7 +202,7 @@ def plot_windspeed_differences(ds1, ds2, save_dir, interval_name, t0=None, sb_t0
                                      title='Average Wind Speed Difference',
                                      cmap=plt.get_cmap('RdBu')))
 
-    # la_polygon = cf.extract_lease_area_outlines()
+    la_polygon = cf.extract_lease_area_outlines()
     # boem_rootdir = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM_shp_kmls/shapefiles'
     # leasing_areas, planning_areas = cf.boem_shapefiles(boem_rootdir)
 
@@ -255,8 +255,8 @@ def plot_windspeed_differences(ds1, ds2, save_dir, interval_name, t0=None, sb_t0
                     data = cf.subset_grid(data, extent)
 
                 # add lease areas
-                #if region_info['lease_area']:
-                    #pf.add_lease_area_polygon_test(ax, la_polygon, 'magenta')
+                if region_info['lease_area']:
+                    pf.add_lease_area_polygon(ax, la_polygon, 'magenta')
                     #leasing_areas.plot(ax=ax, lw=.8, color='magenta', transform=ccrs.LambertConformal())
 
                 # add NYSERDA buoy locations
