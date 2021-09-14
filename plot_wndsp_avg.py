@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/12/2021
-Last modified: 9/13/2021
+Last modified: 9/14/2021
 Plot average WRF windspeeds at 10m, 160m, 200m and 250m at user-defined grouping intervals (monthly and seabreeze vs
 non-seabreeze days)
 """
@@ -104,6 +104,8 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                         nm = 'Non-sea breeze days (00Z - 13Z)'
                     elif interval_name == 'noseabreeze_afternoon':
                         nm = 'Non-sea breeze days (14Z - 23Z)'
+                    elif interval_name == 'summer2020_all':
+                        nm = 'Overall'
                     ttl = '{} {}m\n{}\n{} to {}'.format(plt_info['title'], height, nm, sb_t0str, sb_t1str)
                 sfile = os.path.join(region_savedir, sname)
 
@@ -376,6 +378,16 @@ def main(sDir, sdate, edate, intvl):
                 # difference between morning and afternoon on seabreeze and non-seabreeze days
                 plot_windspeed_differences(ds_sb_aft, ds_sb_morn, savedir, 'diff_seabreeze', **kwargs)
                 plot_windspeed_differences(ds_nosb_aft, ds_nosb_morn, savedir, 'diff_noseabreeze', **kwargs)
+    elif 'all' in intvl:
+        ds = ds.sel(time=slice(sdate, edate))
+        # ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 5, 0)))  # for debugging
+        dst0 = pd.to_datetime(ds.time.values[0]).strftime('%Y-%m-%d')
+        dst1 = pd.to_datetime(ds.time.values[-1]).strftime('%Y-%m-%d')
+        kwargs = dict()
+        kwargs['sb_t0str'] = dst0
+        kwargs['sb_t1str'] = dst1
+        plot_averages(ds, savedir, intvl, **kwargs)
+
     else:
         start, end = cf.daterange_interval(intvl, sdate, edate)
 
