@@ -138,8 +138,8 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
 
                 # add lease areas
                 if region_info['lease_area']:
-                    pf.add_lease_area_polygon(ax, la_polygon, '#525252')  # lease areas
-                    pf.add_lease_area_polygon(ax, pa_polygon, '969696')  # planning areas
+                    pf.add_lease_area_polygon(ax, la_polygon, '#737373')  # lease areas
+                    pf.add_lease_area_polygon(ax, pa_polygon, '#969696')  # planning areas
 
                 # add NYSERDA buoy locations
                 # nyserda_buoys = cf.nyserda_buoys()
@@ -277,7 +277,7 @@ def plot_windspeed_differences(ds1, ds2, save_dir, interval_name, t0=None, sb_t0
 
                 # add lease areas
                 if region_info['lease_area']:
-                    pf.add_lease_area_polygon(ax, la_polygon, '#525252')  # lease areas
+                    pf.add_lease_area_polygon(ax, la_polygon, '#737373')  # lease areas
                     pf.add_lease_area_polygon(ax, pa_polygon, '#969696')  # planning areas
                     #leasing_areas.plot(ax=ax, lw=.8, color='magenta', transform=ccrs.LambertConformal())
 
