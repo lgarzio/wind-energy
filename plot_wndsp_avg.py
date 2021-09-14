@@ -407,6 +407,5 @@ if __name__ == '__main__':
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'seabreeze_diff'  # 'monthly' 'seabreeze_days' 'seabreeze_hours' 'seabreeze_diff'
     interval = 'summer2020_all'  # 'monthly' 'seabreeze_days' 'seabreeze_hours' 'seabreeze_diff' 'summer2020_all'
     main(save_directory, start_date, end_date, interval)
