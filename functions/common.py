@@ -179,8 +179,8 @@ def plot_regions(plot_version):
         # snj.update(sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12, rint=.5), _160m=dict(vmin=6, vmax=12, rint=.5))))
         # snj.update(sdwind_norm=dict(limits=dict(_10m=dict(vmin=.9, vmax=1.2, rint=.05), _160m=dict(vmin=.9, vmax=1.2, rint=.05))))
 
-    elif plot_version in ['summer2020_all', 'seabreeze_days', 'seabreeze_morning', 'seabreeze_afternoon',
-                          'noseabreeze_morning', 'noseabreeze_afternoon']:
+    elif plot_version in ['summer2020_all', 'seabreeze_days', 'noseabreeze_days', 'seabreeze_morning',
+                          'seabreeze_afternoon', 'noseabreeze_morning', 'noseabreeze_afternoon']:
         for k, v in regions.items():
             v.update(
                 meanws=dict(limits=dict(_10m=dict(vmin=2, vmax=10, rint=.5), _160m=dict(vmin=2, vmax=10, rint=.5),

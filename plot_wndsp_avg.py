@@ -262,7 +262,7 @@ def plot_windspeed_differences(ds1, ds2, save_dir, interval_name, t0=None, sb_t0
                     elif interval_name == 'diff_seabreeze':
                         nm = 'Sea breeze days: Afternoon minus Morning'
                     elif interval_name == 'diff_noseabreeze':
-                        nm = 'Non-ea breeze days: Afternoon minus Morning'
+                        nm = 'Non-sea breeze days: Afternoon minus Morning'
                     ttl = '{} {}m\n{}\n{} to {}'.format(plt_info['title'], height, nm, sb_t0str, sb_t1str)
                 sfile = os.path.join(region_savedir, sname)
 
@@ -407,5 +407,5 @@ if __name__ == '__main__':
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'summer2020_all'  # 'monthly' 'seabreeze_days' 'seabreeze_hours' 'seabreeze_diff' 'summer2020_all'
+    interval = 'seabreeze_days'  # 'monthly' 'seabreeze_days' 'seabreeze_hours' 'seabreeze_diff' 'summer2020_all'
     main(save_directory, start_date, end_date, interval)
