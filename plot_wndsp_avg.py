@@ -30,6 +30,9 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
     plt_vars = dict(meanpower=dict(color_label='Average Estimated 15MW Wind Power (kW)',
                                    title='Average Wind Power (15MW)',
                                    cmap='OrRd'),
+                    sdpower=dict(color_label='Variance (kW)',
+                                 title='Power Variance',
+                                 cmap='OrRd'),
                     meanws=dict(color_label='Average Wind Speed (m/s)',
                                 title='Average Wind Speed',
                                 cmap=plt.get_cmap('BuPu')),
@@ -60,6 +63,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
         # calculate wind power
         power = xr.DataArray(np.interp(ws, power_curve['Wind Speed'], power_curve['Power']), coords=ws.coords)
         meanpower = power.mean('time')
+        sdpower = np.sqrt(np.square(power.std('time')))  # power variance
 
         u_mean = u.mean('time')
         v_mean = v.mean('time')
@@ -78,6 +82,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
         sdwind_norm = sdwind / mws
 
         plt_vars['meanpower']['data'] = meanpower
+        plt_vars['sdpower']['data'] = sdpower
         plt_vars['meanws']['data'] = mws
         plt_vars['sdwind']['data'] = sdwind
         plt_vars['sdwind_norm']['data'] = sdwind_norm
