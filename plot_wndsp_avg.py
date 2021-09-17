@@ -169,7 +169,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                     kwargs['levels'] = list(np.arange(0, 15001, 1000))
                     kwargs['extend'] = 'neither'
                 elif pv == 'sdpower':
-                    kwargs['levels'] = list(np.arange(2000, 6001, 1000))
+                    kwargs['levels'] = list(np.arange(2000, 6001, 500))
                     kwargs['extend'] = 'both'
                 else:
                     try:
