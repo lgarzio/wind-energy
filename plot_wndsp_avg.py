@@ -63,7 +63,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
         # calculate wind power
         power = xr.DataArray(np.interp(ws, power_curve['Wind Speed'], power_curve['Power']), coords=ws.coords)
         meanpower = power.mean('time')
-        sdpower = np.sqrt(np.square(power.std('time')))  # power variance
+        sdpower = power.std('time')  # power variance
 
         u_mean = u.mean('time')
         v_mean = v.mean('time')
@@ -72,7 +72,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
         u_mean_standardize = u_mean / cf.wind_uv_to_spd(u_mean, v_mean)
         v_mean_standardize = v_mean / cf.wind_uv_to_spd(u_mean, v_mean)
 
-        # calculate the variance
+        # calculate windspeed variance
         u_variance = np.square(u.std('time'))
         v_variance = np.square(v.std('time'))
 
