@@ -215,6 +215,25 @@ def subset_grid(ds, extent):
     return sub
 
 
+def subset_grid_preserve_time(ds, extent):
+    """
+    Subset the data according to defined latitudes and longitudes, and define the axis limits for the plots
+    """
+    mlon = ds['XLONG']
+    mlat = ds['XLAT']
+    lon_ind = np.logical_and(mlon > extent[0], mlon < extent[1])
+    lat_ind = np.logical_and(mlat > extent[2], mlat < extent[3])
+
+    # find i and j indices of lon/lat in boundaries
+    ind = np.where(np.logical_and(lon_ind, lat_ind))
+
+    # subset data from min i,j corner to max i,j corner
+    # there will be some points outside of defined boundaries because grid is not rectangular
+    sub = np.squeeze(ds)[:, range(np.min(ind[0]), np.max(ind[0]) + 1), range(np.min(ind[1]), np.max(ind[1]) + 1)]
+
+    return sub
+
+
 def wind_uv_to_dir(u, v):
     """
     Calculates the wind direction from the u and v component of wind.
