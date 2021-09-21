@@ -29,7 +29,7 @@ def main(sDir, sdate, edate, hts):
     #ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 2, 5, 0)))  # for debugging
     dst0 = pd.to_datetime(ds.time.values[0]).strftime('%Y-%m-%d')
     dst1 = pd.to_datetime(ds.time.values[-1]).strftime('%Y-%m-%d')
-    extent = [-74.9, -73.8, 38.8, 39.8]
+    extent = [-74.9, -73.9, 38.87, 39.7]
     la_polygon, pa_polygon = cf.extract_lease_area_outlines()
 
     for h in hts:
