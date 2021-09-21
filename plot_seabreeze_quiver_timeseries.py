@@ -12,7 +12,9 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
 import functions.common as cf
+import functions.plotting as pf
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
 
 
@@ -55,9 +57,9 @@ def main(sDir, sdate, edate, hts):
             u_sub.values[mask_sub.values] = np.nan
             v_sub.values[mask_sub.values] = np.nan
 
-            ws = cf.wind_uv_to_spd(u_sub, v_sub)
+            # ws = cf.wind_uv_to_spd(u_sub, v_sub)
             # mws = ws.mean('time')
-            #
+            # 
             # lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
             # fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
             # pf.add_map_features(ax, [-75, -73.6, 38.7, 39.9])
@@ -67,7 +69,7 @@ def main(sDir, sdate, edate, hts):
             # kwargs = dict()
             #
             # pf.add_lease_area_polygon(ax, la_polygon, '#737373')  # lease areas
-            # pf.plot_contourf(fig, ax, lon, lat, mws, 'BuPu', **kwargs)
+            # pf.plot_contourf(fig, ax, lon, lat, mws, 'gray', **kwargs)
             #
             # plt.savefig(os.path.join(savedir, f'seabreeze_feather_{lw}.png'), dpi=200)
             # plt.close()
@@ -82,12 +84,11 @@ def main(sDir, sdate, edate, hts):
         # plot
         fig, (ax1, ax2) = plt.subplots(2, 1, sharey=True, figsize=(12, 6))
 
-        ax1.quiver(hours, 0, data['land']['u_hourly_mean'], data['land']['v_hourly_mean'],
-                   units='y', scale_units='y', scale=1, headlength=1, headaxislength=1, width=0.004)
+        ax1.quiver(hours, 0, data['land']['u_hourly_mean'], data['land']['v_hourly_mean'])
         ax2.quiver(hours, 0, data['water']['u_hourly_mean'], data['water']['v_hourly_mean'])
 
-        ax1.set_title('Land')
-        ax2.set_title('Water')
+        ax1.set_title('Hourly averages over land')
+        ax2.set_title('Hourly averages over water')
 
         #fig.suptitle()
         ax2.set_xlabel('Hour')
