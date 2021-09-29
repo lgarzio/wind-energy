@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 9/21/2021
-Last modified: 9/21/2021
+Last modified: 9/29/2021
 Quiver plots of hourly-averaged winds in Southern NJ over land and over water
 """
 
@@ -29,7 +29,8 @@ def main(sDir, sdate, edate, hts):
     #ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 2, 5, 0)))  # for debugging
     dst0 = pd.to_datetime(ds.time.values[0]).strftime('%Y-%m-%d')
     dst1 = pd.to_datetime(ds.time.values[-1]).strftime('%Y-%m-%d')
-    extent = [-74.9, -73.9, 38.87, 39.7]
+    #extent = [-74.9, -73.9, 38.87, 39.7]
+    extent = [-74.9, -73.9, 38.87, 39.8]
     la_polygon, pa_polygon = cf.extract_lease_area_outlines()
 
     for h in hts:
@@ -69,7 +70,7 @@ def main(sDir, sdate, edate, hts):
             # kwargs = dict()
             #
             # pf.add_lease_area_polygon(ax, la_polygon, '#737373')  # lease areas
-            # pf.plot_contourf(fig, ax, lon, lat, mws, 'gray', **kwargs)
+            # pf.plot_contourf(fig, ax, lon, lat, mws, 'BuPu', **kwargs)
             #
             # plt.savefig(os.path.join(savedir, f'seabreeze_feather_{lw}.png'), dpi=200)
             # plt.close()
