@@ -72,7 +72,7 @@ def plot_feather(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1s
         # fig.suptitle()
         ax2.set_xlabel('Hour')
 
-        sname = f'timeseries_quiver_{h}m.png'
+        sname = f'timeseries_quiver_{interval_name}_{h}m.png'
         plt.savefig(os.path.join(save_dir, sname), dpi=200)
         plt.close()
 
@@ -84,21 +84,44 @@ def main(sDir, sdate, edate, intvl):
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
-    ds = ds.sel(time=slice(sdate, edate))
+    # ds = ds.sel(time=slice(sdate, edate))
     ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 2, 5, 0)))  # for debugging
     dst0 = pd.to_datetime(ds.time.values[0]).strftime('%Y-%m-%d')
     dst1 = pd.to_datetime(ds.time.values[-1]).strftime('%Y-%m-%d')
+
+    # define arguments for plotting function
+    kwargs = dict()
+    kwargs['sb_t0str'] = dst0
+    kwargs['sb_t1str'] = dst1
+
     if intvl == 'all':
-        kwargs = dict()
-        kwargs['sb_t0str'] = dst0
-        kwargs['sb_t1str'] = dst1
         plot_feather(ds, savedir, intvl, **kwargs)
+
+    elif intvl == 'seabreeze_days':
+        df = pd.read_csv(os.path.join(sDir, 'radar_seabreezes_2020.csv'))
+        df = df[df['Seabreeze'] == 'y']
+        sb_dates = np.array(pd.to_datetime(df['Date']))
+        sb_datetimes = [pd.date_range(pd.to_datetime(x), pd.to_datetime(x) + dt.timedelta(hours=23), freq='H') for x in
+                        sb_dates]
+        sb_datetimes = pd.to_datetime(sorted([inner for outer in sb_datetimes for inner in outer]))
+
+        # grab the WRF data for the seabreeze dates
+        ds_sb = ds.sel(time=sb_datetimes)
+        # ds_sb = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
+
+        # grab the WRF data for the non-seabreeze dates
+        nosb_datetimes = [t for t in ds.time.values if t not in sb_datetimes]
+        ds_nosb = ds.sel(time=nosb_datetimes)
+        # ds_nosb = ds.sel(time=slice(dt.datetime(2020, 6, 2, 0, 0), dt.datetime(2020, 6, 2, 15, 0)))  # for debugging
+
+        plot_feather(ds_sb, savedir, 'seabreeze_days', **kwargs)
+        plot_feather(ds_nosb, savedir, 'noseabreeze_days', **kwargs)
 
 
 if __name__ == '__main__':
-    save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
-    #save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
+    # save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
+    save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'all'  # all seabreeze_days
+    interval = 'seabreeze_days'  # all seabreeze_days
     main(save_directory, start_date, end_date, interval)
