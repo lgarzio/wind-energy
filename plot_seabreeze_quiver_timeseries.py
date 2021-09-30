@@ -84,8 +84,8 @@ def main(sDir, sdate, edate, intvl):
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
-    # ds = ds.sel(time=slice(sdate, edate))
-    ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 2, 5, 0)))  # for debugging
+    ds = ds.sel(time=slice(sdate, edate))
+    # ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 2, 5, 0)))  # for debugging
     dst0 = pd.to_datetime(ds.time.values[0]).strftime('%Y-%m-%d')
     dst1 = pd.to_datetime(ds.time.values[-1]).strftime('%Y-%m-%d')
 
