@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 9/21/2021
-Last modified: 9/29/2021
+Last modified: 9/30/2021
 Quiver plots of hourly-averaged winds in Southern NJ over land and over water
 """
 
@@ -18,28 +18,23 @@ import functions.plotting as pf
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
 
 
-def main(sDir, sdate, edate, hts):
-    wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
+def plot_feather(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1str=None):
+    t0 = t0 or None
+    sb_t0str = sb_t0str or None
+    sb_t1str = sb_t1str or None
+    heights = [250, 200, 160, 10]
 
-    savedir = os.path.join(sDir, '{}_{}-{}'.format('feather', sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
-    os.makedirs(savedir, exist_ok=True)
-
-    ds = xr.open_dataset(wrf)
-    ds = ds.sel(time=slice(sdate, edate))
-    #ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 2, 5, 0)))  # for debugging
-    dst0 = pd.to_datetime(ds.time.values[0]).strftime('%Y-%m-%d')
-    dst1 = pd.to_datetime(ds.time.values[-1]).strftime('%Y-%m-%d')
-    #extent = [-74.9, -73.9, 38.87, 39.7]
-    extent = [-74.9, -73.9, 38.87, 39.8]
+    # extent = [-74.9, -73.9, 38.87, 39.7]  # test 1
+    extent = [-74.9, -73.9, 38.87, 39.8]  # test2
     la_polygon, pa_polygon = cf.extract_lease_area_outlines()
 
-    for h in hts:
+    for h in heights:
         if h == 10:
-            u = ds['U10']
-            v = ds['V10']
+            u = ds_sub['U10']
+            v = ds_sub['V10']
         else:
-            u = ds.sel(height=h)['U']
-            v = ds.sel(height=h)['V']
+            u = ds_sub.sel(height=h)['U']
+            v = ds_sub.sel(height=h)['V']
 
         hours = np.arange(1, 24)
 
@@ -53,27 +48,10 @@ def main(sDir, sdate, edate, hts):
             data[lw]['v_hourly_mean'] = np.array([])
             u_sub = cf.subset_grid_preserve_time(u, extent)
             v_sub = cf.subset_grid_preserve_time(v, extent)
-            mask = cf.subset_grid_preserve_time(ds['LANDMASK'], extent)
+            mask = cf.subset_grid_preserve_time(ds_sub['LANDMASK'], extent)
             mask_sub = np.logical_not(mask == value)
             u_sub.values[mask_sub.values] = np.nan
             v_sub.values[mask_sub.values] = np.nan
-
-            # ws = cf.wind_uv_to_spd(u_sub, v_sub)
-            # mws = ws.mean('time')
-            # 
-            # lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
-            # fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
-            # pf.add_map_features(ax, [-75, -73.6, 38.7, 39.9])
-            #
-            # lon = u_sub.XLONG.values
-            # lat = u_sub.XLAT.values
-            # kwargs = dict()
-            #
-            # pf.add_lease_area_polygon(ax, la_polygon, '#737373')  # lease areas
-            # pf.plot_contourf(fig, ax, lon, lat, mws, 'BuPu', **kwargs)
-            #
-            # plt.savefig(os.path.join(savedir, f'seabreeze_feather_{lw}.png'), dpi=200)
-            # plt.close()
 
             # calculate hourly averages
             for hour in hours:
@@ -88,21 +66,39 @@ def main(sDir, sdate, edate, hts):
         ax1.quiver(hours, 0, data['land']['u_hourly_mean'], data['land']['v_hourly_mean'])
         ax2.quiver(hours, 0, data['water']['u_hourly_mean'], data['water']['v_hourly_mean'])
 
-        ax1.set_title('Hourly averages over land')
-        ax2.set_title('Hourly averages over water')
+        ax1.set_title(f'Hourly averages over land: {sb_t0str} to {sb_t1str} ({interval_name})')
+        ax2.set_title(f'Hourly averages over water: {sb_t0str} to {sb_t1str} ({interval_name})')
 
-        #fig.suptitle()
+        # fig.suptitle()
         ax2.set_xlabel('Hour')
 
         sname = f'timeseries_quiver_{h}m.png'
-        plt.savefig(os.path.join(savedir, sname), dpi=200)
+        plt.savefig(os.path.join(save_dir, sname), dpi=200)
         plt.close()
 
 
+def main(sDir, sdate, edate, intvl):
+    wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
+
+    savedir = os.path.join(sDir, '{}_{}_{}-{}'.format('feather', intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    os.makedirs(savedir, exist_ok=True)
+
+    ds = xr.open_dataset(wrf)
+    ds = ds.sel(time=slice(sdate, edate))
+    ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 2, 5, 0)))  # for debugging
+    dst0 = pd.to_datetime(ds.time.values[0]).strftime('%Y-%m-%d')
+    dst1 = pd.to_datetime(ds.time.values[-1]).strftime('%Y-%m-%d')
+    if intvl == 'all':
+        kwargs = dict()
+        kwargs['sb_t0str'] = dst0
+        kwargs['sb_t1str'] = dst1
+        plot_feather(ds, savedir, intvl, **kwargs)
+
+
 if __name__ == '__main__':
-    #save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
-    save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
+    save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
+    #save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    heights = [250, 200, 160, 10]
-    main(save_directory, start_date, end_date, heights)
+    interval = 'all'  # all seabreeze_days
+    main(save_directory, start_date, end_date, interval)
