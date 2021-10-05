@@ -157,7 +157,8 @@ def plot_regions(plot_version):
             )
 
     elif plot_version in ['summer2020_all', 'seabreeze_days', 'noseabreeze_days', 'seabreeze_morning',
-                          'seabreeze_afternoon', 'noseabreeze_morning', 'noseabreeze_afternoon']:
+                          'seabreeze_afternoon', 'noseabreeze_morning', 'noseabreeze_afternoon', 'hourly_avg',
+                          'seabreeze_days_hourly_avg', 'noseabreeze_days_hourly_avg']:
         for k, v in regions.items():
             v.update(
                 meanws=dict(limits=dict(_10m=dict(vmin=2, vmax=10, rint=.5), _160m=dict(vmin=2, vmax=10, rint=.5),
