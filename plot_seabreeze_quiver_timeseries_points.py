@@ -76,9 +76,9 @@ def plot_feather(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1s
         ax4.quiver(hours, 0, points['pt4']['u_hourly_mean'], points['pt4']['v_hourly_mean'])
 
         ax1.set_title(f'{sb_t0str} to {sb_t1str}: {h}m ({interval_name})\nHourly averages point 1')
-        ax2.set_title('Hourly averages point 2')
-        ax3.set_title('Hourly averages point 3')
-        ax4.set_title('Hourly averages point 4')
+        ax2.set_title('point 2')
+        ax3.set_title('point 3')
+        ax4.set_title('point 4')
 
         # fig.suptitle()
         ax2.set_xlabel('Hour')
