@@ -68,7 +68,7 @@ def plot_feather(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1s
                 points[key]['v_hourly_mean'] = np.append(points[key]['v_hourly_mean'], v_hourly)
 
         # plot quiver timeseries
-        fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, sharey=True, figsize=(12, 8))
+        fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, sharey=True, sharex=True, figsize=(12, 8))
 
         ax1.quiver(hours, 0, points['pt1']['u_hourly_mean'], points['pt1']['v_hourly_mean'])
         ax2.quiver(hours, 0, points['pt2']['u_hourly_mean'], points['pt2']['v_hourly_mean'])
@@ -81,7 +81,7 @@ def plot_feather(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1s
         ax4.set_title('point 4')
 
         # fig.suptitle()
-        ax2.set_xlabel('Hour')
+        ax4.set_xlabel('Hour')
 
         sname = f'timeseries_quiver_points_{interval_name}_{h}m.png'
         fig.savefig(os.path.join(save_dir, sname), dpi=200)
