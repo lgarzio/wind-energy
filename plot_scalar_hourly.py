@@ -112,7 +112,7 @@ def plot_scalar(ds_sub, ds_sb_sub, save_dir, interval_name, t0=None, sb_t0str=No
                     # pcolormesh: coarser resolution, shows the actual resolution of the model data
                     # contourf: smooths the resolution of the model data, plots are less pixelated, can define discrete levels
                     #kwargs['levels'] = list(np.arange(-1, 1.25, .25))
-                    kwargs['levels'] = np.linspace(-1, 1, 21)
+                    kwargs['levels'] = list(np.linspace(-1, 1, 21))
                     kwargs['extend'] = 'neither'
 
                     kwargs['ttl'] = ttl
