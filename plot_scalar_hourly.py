@@ -43,7 +43,7 @@ def plot_scalar(ds_sub, ds_sb_sub, save_dir, interval_name, t0=None, sb_t0str=No
             u_sb = ds_sb_sub.sel(height=height)['U']
             v_sb = ds_sb_sub.sel(height=height)['V']
 
-        hours = np.arange(1, 25)
+        hours = np.arange(0, 24)
 
         # calculate hourly averages
         for hour in hours:
