@@ -26,7 +26,7 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
     heights = [250, 200, 160, 10]
 
     plt_regions = cf.plot_regions(interval_name)
-    plt_vars = dict(divergence=dict(color_label='Divergence (m/s)',
+    plt_vars = dict(divergence=dict(color_label='Divergence (1/s)',
                                     title='Divergence',
                                     cmap=plt.get_cmap('RdBu')))
 
@@ -126,24 +126,12 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                     # plot data
                     # pcolormesh: coarser resolution, shows the actual resolution of the model data
                     # contourf: smooths the resolution of the model data, plots are less pixelated, can define discrete levels
-                    if pv == 'meanpower':
-                        kwargs['levels'] = list(np.arange(0, 15001, 1000))
-                        kwargs['extend'] = 'neither'
-                    elif pv == 'sdpower':
-                        kwargs['levels'] = list(np.arange(2000, 6001, 500))
-                        kwargs['extend'] = 'both'
-                    else:
-                        try:
-                            vmin = region_info[pv]['limits']['_{}m'.format(height)]['vmin']
-                            vmax = region_info[pv]['limits']['_{}m'.format(height)]['vmax']
-                            arange_interval = region_info[pv]['limits']['_{}m'.format(height)]['rint']
-                            levels = list(np.arange(vmin, vmax + arange_interval, arange_interval))
-                            kwargs['levels'] = levels
-                        except KeyError:
-                            print('no levels specified')
+                    kwargs['levels'] = [-.0004, -.0003, -.0002, -.0001, 0, .0001, .0002, .0003, .0004]
+                    kwargs['extend'] = 'both'
 
                     kwargs['ttl'] = ttl
                     kwargs['clab'] = plt_info['color_label']
+                    kwargs['shift_subplot_right'] = 0.85
                     pf.plot_contourf(fig, ax, lon_plot, lat_plot, data, plt_info['cmap'], **kwargs)
 
                     # subset the quivers and add as a layer

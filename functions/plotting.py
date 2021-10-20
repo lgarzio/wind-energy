@@ -119,7 +119,8 @@ def add_map_features(ax, axes_limits, xticks=None, yticks=None, landcolor=None, 
     ax.add_feature(state_lines, zorder=7, edgecolor=ec)
 
 
-def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar_ticks=None, extend=None):
+def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar_ticks=None, extend=None,
+                  shift_subplot_right=None):
     """
     Create a filled contour plot with user-defined levels and colors
     :param fig: figure object
@@ -132,6 +133,8 @@ def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar
     :param ttl: optional plot title
     :param clab: optional colorbar label
     :param cbar_ticks: optional, specify colorbar ticks
+    :param extend: optional, different colorbar extensions, default is 'both'
+    :param shift_subplot_right: optional, specify shifting the subplot, default is 0.88
     :returns fig, ax objects
     """
     ttl = ttl or None
@@ -139,8 +142,9 @@ def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar
     clab = clab or None
     cbar_ticks = cbar_ticks or None
     extend = extend or 'both'
+    shift_subplot_right = shift_subplot_right or 0.88
 
-    plt.subplots_adjust(right=0.88)
+    plt.subplots_adjust(right=shift_subplot_right)
     if ttl:
         plt.title(ttl, fontsize=17)
     divider = make_axes_locatable(ax)
