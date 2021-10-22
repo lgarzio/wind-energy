@@ -140,9 +140,9 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                     # plot data
                     # pcolormesh: coarser resolution, shows the actual resolution of the model data
                     # contourf: smooths the resolution of the model data, plots are less pixelated, can define discrete levels
-                    kwargs['levels'] = [-.0004, -.00035, -.0003, -.00025, -.0002, -.00015, -.0001, -.00005, .00005,
-                                        .0001, .00015, .0002, .00025, .0003, .00035, .0004]
-                    kwargs['cbar_ticks'] = [-.0004, -.0003, -.0002, -.0001, .0001, .0002, .0003, .0004]
+                    #kwargs['levels'] = [-.0004, -.00035, -.0003, -.00025, -.0002, -.00015, -.0001, -.00005, .00005,
+                    #                    .0001, .00015, .0002, .00025, .0003, .00035, .0004]
+                    #kwargs['cbar_ticks'] = [-.0004, -.0003, -.0002, -.0001, .0001, .0002, .0003, .0004]
                     kwargs['extend'] = 'both'
 
                     kwargs['ttl'] = ttl
