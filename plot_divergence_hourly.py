@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 10/19/2021
-Last modified: 10/20/2021
+Last modified: 10/22/2021
 Plot divergence of hourly-averaged wind speeds
 """
 
@@ -17,6 +17,12 @@ import cartopy.crs as ccrs
 import functions.common as cf
 import functions.plotting as pf
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
+
+
+def calculate_distance_meters(lat1, lon1, lat2, lon2):
+    geod = Geodesic.WGS84
+    g = geod.Inverse(lat1, lon1, lat2, lon2)
+    return np.round(g['s12'])
 
 
 def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1str=None):
@@ -65,23 +71,31 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                 for j in range(len(vhm.values)):
                     if np.logical_and(i > 0, j > 0):  # edges are nan
                         if np.logical_and(i < len(uhm.values) - 1, j < len(vhm.values) - 1):  # edges are nan
-                            vy1 = vhm.values[i, j + 1]  # v in y direction from center point
-                            vy2 = vhm.values[i, j - 1]  # v in opposite y direction from center point
+                            ux = uhm.values[i, j]  # u at center point
                             ux1 = uhm.values[i + 1, j]  # u in x direction from center point
                             ux2 = uhm.values[i - 1, j]  # u in opposite x direction from center point
+                            vy = vhm.values[i, j]  # v at center point
+                            vy1 = vhm.values[i, j + 1]  # v in y direction from center point
+                            vy2 = vhm.values[i, j - 1]  # v in opposite y direction from center point
 
-                            # calculate distances between points
-                            geod = Geodesic.WGS84
-                            g = geod.Inverse(lat[i, j + 1], lon[i, j + 1], lat[i, j - 1], lon[i, j - 1])
-                            dy1minus2_meters = np.round(g['s12'])
-                            g = geod.Inverse(lat[i + 1, j], lon[i + 1, j], lat[i - 1, j], lon[i - 1, j])
-                            dx1minus2_meters = np.round(g['s12'])
+                            # calculate distances between center point and surrounding points
+                            dux_ux1_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i + 1, j],
+                                                                       lon[i + 1, j])
+                            dux_ux2_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i - 1, j],
+                                                                       lon[i - 1, j])
+                            dvy_vy1_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i, j + 1],
+                                                                       lon[i, j + 1])
+                            dvy_vy2_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i, j - 1],
+                                                                       lon[i, j - 1])
 
-                            # calculate dudx, dvdx, dudy, dvdy at one gridpoint distance from center point
-                            dudx = (ux1 - ux2) / dx1minus2_meters
-                            dvdy = (vy1 - vy2) / dy1minus2_meters
+                            # calculate dudx, dvdy at each point to the center point
+                            dudx1 = (ux - ux1) / dux_ux1_meters
+                            dudx2 = (ux - ux2) / dux_ux2_meters
+                            dvdy1 = (vy - vy1) / dvy_vy1_meters
+                            dvdy2 = (vy - vy2) / dvy_vy2_meters
 
-                            div[i, j] = dudx + dvdy  # surface divergence in m/s
+                            # averaging divergence in the x and y directions: surface divergence in 1/s
+                            div[i, j] = np.nanmean([dudx1, dudx2]) + np.nanmean([dvdy1, dvdy2])
 
             plt_vars['divergence']['data'] = xr.DataArray(div, coords=uhm.coords, dims=uhm.dims)
 
@@ -154,7 +168,7 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
 def main(sDir, sdate, edate, intvl):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
 
-    savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    savedir = os.path.join(sDir, '{}_averaged_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
