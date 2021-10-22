@@ -35,7 +35,7 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
     plt_regions = cf.plot_regions(interval_name)
     plt_vars = dict(divergence=dict(color_label='Divergence x $10^{-4}$ (1/s)',
                                     title='Divergence',
-                                    cmap=plt.get_cmap('RdBu')))
+                                    cmap=plt.get_cmap('RdBu_r')))
 
     la_polygon, pa_polygon = cf.extract_lease_area_outlines()
 
