@@ -89,7 +89,7 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                             dudx = (ux1 - ux2) / dx1minus2_meters
                             dvdy = (vy1 - vy2) / dy1minus2_meters
 
-                            div[i, j] = (dudx + dvdy) * 10**4  # surface divergence in m/s
+                            div[i, j] = (dudx + dvdy) * 10**4  # surface divergence, *10^-4 1/s
 
                             # # calculate distances between center point and surrounding points
                             # dux_ux1_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i + 1, j],

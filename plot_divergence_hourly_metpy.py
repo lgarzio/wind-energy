@@ -66,7 +66,7 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
 
             div = mc.divergence(uhm, vhm)
 
-            plt_vars['divergence']['data'] = div
+            plt_vars['divergence']['data'] = div * 10**4  # surface divergence, *10^-4 1/s
 
             for pv, plt_info in plt_vars.items():
                 for pr, region_info in plt_regions.items():
@@ -112,9 +112,9 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                     # kwargs['levels'] = [-.0004, -.00035, -.0003, -.00025, -.0002, -.00015, -.0001, -.00005, .00005,
                     #                    .0001, .00015, .0002, .00025, .0003, .00035, .0004]
                     # kwargs['cbar_ticks'] = [-.0004, -.0003, -.0002, -.0001, .0001, .0002, .0003, .0004]
-                    # kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25, 0.25, 0.5, 0.75,
-                    #                     1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
-                    # kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
+                    kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25, 0.25, 0.5, 0.75,
+                                        1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
+                    kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
                     kwargs['extend'] = 'both'
 
                     kwargs['ttl'] = ttl
