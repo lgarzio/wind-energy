@@ -32,7 +32,7 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
     heights = [250, 200, 160, 10]
 
     plt_regions = cf.plot_regions(interval_name)
-    plt_vars = dict(divergence=dict(color_label='Divergence (1/s)',
+    plt_vars = dict(divergence=dict(color_label='Divergence x $10^{-4}$ (1/s)',
                                     title='Divergence',
                                     cmap=plt.get_cmap('RdBu')))
 
@@ -71,31 +71,44 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                 for j in range(len(vhm.values)):
                     if np.logical_and(i > 0, j > 0):  # edges are nan
                         if np.logical_and(i < len(uhm.values) - 1, j < len(vhm.values) - 1):  # edges are nan
-                            ux = uhm.values[i, j]  # u at center point
+                            # ux = uhm.values[i, j]  # u at center point
                             ux1 = uhm.values[i + 1, j]  # u in x direction from center point
                             ux2 = uhm.values[i - 1, j]  # u in opposite x direction from center point
-                            vy = vhm.values[i, j]  # v at center point
+                            # vy = vhm.values[i, j]  # v at center point
                             vy1 = vhm.values[i, j + 1]  # v in y direction from center point
                             vy2 = vhm.values[i, j - 1]  # v in opposite y direction from center point
 
-                            # calculate distances between center point and surrounding points
-                            dux_ux1_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i + 1, j],
-                                                                       lon[i + 1, j])
-                            dux_ux2_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i - 1, j],
-                                                                       lon[i - 1, j])
-                            dvy_vy1_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i, j + 1],
-                                                                       lon[i, j + 1])
-                            dvy_vy2_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i, j - 1],
-                                                                       lon[i, j - 1])
+                            # calculate distances between points
+                            geod = Geodesic.WGS84
+                            g = geod.Inverse(lat[i, j + 1], lon[i, j + 1], lat[i, j - 1], lon[i, j - 1])
+                            dy1minus2_meters = np.round(g['s12'])
+                            g = geod.Inverse(lat[i + 1, j], lon[i + 1, j], lat[i - 1, j], lon[i - 1, j])
+                            dx1minus2_meters = np.round(g['s12'])
 
-                            # calculate dudx, dvdy at each point to the center point
-                            dudx1 = (ux - ux1) / dux_ux1_meters
-                            dudx2 = (ux - ux2) / dux_ux2_meters
-                            dvdy1 = (vy - vy1) / dvy_vy1_meters
-                            dvdy2 = (vy - vy2) / dvy_vy2_meters
+                            # calculate dudx, dvdx, dudy, dvdy at one gridpoint distance from center point
+                            dudx = (ux1 - ux2) / dx1minus2_meters
+                            dvdy = (vy1 - vy2) / dy1minus2_meters
 
-                            # averaging divergence in the x and y directions: surface divergence in 1/s
-                            div[i, j] = np.nanmean([dudx1, dudx2]) + np.nanmean([dvdy1, dvdy2])
+                            div[i, j] = (dudx + dvdy) * 10**4  # surface divergence in m/s
+
+                            # # calculate distances between center point and surrounding points
+                            # dux_ux1_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i + 1, j],
+                            #                                            lon[i + 1, j])
+                            # dux_ux2_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i - 1, j],
+                            #                                            lon[i - 1, j])
+                            # dvy_vy1_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i, j + 1],
+                            #                                            lon[i, j + 1])
+                            # dvy_vy2_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i, j - 1],
+                            #                                            lon[i, j - 1])
+                            #
+                            # # calculate dudx, dvdy at each point to the center point
+                            # dudx1 = (ux - ux1) / dux_ux1_meters
+                            # dudx2 = (ux - ux2) / dux_ux2_meters
+                            # dvdy1 = (vy - vy1) / dvy_vy1_meters
+                            # dvdy2 = (vy - vy2) / dvy_vy2_meters
+                            #
+                            # # averaging divergence in the x and y directions: surface divergence in 1/s
+                            # div[i, j] = np.nanmean([dudx1, dudx2]) + np.nanmean([dvdy1, dvdy2])
 
             plt_vars['divergence']['data'] = xr.DataArray(div, coords=uhm.coords, dims=uhm.dims)
 
@@ -140,9 +153,12 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                     # plot data
                     # pcolormesh: coarser resolution, shows the actual resolution of the model data
                     # contourf: smooths the resolution of the model data, plots are less pixelated, can define discrete levels
-                    kwargs['levels'] = [-.0004, -.00035, -.0003, -.00025, -.0002, -.00015, -.0001, -.00005, .00005,
-                                       .0001, .00015, .0002, .00025, .0003, .00035, .0004]
-                    kwargs['cbar_ticks'] = [-.0004, -.0003, -.0002, -.0001, .0001, .0002, .0003, .0004]
+                    # kwargs['levels'] = [-.0004, -.00035, -.0003, -.00025, -.0002, -.00015, -.0001, -.00005, .00005,
+                    #                    .0001, .00015, .0002, .00025, .0003, .00035, .0004]
+                    # kwargs['cbar_ticks'] = [-.0004, -.0003, -.0002, -.0001, .0001, .0002, .0003, .0004]
+                    kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25, 0.25, 0.5, 0.75,
+                                        1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
+                    kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
                     kwargs['extend'] = 'both'
 
                     kwargs['ttl'] = ttl
