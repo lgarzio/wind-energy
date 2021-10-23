@@ -72,11 +72,11 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                     if np.logical_and(i > 0, j > 0):  # edges are nan
                         if np.logical_and(i < len(uhm.values) - 1, j < len(vhm.values) - 1):  # edges are nan
                             # ux = uhm.values[i, j]  # u at center point
-                            ux1 = uhm.values[i + 1, j]  # u in x direction from center point
-                            ux2 = uhm.values[i - 1, j]  # u in opposite x direction from center point
+                            ux1 = uhm.values[i - 1, j]  # u in x direction from center point
+                            ux2 = uhm.values[i + 1, j]  # u in opposite x direction from center point
                             # vy = vhm.values[i, j]  # v at center point
-                            vy1 = vhm.values[i, j + 1]  # v in y direction from center point
-                            vy2 = vhm.values[i, j - 1]  # v in opposite y direction from center point
+                            vy1 = vhm.values[i, j - 1]  # v in y direction from center point
+                            vy2 = vhm.values[i, j + 1]  # v in opposite y direction from center point
 
                             # calculate distances between points
                             geod = Geodesic.WGS84
