@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 10/19/2021
-Last modified: 10/22/2021
+Last modified: 10/25/2021
 Plot divergence of hourly-averaged wind speeds
 """
 
@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import functions.common as cf
 import functions.plotting as pf
+import metpy.calc as mc
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
 
 
@@ -37,9 +38,6 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                                     cmap=plt.get_cmap('RdBu_r')))
 
     la_polygon, pa_polygon = cf.extract_lease_area_outlines()
-
-    lon = ds_sub.XLONG.values
-    lat = ds_sub.XLAT.values
 
     for height in heights:
         if height == 10:
@@ -63,54 +61,8 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
             u_hourly_mean_standardize = uhm / cf.wind_uv_to_spd(uhm, vhm)
             v_hourly_mean_standardize = vhm / cf.wind_uv_to_spd(uhm, vhm)
 
-            # calculate divergence - translated from Laura Nazzaro's MATLAB code
-            div = np.empty(np.shape(uhm.values))
-            div[:] = np.nan
-
-            for i in range(len(uhm.values)):
-                for j in range(len(vhm.values)):
-                    if np.logical_and(i > 0, j > 0):  # edges are nan
-                        if np.logical_and(i < len(uhm.values) - 1, j < len(vhm.values) - 1):  # edges are nan
-                            # ux = uhm.values[i, j]  # u at center point
-                            ux1 = uhm.values[i - 1, j]  # u in x direction from center point
-                            ux2 = uhm.values[i + 1, j]  # u in opposite x direction from center point
-                            # vy = vhm.values[i, j]  # v at center point
-                            vy1 = vhm.values[i, j - 1]  # v in y direction from center point
-                            vy2 = vhm.values[i, j + 1]  # v in opposite y direction from center point
-
-                            # calculate distances between points
-                            geod = Geodesic.WGS84
-                            g = geod.Inverse(lat[i, j + 1], lon[i, j + 1], lat[i, j - 1], lon[i, j - 1])
-                            dy1minus2_meters = np.round(g['s12'])
-                            g = geod.Inverse(lat[i + 1, j], lon[i + 1, j], lat[i - 1, j], lon[i - 1, j])
-                            dx1minus2_meters = np.round(g['s12'])
-
-                            # calculate dudx, dvdx, dudy, dvdy at one gridpoint distance from center point
-                            dudx = (ux1 - ux2) / dx1minus2_meters
-                            dvdy = (vy1 - vy2) / dy1minus2_meters
-
-                            div[i, j] = (dudx + dvdy) * 10**4  # surface divergence, *10^-4 1/s
-
-                            # # calculate distances between center point and surrounding points
-                            # dux_ux1_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i + 1, j],
-                            #                                            lon[i + 1, j])
-                            # dux_ux2_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i - 1, j],
-                            #                                            lon[i - 1, j])
-                            # dvy_vy1_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i, j + 1],
-                            #                                            lon[i, j + 1])
-                            # dvy_vy2_meters = calculate_distance_meters(lat[i, j], lon[i, j], lat[i, j - 1],
-                            #                                            lon[i, j - 1])
-                            #
-                            # # calculate dudx, dvdy at each point to the center point
-                            # dudx1 = (ux - ux1) / dux_ux1_meters
-                            # dudx2 = (ux - ux2) / dux_ux2_meters
-                            # dvdy1 = (vy - vy1) / dvy_vy1_meters
-                            # dvdy2 = (vy - vy2) / dvy_vy2_meters
-                            #
-                            # # averaging divergence in the x and y directions: surface divergence in 1/s
-                            # div[i, j] = np.nanmean([dudx1, dudx2]) + np.nanmean([dvdy1, dvdy2])
-
-            plt_vars['divergence']['data'] = xr.DataArray(div, coords=uhm.coords, dims=uhm.dims)
+            div = mc.divergence(uhm, vhm)
+            plt_vars['divergence']['data'] = div * 10**4  # surface divergence, *10^-4 1/s
 
             for pv, plt_info in plt_vars.items():
                 for pr, region_info in plt_regions.items():
@@ -118,9 +70,14 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                     os.makedirs(region_savedir, exist_ok=True)
 
                     sname = '{}_{}m_{}_H{}'.format(pr, height, interval_name, str(hour).zfill(3))
-                    ttl = 'Sea Breeze Days\nHourly Averaged {} {}m: H{}\n{} to {}'.format(plt_info['title'], height,
-                                                                                          str(hour).zfill(3),
-                                                                                          sb_t0str, sb_t1str)
+                    if interval_name == 'divergence_seabreeze_days_hourly_avg':
+                        ttl = 'Sea Breeze Days\nHourly Averaged {} {}m: H{}\n{} to {}'.format(plt_info['title'], height,
+                                                                                              str(hour).zfill(3),
+                                                                                              sb_t0str, sb_t1str)
+                    else:
+                        ttl = 'Sea Breeze Days\n{} {}m: H{}\n{} to {}'.format(plt_info['title'], height,
+                                                                           str(hour).zfill(3),
+                                                                           sb_t0str, sb_t1str)
                     sfile = os.path.join(region_savedir, sname)
 
                     # set up the map
@@ -144,8 +101,8 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                         pf.add_lease_area_polygon(ax, pa_polygon, '#969696')  # planning areas
                         #leasing_areas.plot(ax=ax, lw=.8, color='magenta', transform=ccrs.LambertConformal())
 
-                    lon_plot = data.XLONG.values
-                    lat_plot = data.XLAT.values
+                    lon = data.XLONG.values
+                    lat = data.XLAT.values
 
                     # initialize keyword arguments for plotting
                     kwargs = dict()
@@ -164,17 +121,17 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                     kwargs['ttl'] = ttl
                     kwargs['clab'] = plt_info['color_label']
                     kwargs['shift_subplot_right'] = 0.85
-                    pf.plot_contourf(fig, ax, lon_plot, lat_plot, data, plt_info['cmap'], **kwargs)
+                    pf.plot_contourf(fig, ax, lon, lat, data, plt_info['cmap'], **kwargs)
 
                     # subset the quivers and add as a layer
                     if region_info['quiver_subset']:
                         quiver_scale = region_info['quiver_scale']
                         qs = region_info['quiver_subset']['_{}m'.format(height)]
-                        ax.quiver(lon_plot[::qs, ::qs], lat_plot[::qs, ::qs], u_hourly_mean_standardize.values[::qs, ::qs],
+                        ax.quiver(lon[::qs, ::qs], lat[::qs, ::qs], u_hourly_mean_standardize.values[::qs, ::qs],
                                   v_hourly_mean_standardize.values[::qs, ::qs], scale=quiver_scale,
                                   color=quiver_color, transform=ccrs.PlateCarree())
                     else:
-                        ax.quiver(lon_plot, lat_plot, u_hourly_mean_standardize.values, v_hourly_mean_standardize.values,
+                        ax.quiver(lon, lat, u_hourly_mean_standardize.values, v_hourly_mean_standardize.values,
                                   scale=quiver_scale, color=quiver_color, transform=ccrs.PlateCarree())
 
                     plt.savefig(sfile, dpi=200)
@@ -191,28 +148,29 @@ def main(sDir, sdate, edate, intvl):
     ds = ds.sel(time=slice(sdate, edate))
     dst0 = pd.to_datetime(ds.time.values[0]).strftime('%Y-%m-%d')
     dst1 = pd.to_datetime(ds.time.values[-1]).strftime('%Y-%m-%d')
-    df = pd.read_csv(os.path.join(sDir, 'radar_seabreezes_2020.csv'))
-    df = df[df['Seabreeze'] == 'y']
-    sb_dates = np.array(pd.to_datetime(df['Date']))
-    sb_datetimes = [pd.date_range(pd.to_datetime(x), pd.to_datetime(x) + dt.timedelta(hours=23), freq='H') for x in sb_dates]
-    sb_datetimes = pd.to_datetime(sorted([inner for outer in sb_datetimes for inner in outer]))
+    if intvl == 'seabreeze_days_hourly_avg_divergence':
+        df = pd.read_csv(os.path.join(sDir, 'radar_seabreezes_2020.csv'))
+        df = df[df['Seabreeze'] == 'y']
+        sb_dates = np.array(pd.to_datetime(df['Date']))
+        sb_datetimes = [pd.date_range(pd.to_datetime(x), pd.to_datetime(x) + dt.timedelta(hours=23), freq='H') for x in sb_dates]
+        sb_datetimes = pd.to_datetime(sorted([inner for outer in sb_datetimes for inner in outer]))
+
+        # grab the WRF data for the seabreeze dates
+        ds = ds.sel(time=sb_datetimes)
+        # ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 5, 0)))  # for debugging
 
     # define arguments for plotting function
     kwargs = dict()
     kwargs['sb_t0str'] = dst0
     kwargs['sb_t1str'] = dst1
 
-    # grab the WRF data for the seabreeze dates
-    ds_sb = ds.sel(time=sb_datetimes)
-    # ds_sb = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 5, 0)))  # for debugging
-
-    plot_divergence(ds_sb, savedir, 'seabreeze_days_hourly_avg_divergence', **kwargs)
+    plot_divergence(ds, savedir, intvl, **kwargs)
 
 
 if __name__ == '__main__':
     # save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
-    start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
-    end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'divergence'
+    start_date = dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
+    end_date = dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
+    interval = 'divergence_hourly'  # seabreeze_days_hourly_avg_divergence  divergence_hourly
     main(save_directory, start_date, end_date, interval)
