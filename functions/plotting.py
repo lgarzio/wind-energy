@@ -120,7 +120,7 @@ def add_map_features(ax, axes_limits, xticks=None, yticks=None, landcolor=None, 
 
 
 def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar_ticks=None, extend=None,
-                  shift_subplot_right=None):
+                  shift_subplot_right=None, xlab=None, ylab=None, yticks=None):
     """
     Create a filled contour plot with user-defined levels and colors
     :param fig: figure object
@@ -135,6 +135,9 @@ def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar
     :param cbar_ticks: optional, specify colorbar ticks
     :param extend: optional, different colorbar extensions, default is 'both'
     :param shift_subplot_right: optional, specify shifting the subplot, default is 0.88
+    :param xlab: optional x-label
+    :param ylab: optional y-label
+    :param yticks: specify optional yticks
     :returns fig, ax objects
     """
     ttl = ttl or None
@@ -143,6 +146,9 @@ def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar
     cbar_ticks = cbar_ticks or None
     extend = extend or 'both'
     shift_subplot_right = shift_subplot_right or 0.88
+    xlab = xlab or None
+    ylab = ylab or None
+    yticks = yticks or None
 
     plt.subplots_adjust(right=shift_subplot_right)
     if ttl:
@@ -152,9 +158,15 @@ def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar
     fig.add_axes(cax)
 
     if levels:
-        cs = ax.contourf(x, y, c, levels=levels, cmap=cmap, extend=extend, transform=ccrs.PlateCarree())
+        try:
+            cs = ax.contourf(x, y, c, levels=levels, cmap=cmap, extend=extend, transform=ccrs.PlateCarree())
+        except ValueError:
+            cs = ax.contourf(x, y, c, levels=levels, cmap=cmap, extend=extend)
     else:
-        cs = ax.contourf(x, y, c, cmap=cmap, extend=extend, transform=ccrs.PlateCarree())
+        try:
+            cs = ax.contourf(x, y, c, cmap=cmap, extend=extend, transform=ccrs.PlateCarree())
+        except ValueError:
+            cs = ax.contourf(x, y, c, cmap=cmap, extend=extend)
 
     if cbar_ticks:
         cb = plt.colorbar(cs, cax=cax, ticks=cbar_ticks)
@@ -163,6 +175,13 @@ def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar
 
     if clab:
         cb.set_label(label=clab, fontsize=14)
+
+    if xlab:
+        ax.set_xlabel(xlab)
+    if ylab:
+        ax.set_ylabel(ylab)
+    if yticks:
+        ax.set_yticks(yticks)
 
     return fig, ax
 
