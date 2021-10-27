@@ -53,33 +53,32 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
         divergence[:] = np.nan
 
         for hour in hours:
-            if hour < 5:
-                u_hour = u[u.time.dt.hour == hour]
-                v_hour = v[v.time.dt.hour == hour]
+            u_hour = u[u.time.dt.hour == hour]
+            v_hour = v[v.time.dt.hour == hour]
 
-                # calculate hourly average
-                uhm = u_hour.mean('time')
-                vhm = v_hour.mean('time')
+            # calculate hourly average
+            uhm = u_hour.mean('time')
+            vhm = v_hour.mean('time')
 
-                # calculate divergence
-                div = mc.divergence(uhm, vhm) * 10**4  # surface divergence, *10^-4 1/s
+            # calculate divergence
+            div = mc.divergence(uhm, vhm) * 10**4  # surface divergence, *10^-4 1/s
 
-                # get values along specified line
-                wrf_projection = WrfProj(map_proj=1, dx=3000, dy=3000, truelat1=38.8, truelat2=38.8,
-                                         moad_cen_lat=38.75293, stand_lon=-74.5)
-                ll_point = CoordPair(lat=34.321144, lon=-79.763733)
-                div_line = interpline(div, start_point=point_start, end_point=point_end, projection=wrf_projection,
-                                      ll_point=ll_point, latlon=True)
+            # get values along specified line
+            wrf_projection = WrfProj(map_proj=1, dx=3000, dy=3000, truelat1=38.8, truelat2=38.8,
+                                     moad_cen_lat=38.75293, stand_lon=-74.5)
+            ll_point = CoordPair(lat=34.321144, lon=-79.763733)
+            div_line = interpline(div, start_point=point_start, end_point=point_end, projection=wrf_projection,
+                                  ll_point=ll_point, latlon=True)
 
-                # get the coordinates for the line that is returned
-                if hour == 1:
-                    lats_interp = np.array([])
-                    lons_interp = np.array([])
-                    for i, value in enumerate(div_line.xy_loc.values):
-                        lats_interp = np.append(lats_interp, value.lat)
-                        lons_interp = np.append(lons_interp, value.lon)
+            # get the coordinates for the line that is returned
+            if hour == 1:
+                lats_interp = np.array([])
+                lons_interp = np.array([])
+                for i, value in enumerate(div_line.xy_loc.values):
+                    lats_interp = np.append(lats_interp, value.lat)
+                    lons_interp = np.append(lons_interp, value.lon)
 
-                divergence[hour - 1] = div_line
+            divergence[hour - 1] = div_line
 
             # # set up map
             # lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
