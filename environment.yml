@@ -13,3 +13,5 @@ dependencies:
   - windrose=1.6.8
   - scikit-learn=0.24.2
   - geographiclib=1.52
+  - metpy=1.1
+  - wrf-python=1.3.2
