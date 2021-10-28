@@ -132,7 +132,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
         #pf.plot_contourf(fig, ax, lons_interp, hours, divergence, plt.get_cmap('RdBu_r'), **kwargs)
         pf.plot_pcolormesh(fig, ax, lons_interp, hours, divergence, **kwargs)
         ylims = ax.get_ylim()
-        ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k')
+        ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
         ax.set_ylim(ylims)
 
         sname = 'divergence_hovmoller_{}.png'.format(height)
