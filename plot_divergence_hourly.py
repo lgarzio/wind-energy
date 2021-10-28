@@ -11,19 +11,12 @@ import os
 import xarray as xr
 import numpy as np
 import pandas as pd
-from geographiclib.geodesic import Geodesic
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import functions.common as cf
 import functions.plotting as pf
 import metpy.calc as mc
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
-
-
-def calculate_distance_meters(lat1, lon1, lat2, lon2):
-    geod = Geodesic.WGS84
-    g = geod.Inverse(lat1, lon1, lat2, lon2)
-    return np.round(g['s12'])
 
 
 def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1str=None):
@@ -150,7 +143,7 @@ def main(sDir, sdate, edate, intvl):
     ds = ds.sel(time=slice(sdate, edate))
     dst0 = pd.to_datetime(ds.time.values[0]).strftime('%Y-%m-%d')
     dst1 = pd.to_datetime(ds.time.values[-1]).strftime('%Y-%m-%d')
-    if intvl == 'seabreeze_days_hourly_avg_divergence':
+    if intvl == 'divergence_seabreeze_days_hourly_avg':
         df = pd.read_csv(os.path.join(sDir, 'radar_seabreezes_2020.csv'))
         df = df[df['Seabreeze'] == 'y']
         sb_dates = np.array(pd.to_datetime(df['Date']))
@@ -174,5 +167,5 @@ if __name__ == '__main__':
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'divergence_hourly'  # seabreeze_days_hourly_avg_divergence  divergence_hourly
+    interval = 'divergence_hourly'  # divergence_seabreeze_days_hourly_avg  divergence_hourly
     main(save_directory, start_date, end_date, interval)
