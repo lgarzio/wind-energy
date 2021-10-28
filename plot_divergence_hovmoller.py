@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 10/26/2021
-Last modified: 10/27/2021
+Last modified: 10/28/2021
 Plot Hovmoller diagram of hourly-averaged wind speed divergence at specified cross-section
 """
 
@@ -34,6 +34,11 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
     heights = [250, 200, 160, 10]
 
     la_polygon, pa_polygon = cf.extract_lease_area_outlines()
+
+    lon = ds_sub.XLONG.values
+    lat = ds_sub.XLAT.values
+
+    lm = ds_sub.LANDMASK.mean('time')
 
     # grab data along the line perpendicular to the coast in southern NJ
     point_start = CoordPair(lat=39.64, lon=-74.745)
@@ -74,9 +79,22 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
             if hour == 1:
                 lats_interp = np.array([])
                 lons_interp = np.array([])
+                land_mask = np.array([])
                 for i, value in enumerate(div_line.xy_loc.values):
                     lats_interp = np.append(lats_interp, value.lat)
                     lons_interp = np.append(lons_interp, value.lon)
+
+                    # find the land mask at the closest grid point
+                    # calculate the sum of the absolute value distance between the model location and buoy location
+                    a = abs(lat - value.lat) + abs(lon - value.lon)
+
+                    # find the indices of the minimum value in the array calculated above
+                    i, j = np.unravel_index(a.argmin(), a.shape)
+                    land_mask = np.append(land_mask, lm[i, j].values)
+
+                # find the coastline longitude (where landmask values change from 1 to 0)
+                coastline_idx = np.where(land_mask[:-1] != land_mask[1:])[0]
+                coastline_lon = np.mean(lons_interp[coastline_idx[0]:coastline_idx[0] + 2])
 
             divergence[hour - 1] = div_line
 
@@ -99,10 +117,10 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
         # kwargs['levels'] = [-.0004, -.00035, -.0003, -.00025, -.0002, -.00015, -.0001, -.00005, .00005,
         #                    .0001, .00015, .0002, .00025, .0003, .00035, .0004]
         # kwargs['cbar_ticks'] = [-.0004, -.0003, -.0002, -.0001, .0001, .0002, .0003, .0004]
-        kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25, 0.25, 0.5, 0.75,
-                            1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
-        kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
-        kwargs['extend'] = 'both'
+        # kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25, 0.25, 0.5, 0.75,
+        #                     1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
+        # kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
+        kwargs['var_lims'] = [-2.5, 2.5]
 
         kwargs['ttl'] = 'Hourly Averaged Seabreeze Days\nDivergence Along Cross-Section: {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
         kwargs['clab'] = 'Divergence x $10^{-4}$ (1/s)'
@@ -110,7 +128,12 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
         kwargs['xlab'] = 'Longitude'
         kwargs['ylab'] = 'Hour'
         kwargs['yticks'] = [5, 10, 15, 20]
-        pf.plot_contourf(fig, ax, lons_interp, hours, divergence, plt.get_cmap('RdBu_r'), **kwargs)
+        kwargs['cmap'] = plt.get_cmap('RdBu_r')
+        #pf.plot_contourf(fig, ax, lons_interp, hours, divergence, plt.get_cmap('RdBu_r'), **kwargs)
+        pf.plot_pcolormesh(fig, ax, lons_interp, hours, divergence, **kwargs)
+        ylims = ax.get_ylim()
+        ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k')
+        ax.set_ylim(ylims)
 
         sname = 'divergence_hovmoller_{}.png'.format(height)
         plt.savefig(os.path.join(save_dir, sname), dpi=200)
