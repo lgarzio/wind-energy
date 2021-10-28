@@ -11,7 +11,6 @@ import os
 import xarray as xr
 import numpy as np
 import pandas as pd
-from geographiclib.geodesic import Geodesic
 import matplotlib.pyplot as plt
 from matplotlib.colors import BoundaryNorm
 import cartopy.crs as ccrs
@@ -20,12 +19,6 @@ import functions.plotting as pf
 import metpy.calc as mc
 from wrf import interpline, CoordPair, WrfProj
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
-
-
-def calculate_distance_meters(lat1, lon1, lat2, lon2):
-    geod = Geodesic.WGS84
-    g = geod.Inverse(lat1, lon1, lat2, lon2)
-    return np.round(g['s12'])
 
 
 def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1str=None):
@@ -115,12 +108,13 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
 
         # initialize keyword arguments for plotting
         kwargs = dict()
-        levels = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
-                  0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
-        # kwargs['levels'] = levels
+        # kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
+        #                   0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
         kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
         cmap = plt.get_cmap('RdBu_r')
         kwargs['cmap'] = cmap
+        levels = [-2.75, -2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
+                  0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75]
         norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
         kwargs['norm_clevs'] = norm
 
