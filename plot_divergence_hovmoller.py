@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 from geographiclib.geodesic import Geodesic
 import matplotlib.pyplot as plt
+from matplotlib.colors import BoundaryNorm
 import cartopy.crs as ccrs
 import functions.common as cf
 import functions.plotting as pf
@@ -114,13 +115,14 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
 
         # initialize keyword arguments for plotting
         kwargs = dict()
-        # kwargs['levels'] = [-.0004, -.00035, -.0003, -.00025, -.0002, -.00015, -.0001, -.00005, .00005,
-        #                    .0001, .00015, .0002, .00025, .0003, .00035, .0004]
-        # kwargs['cbar_ticks'] = [-.0004, -.0003, -.0002, -.0001, .0001, .0002, .0003, .0004]
-        kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25, 0.25, 0.5, 0.75,
-                            1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
+        levels = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
+                  0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
+        # kwargs['levels'] = levels
         kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
-        # kwargs['var_lims'] = [-2.5, 2.5]
+        cmap = plt.get_cmap('RdBu_r')
+        kwargs['cmap'] = cmap
+        norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
+        kwargs['norm_clevs'] = norm
 
         kwargs['ttl'] = 'Hourly Averaged Seabreeze Days\nDivergence Along Cross-Section: {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
         kwargs['clab'] = 'Divergence x $10^{-4}$ (1/s)'
@@ -128,9 +130,8 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
         kwargs['xlab'] = 'Longitude'
         kwargs['ylab'] = 'Hour'
         kwargs['yticks'] = [5, 10, 15, 20]
-        #kwargs['cmap'] = plt.get_cmap('RdBu_r')
-        pf.plot_contourf(fig, ax, lons_interp, hours, divergence, plt.get_cmap('RdBu_r'), **kwargs)
-        #pf.plot_pcolormesh(fig, ax, lons_interp, hours, divergence, **kwargs)
+        #pf.plot_contourf(fig, ax, lons_interp, hours, divergence, plt.get_cmap('RdBu_r'), **kwargs)
+        pf.plot_pcolormesh(fig, ax, lons_interp, hours, divergence, **kwargs)
         ylims = ax.get_ylim()
         ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
         ax.set_ylim(ylims)
@@ -143,7 +144,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
 def main(sDir, sdate, edate, intvl):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
 
-    savedir = os.path.join(sDir, '{}_{}-{}-contourf'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
