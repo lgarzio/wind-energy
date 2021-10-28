@@ -100,17 +100,14 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                     kwargs = dict()
 
                     # plot data
-                    # pcolormesh: coarser resolution, shows the actual resolution of the model data
-                    # contourf: smooths the resolution of the model data, plots are less pixelated, can define discrete levels
-                    # kwargs['levels'] = [-.0004, -.00035, -.0003, -.00025, -.0002, -.00015, -.0001, -.00005, .00005,
-                    #                    .0001, .00015, .0002, .00025, .0003, .00035, .0004]
-                    # kwargs['cbar_ticks'] = [-.0004, -.0003, -.0002, -.0001, .0001, .0002, .0003, .0004]
-                    # kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25, 0.25, 0.5, 0.75,
-                    #                     1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
-                    # kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
-                    kwargs['levels'] = [-5, -4.5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5,
-                                        3, 3.5, 4, 4.5, 5]
-                    kwargs['cbar_ticks'] = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+                    if interval_name == 'divergence_seabreeze_days_hourly_avg':
+                        kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25, 0.25, 0.5,
+                                            0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
+                        kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
+                    else:
+                        kwargs['levels'] = [-5, -4.5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5,
+                                            3, 3.5, 4, 4.5, 5]
+                        kwargs['cbar_ticks'] = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
                     kwargs['extend'] = 'both'
 
                     kwargs['ttl'] = ttl

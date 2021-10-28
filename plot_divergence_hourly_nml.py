@@ -96,12 +96,14 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                     kwargs = dict()
 
                     # plot data
-                    kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25, 0.25, 0.5, 0.75,
-                                        1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
-                    kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
-                    # kwargs['levels'] = [-5, -4.5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5,
-                    #                     3, 3.5, 4, 4.5, 5]
-                    # kwargs['cbar_ticks'] = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+                    if interval_name == 'divergence_seabreeze_days_hourly_avg':
+                        kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25, 0.25, 0.5,
+                                            0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
+                        kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
+                    else:
+                        kwargs['levels'] = [-5, -4.5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5,
+                                            3, 3.5, 4, 4.5, 5]
+                        kwargs['cbar_ticks'] = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
                     kwargs['extend'] = 'both'
 
                     kwargs['ttl'] = ttl
@@ -156,7 +158,7 @@ def main(sDir, sdate, edate, intvl):
 if __name__ == '__main__':
     # save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
-    start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
-    end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'divergence_seabreeze_days_hourly_avg'  # divergence_seabreeze_days_hourly_avg  divergence_hourly
+    start_date = dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
+    end_date = dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
+    interval = 'divergence_hourly'  # divergence_seabreeze_days_hourly_avg  divergence_hourly
     main(save_directory, start_date, end_date, interval)
