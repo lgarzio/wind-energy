@@ -186,31 +186,66 @@ def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar
     return fig, ax
 
 
-def plot_pcolormesh(fig, ax, ttl, lon_data, lat_data, var_data, var_min, var_max, cmap, clab):
+def plot_pcolormesh(fig, ax, x, y, c, var_lims=None, cmap=None, clab=None, ttl=None, extend=None,
+                    shift_subplot_right=None, xlab=None, ylab=None, yticks=None, shading=None):
     """
     Create a pseudocolor plot
     :param fig: figure object
     :param ax: plotting axis object
-    :param ttl: plot title
-    :param lon_data: longitude data
-    :param lat_data: latitude data
-    :param var_data: variable data
-    :param var_min: minimum value for plotting (for fixed colorbar)
-    :param var_max: maximum value for plotting (for fixed colorbar)
-    :param cmap: color map
-    :param clab: colorbar label
+    :param x: x-axis data
+    :param y: y-axis data
+    :param c: color data
+    :param var_lims: optional [min, max] values for plotting (for fixed colorbar)
+    :param cmap: optional color map, default is jet
+    :param clab: optionalcolorbar label
+    :param ttl: optional plot title
+    :param extend: optional, different colorbar extensions, default is 'both'
+    :param shift_subplot_right: optional, specify shifting the subplot, default is 0.88
+    :param xlab: optional x-label
+    :param ylab: optional y-label
+    :param yticks: specify optional yticks
+    :param shading: optional shading ('auto', 'nearest', 'gouraud') default is 'auto'
     """
-    plt.subplots_adjust(right=0.88)
-    plt.title(ttl, fontsize=17)
+    var_lims = var_lims or None
+    cmap = cmap or plt.get_cmap('jet')
+    clab = clab or None
+    ttl = ttl or None
+    extend = extend or 'both'
+    shift_subplot_right = shift_subplot_right or 0.88
+    xlab = xlab or None
+    ylab = ylab or None
+    yticks = yticks or None
+    shading = shading or 'auto'
+
+    plt.subplots_adjust(right=shift_subplot_right)
+    if ttl:
+        plt.title(ttl, fontsize=17)
     divider = make_axes_locatable(ax)
     cax = divider.new_horizontal(size='5%', pad=0.1, axes_class=plt.Axes)
     fig.add_axes(cax)
 
-    h = ax.pcolormesh(lon_data, lat_data, var_data, vmin=var_min, vmax=var_max, shading='gouraud', cmap=cmap,
-                      transform=ccrs.PlateCarree())
+    if var_lims:
+        try:
+            h = ax.pcolormesh(x, y, c, vmin=var_lims[0], vmax=var_lims[1], shading=shading, cmap=cmap,
+                              transform=ccrs.PlateCarree())
+        except ValueError:
+            h = ax.pcolormesh(x, y, c, vmin=var_lims[0], vmax=var_lims[1], shading=shading, cmap=cmap)
+    else:
+        try:
+            h = ax.pcolormesh(x, y, c, shading=shading, cmap=cmap, transform=ccrs.PlateCarree())
+        except ValueError:
+            h = ax.pcolormesh(x, y, c, shading=shading, cmap=cmap)
 
-    cb = plt.colorbar(h, cax=cax, extend='both')
-    cb.set_label(label=clab, fontsize=14)
+    cb = plt.colorbar(h, cax=cax, extend=extend)
+
+    if clab:
+        cb.set_label(label=clab, fontsize=14)
+    if xlab:
+        ax.set_xlabel(xlab)
+    if ylab:
+        ax.set_ylabel(ylab)
+    if yticks:
+        ax.set_yticks(yticks)
 
 
 def plot_windrose(axis, wspd, wdir, ttl):
