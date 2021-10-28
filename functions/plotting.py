@@ -187,7 +187,8 @@ def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar
 
 
 def plot_pcolormesh(fig, ax, x, y, c, var_lims=None, cmap=None, clab=None, ttl=None, extend=None,
-                    shift_subplot_right=None, xlab=None, ylab=None, yticks=None, shading=None):
+                    shift_subplot_right=None, xlab=None, ylab=None, yticks=None, shading=None, norm_clevs=None,
+                    cbar_ticks=None):
     """
     Create a pseudocolor plot
     :param fig: figure object
@@ -205,6 +206,9 @@ def plot_pcolormesh(fig, ax, x, y, c, var_lims=None, cmap=None, clab=None, ttl=N
     :param ylab: optional y-label
     :param yticks: specify optional yticks
     :param shading: optional shading ('auto', 'nearest', 'gouraud') default is 'auto'
+    :param norm_clevs: optional normalized levels
+    :param cbar_ticks: optional, specify colorbar ticks
+
     """
     var_lims = var_lims or None
     cmap = cmap or plt.get_cmap('jet')
@@ -216,6 +220,8 @@ def plot_pcolormesh(fig, ax, x, y, c, var_lims=None, cmap=None, clab=None, ttl=N
     ylab = ylab or None
     yticks = yticks or None
     shading = shading or 'auto'
+    norm_clevs = norm_clevs or None
+    cbar_ticks = cbar_ticks or None
 
     plt.subplots_adjust(right=shift_subplot_right)
     if ttl:
@@ -230,13 +236,21 @@ def plot_pcolormesh(fig, ax, x, y, c, var_lims=None, cmap=None, clab=None, ttl=N
                               transform=ccrs.PlateCarree())
         except ValueError:
             h = ax.pcolormesh(x, y, c, vmin=var_lims[0], vmax=var_lims[1], shading=shading, cmap=cmap)
+    elif norm_clevs:
+        try:
+            h = ax.pcolormesh(x, y, c, shading=shading, cmap=cmap, norm=norm_clevs, transform=ccrs.PlateCarree())
+        except ValueError:
+            h = ax.pcolormesh(x, y, c, shading=shading, cmap=cmap, norm=norm_clevs)
     else:
         try:
             h = ax.pcolormesh(x, y, c, shading=shading, cmap=cmap, transform=ccrs.PlateCarree())
         except ValueError:
             h = ax.pcolormesh(x, y, c, shading=shading, cmap=cmap)
 
-    cb = plt.colorbar(h, cax=cax, extend=extend)
+    if cbar_ticks:
+        cb = plt.colorbar(h, cax=cax, extend=extend, ticks=cbar_ticks)
+    else:
+        cb = plt.colorbar(h, cax=cax, extend=extend)
 
     if clab:
         cb.set_label(label=clab, fontsize=14)
