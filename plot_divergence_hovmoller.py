@@ -88,7 +88,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
 
                 # find the coastline longitude (where landmask values change from 1 to 0)
                 coastline_idx = np.where(land_mask[:-1] != land_mask[1:])[0]
-                coastline_lon = np.mean(lons_interp[coastline_idx[0]:coastline_idx[0] + 2])
+                coastline_lon = lons_interp[coastline_idx[0]]
 
             divergence[hour - 1] = div_line
 
@@ -112,7 +112,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
                             0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
         kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
         cmap = plt.get_cmap('RdBu_r')
-        kwargs['cmap'] = cmap
+        # kwargs['cmap'] = cmap
         # levels = [-2.75, -2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
         #           0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75]
         # norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
