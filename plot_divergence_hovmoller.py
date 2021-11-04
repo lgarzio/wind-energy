@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 10/26/2021
-Last modified: 10/28/2021
+Last modified: 11/4/2021
 Plot Hovmoller diagram of hourly-averaged wind speed divergence at specified cross-section
 """
 
@@ -35,8 +35,8 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
     lm = ds_sub.LANDMASK.mean('time')
 
     # grab data along the line perpendicular to the coast in southern NJ
-    point_start = CoordPair(lat=39.64, lon=-74.745)
-    point_end = CoordPair(lat=39.1, lon=-74.15)
+    point_start = CoordPair(lat=39.8, lon=-74.95)
+    point_end = CoordPair(lat=38.85, lon=-73.8)
 
     for height in heights:
         if height == 10:
@@ -48,7 +48,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
 
         hours = np.arange(1, 24)
 
-        divergence = np.empty(shape=(len(hours), 27))
+        divergence = np.empty(shape=(len(hours), 49))
         divergence[:] = np.nan
 
         for hour in hours:
