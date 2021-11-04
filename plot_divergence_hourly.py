@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 10/19/2021
-Last modified: 10/25/2021
+Last modified: 11/4/2021
 Plot divergence of hourly-averaged wind speeds
 """
 
@@ -67,6 +67,10 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                         ttl = 'Sea Breeze Days\nHourly Averaged {} {}m: H{}\n{} to {}'.format(plt_info['title'], height,
                                                                                               str(hour).zfill(3),
                                                                                               sb_t0str, sb_t1str)
+                    elif interval_name == 'divergence_nonseabreeze_days_hourly_avg':
+                        ttl = 'Non-Sea Breeze Days\nHourly Averaged {} {}m: H{}\n{} to {}'.format(plt_info['title'], height,
+                                                                                              str(hour).zfill(3),
+                                                                                              sb_t0str, sb_t1str)
                     else:
                         ttl = 'Sea Breeze Days\n{} {}m: H{}\n{}'.format(plt_info['title'], height, str(hour).zfill(3),
                                                                         sb_t0str)
@@ -100,7 +104,7 @@ def plot_divergence(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_
                     kwargs = dict()
 
                     # plot data
-                    if interval_name == 'divergence_seabreeze_days_hourly_avg':
+                    if interval_name in ['divergence_seabreeze_days_hourly_avg', 'divergence_nonseabreeze_days_hourly_avg']:
                         kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25, 0.25, 0.5,
                                             0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
                         kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
@@ -140,6 +144,12 @@ def main(sDir, sdate, edate, intvl):
     ds = ds.sel(time=slice(sdate, edate))
     dst0 = pd.to_datetime(ds.time.values[0]).strftime('%Y-%m-%d')
     dst1 = pd.to_datetime(ds.time.values[-1]).strftime('%Y-%m-%d')
+
+    # define arguments for plotting function
+    kwargs = dict()
+    kwargs['sb_t0str'] = dst0
+    kwargs['sb_t1str'] = dst1
+
     if intvl == 'divergence_seabreeze_days_hourly_avg':
         df = pd.read_csv(os.path.join(sDir, 'radar_seabreezes_2020.csv'))
         df = df[df['Seabreeze'] == 'y']
@@ -150,19 +160,29 @@ def main(sDir, sdate, edate, intvl):
         # grab the WRF data for the seabreeze dates
         ds = ds.sel(time=sb_datetimes)
         # ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 5, 0)))  # for debugging
+        plot_divergence(ds, savedir, intvl, **kwargs)
 
-    # define arguments for plotting function
-    kwargs = dict()
-    kwargs['sb_t0str'] = dst0
-    kwargs['sb_t1str'] = dst1
+    elif intvl == 'divergence_nonseabreeze_days_hourly_avg':
+        df = pd.read_csv(os.path.join(sDir, 'radar_seabreezes_2020.csv'))
+        df = df[df['Seabreeze'] == 'y']
+        sb_dates = np.array(pd.to_datetime(df['Date']))
+        sb_datetimes = [pd.date_range(pd.to_datetime(x), pd.to_datetime(x) + dt.timedelta(hours=23), freq='H') for x in sb_dates]
+        sb_datetimes = pd.to_datetime(sorted([inner for outer in sb_datetimes for inner in outer]))
 
-    plot_divergence(ds, savedir, intvl, **kwargs)
+        # grab the WRF data for the non-seabreeze dates
+        nosb_datetimes = [t for t in ds.time.values if t not in sb_datetimes]
+        ds_nosb = ds.sel(time=nosb_datetimes)
+        # ds_nosb = ds.sel(time=slice(dt.datetime(2020, 6, 2, 0, 0), dt.datetime(2020, 6, 2, 5, 0)))  # for debugging
+        plot_divergence(ds_nosb, savedir, intvl, **kwargs)
+
+    else:
+        plot_divergence(ds, savedir, intvl, **kwargs)
 
 
 if __name__ == '__main__':
     # save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
-    start_date = dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
-    end_date = dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'divergence_hourly'  # divergence_seabreeze_days_hourly_avg  divergence_hourly
+    start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
+    end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
+    interval = 'divergence_nonseabreeze_days_hourly_avg'  # divergence_seabreeze_days_hourly_avg divergence_nonseabreeze_days_hourly_avg  divergence_hourly - use this for daily intervals
     main(save_directory, start_date, end_date, interval)
