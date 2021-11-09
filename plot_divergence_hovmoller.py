@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 10/26/2021
-Last modified: 11/4/2021
+Last modified: 11/9/2021
 Plot Hovmoller diagram of hourly-averaged wind speed divergence at specified cross-section
 """
 
@@ -18,6 +18,7 @@ import functions.common as cf
 import functions.plotting as pf
 import metpy.calc as mc
 from wrf import interpline, CoordPair, WrfProj
+from geographiclib.geodesic import Geodesic
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
 
 
@@ -89,6 +90,18 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
                 # find the coastline longitude (where landmask values change from 1 to 0)
                 coastline_idx = np.where(land_mask[:-1] != land_mask[1:])[0]
                 coastline_lon = lons_interp[coastline_idx[0]]
+                coastline_lat = np.mean(lats_interp[coastline_idx[0]:coastline_idx[0] + 2])
+
+                # calculate the distance from each coordinate to the coastline
+                # negative values are land-side, positive values are ocean-side
+                distance_km = np.array([])
+                geod = Geodesic.WGS84
+                for i, lati in enumerate(lats_interp):
+                    g = geod.Inverse(coastline_lat, coastline_lon, lati, lons_interp[i])
+                    dist_km = g['s12'] * .001
+                    if land_mask[i] == 1:
+                        dist_km = -dist_km
+                    distance_km = np.append(distance_km, dist_km)
 
             divergence[hour - 1] = div_line
 
@@ -128,7 +141,9 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
         pf.plot_pcolormesh(fig, ax, lons_interp, hours, divergence, **kwargs)
         ylims = ax.get_ylim()
         ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
+        ax.vlines(0, ylims[0], ylims[1], colors='k', ls='--')
         ax.set_ylim(ylims)
+        ax.set_xlim([-75, 75])
 
         sname = 'divergence_hovmoller_{}.png'.format(height)
         plt.savefig(os.path.join(save_dir, sname), dpi=200)
