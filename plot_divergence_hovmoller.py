@@ -89,7 +89,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
 
                 # find the coastline longitude (where landmask values change from 1 to 0)
                 coastline_idx = np.where(land_mask[:-1] != land_mask[1:])[0]
-                coastline_lon = lons_interp[coastline_idx[0]]
+                coastline_lon = np.mean(lons_interp[coastline_idx[0]:coastline_idx[0] + 2])
                 coastline_lat = np.mean(lats_interp[coastline_idx[0]:coastline_idx[0] + 2])
 
                 # calculate the distance from each coordinate to the coastline
@@ -112,6 +112,8 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
             # la_polygon, pa_polygon = cf.extract_lease_area_outlines()
             # pf.add_lease_area_polygon(ax, la_polygon, '#737373')  # lease areas
             # ax.plot(lons_interp, lats_interp, transform=ccrs.PlateCarree())
+            # # ax.plot(lons_interp, lats_interp, lw=5, transform=ccrs.PlateCarree())
+            # # ax.plot(lons_interp2, lats_interp2, color='r', transform=ccrs.PlateCarree())
             #
             # sname = f'hovmoller_map.png'
             # plt.savefig(os.path.join(save_dir, sname), dpi=200)
@@ -134,13 +136,13 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
         kwargs['ttl'] = 'Hourly Averaged Seabreeze Days\nDivergence Along Cross-Section: {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
         kwargs['clab'] = 'Divergence x $10^{-4}$ (1/s)'
         kwargs['shift_subplot_right'] = 0.85
-        kwargs['xlab'] = 'Longitude'
+        kwargs['xlab'] = 'Distance From Shore (km)'
         kwargs['ylab'] = 'Hour'
         kwargs['yticks'] = [5, 10, 15, 20]
         #pf.plot_contourf(fig, ax, lons_interp, hours, divergence, plt.get_cmap('RdBu_r'), **kwargs)
-        pf.plot_pcolormesh(fig, ax, lons_interp, hours, divergence, **kwargs)
+        pf.plot_pcolormesh(fig, ax, distance_km, hours, divergence, **kwargs)
         ylims = ax.get_ylim()
-        ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
+        #ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
         ax.vlines(0, ylims[0], ylims[1], colors='k', ls='--')
         ax.set_ylim(ylims)
         ax.set_xlim([-75, 75])
