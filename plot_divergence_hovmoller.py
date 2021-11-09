@@ -145,7 +145,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
         #ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
         ax.vlines(0, ylims[0], ylims[1], colors='k', ls='--')
         ax.set_ylim(ylims)
-        ax.set_xlim([-75, 75])
+        ax.set_xlim([-80, 80])
 
         sname = 'divergence_hovmoller_{}.png'.format(height)
         plt.savefig(os.path.join(save_dir, sname), dpi=200)
