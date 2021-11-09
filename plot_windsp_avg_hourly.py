@@ -2,8 +2,8 @@
 
 """
 Author: Lori Garzio on 10/5/2021
-Last modified: 10/5/2021
-Plot hourly-averaged WRF windspeeds at 10m, 160m, 200m and 250m at user-defined grouping intervals (overall and
+Last modified: 11/9/2021
+Plot hourly-averaged WRF windspeeds and variance at 10m, 160m, 200m and 250m at user-defined grouping intervals (overall and
 seabreeze vs non-seabreeze days)
 """
 
@@ -28,7 +28,13 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
     plt_regions = cf.plot_regions(interval_name)
     plt_vars = dict(meanws=dict(color_label='Average Wind Speed (m/s)',
                                 title='Average Wind Speed',
-                                cmap=plt.get_cmap('BuPu')))
+                                cmap=plt.get_cmap('BuPu')),
+                    sdwind=dict(color_label='Variance (m/s)',
+                                title='Wind Speed Variance',
+                                cmap='BuPu'),
+                    sdwind_norm=dict(color_label='Normalized Variance',
+                                     title='Normalized Wind Speed Variance',
+                                     cmap='BuPu'))
 
     la_polygon, pa_polygon = cf.extract_lease_area_outlines()
 
@@ -55,7 +61,18 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
             u_hourly_mean_standardize = u_hourly_mean / cf.wind_uv_to_spd(u_hourly_mean, v_hourly_mean)
             v_hourly_mean_standardize = v_hourly_mean / cf.wind_uv_to_spd(u_hourly_mean, v_hourly_mean)
 
+            # calculate wind speed variance
+            u_hour_variance = np.square(u_hour.std('time'))
+            v_hour_variance = np.square(v_hour.std('time'))
+
+            sd_wind_hourly = np.sqrt(u_hour_variance + v_hour_variance)
+
+            # variance normalized to mean wind speed
+            sd_wind_hourly_norm = sd_wind_hourly / ws_hourly_mean
+
             plt_vars['meanws']['data'] = ws_hourly_mean
+            plt_vars['sdwind']['data'] = sd_wind_hourly
+            plt_vars['sdwind_norm']['data'] = sd_wind_hourly_norm
 
             for pv, plt_info in plt_vars.items():
                 for pr, region_info in plt_regions.items():
