@@ -28,7 +28,7 @@ def plot_average_sst(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb
     plt_vars = dict(sst_mean=dict(color_label='Average SST (\N{DEGREE SIGN}C)',
                                   title='Average Sea Surface Temperature (\N{DEGREE SIGN}C)',
                                   cmap=cmo.cm.thermal),
-                    sst_sd=dict(color_label='Variance ($^\circ$C)',
+                    sst_sd=dict(color_label='Variance (\N{DEGREE SIGN}C)',
                                 title='SST Variance',
                                 cmap=cmo.cm.thermal)
                     )
@@ -42,6 +42,15 @@ def plot_average_sst(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb
 
     landmask = ds_sub.LANDMASK.mean('time')  # 1=land, 0=water
     lakemask = ds_sub.LAKEMASK.mean('time')  # 1=lake, 0=non-lake
+
+    # mask values over land and lakes
+    ldmask = np.logical_and(landmask == 1, landmask == 1)
+    sst_mean.values[ldmask] = np.nan
+    sst_std.values[ldmask] = np.nan
+
+    lkmask = np.logical_and(lakemask == 1, lakemask == 1)
+    sst_mean.values[lkmask] = np.nan
+    sst_std.values[lkmask] = np.nan
 
     plt_vars['sst_mean']['data'] = sst_mean
     plt_vars['sst_sd']['data'] = sst_std
@@ -85,8 +94,6 @@ def plot_average_sst(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb
             if region_info['subset']:
                 extent = np.add(region_info['extent'], [-.5, .5, -.5, .5]).tolist()
                 data = cf.subset_grid(data, extent)
-                landmask = cf.subset_grid(landmask, extent)
-                lakemask = cf.subset_grid(lakemask, extent)
 
             # add lease areas
             if region_info['lease_area']:
@@ -96,13 +103,6 @@ def plot_average_sst(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb
 
             lon = data.XLONG.values
             lat = data.XLAT.values
-
-            # mask values over land and lakes
-            ldmask = np.logical_and(landmask == 1, landmask == 1)
-            data.values[ldmask] = np.nan
-
-            lkmask = np.logical_and(lakemask == 1, lakemask == 1)
-            data.values[lkmask] = np.nan
 
             # initialize keyword arguments for plotting
             kwargs = dict()
