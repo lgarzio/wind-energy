@@ -28,6 +28,13 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
     sb_t1str = sb_t1str or None
     heights = [250, 200, 160, 10]
 
+    # bathymetry = '/Users/garzio/Documents/rucool/bathymetry/GEBCO_2014_2D_-100.0_0.0_-10.0_50.0.nc'
+    bathymetry = '/home/lgarzio/bathymetry_files/GEBCO_2014_2D_-100.0_0.0_-10.0_50.0.nc'  # on server
+    extent = [-78, -70, 37, 41]  # subset the file so it's easier to work with
+    bathy = xr.open_dataset(bathymetry)
+    bathy = bathy.sel(lon=slice(extent[0] - .1, extent[1] + .1),
+                      lat=slice(extent[2] - .1, extent[3] + .1))
+
     lon = ds_sub.XLONG.values
     lat = ds_sub.XLAT.values
 
@@ -38,6 +45,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
     point_end = CoordPair(lat=38, lon=-72.8)
 
     for height in heights:
+        print('plotting {}m'.format(height))
         if height == 10:
             u = ds_sub['U10']
             v = ds_sub['V10']
@@ -71,12 +79,6 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
             # get the coordinates for the line that is returned
             if hour == 1:
                 # get the bathymetry along the interpolated line
-                # bathymetry = '/Users/garzio/Documents/rucool/bathymetry/GEBCO_2014_2D_-100.0_0.0_-10.0_50.0.nc'
-                bathymetry = '/home/lgarzio/bathymetry_files/GEBCO_2014_2D_-100.0_0.0_-10.0_50.0.nc'  # on server
-                extent = [-78, -70, 37, 41]  # subset the file so it's easier to work with
-                bathy = xr.open_dataset(bathymetry)
-                bathy = bathy.sel(lon=slice(extent[0] - .1, extent[1] + .1),
-                                  lat=slice(extent[2] - .1, extent[3] + .1))
 
                 lats_interp = np.array([])
                 lons_interp = np.array([])
