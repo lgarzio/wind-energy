@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 10/26/2021
-Last modified: 11/9/2021
+Last modified: 11/11/2021
 Plot Hovmoller diagram of hourly-averaged wind speed divergence at specified cross-section
 """
 
@@ -28,16 +28,14 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
     sb_t1str = sb_t1str or None
     heights = [250, 200, 160, 10]
 
-    la_polygon, pa_polygon = cf.extract_lease_area_outlines()
-
     lon = ds_sub.XLONG.values
     lat = ds_sub.XLAT.values
 
     lm = ds_sub.LANDMASK.mean('time')
 
     # grab data along the line perpendicular to the coast in southern NJ
-    point_start = CoordPair(lat=39.8, lon=-74.95)
-    point_end = CoordPair(lat=38.85, lon=-73.8)
+    point_start = CoordPair(lat=40.7, lon=-76)
+    point_end = CoordPair(lat=38, lon=-72.8)
 
     for height in heights:
         if height == 10:
@@ -49,7 +47,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
 
         hours = np.arange(1, 24)
 
-        divergence = np.empty(shape=(len(hours), 49))
+        divergence = np.empty(shape=(len(hours), 136))
         divergence[:] = np.nan
 
         for hour in hours:
@@ -72,9 +70,17 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
 
             # get the coordinates for the line that is returned
             if hour == 1:
+                # get the bathymetry along the interpolated line
+                bathymetry = '/Users/garzio/Documents/rucool/bathymetry/GEBCO_2014_2D_-100.0_0.0_-10.0_50.0.nc'
+                extent = [-78, -70, 37, 41]  # subset the file so it's easier to work with
+                bathy = xr.open_dataset(bathymetry)
+                bathy = bathy.sel(lon=slice(extent[0] - .1, extent[1] + .1),
+                                  lat=slice(extent[2] - .1, extent[3] + .1))
+
                 lats_interp = np.array([])
                 lons_interp = np.array([])
                 land_mask = np.array([])
+                plot_elev = np.array([])
                 for i, value in enumerate(div_line.xy_loc.values):
                     lats_interp = np.append(lats_interp, value.lat)
                     lons_interp = np.append(lons_interp, value.lon)
@@ -87,8 +93,14 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
                     i, j = np.unravel_index(a.argmin(), a.shape)
                     land_mask = np.append(land_mask, lm[i, j].values)
 
+                    # find the bathymetry at the closest point
+                    minlat_idx = np.argmin(abs(bathy.lat.values - value.lat))
+                    minlon_idx = np.argmin(abs(bathy.lon.values - value.lon))
+                    plot_elev = np.append(plot_elev, bathy.elevation[minlat_idx, minlon_idx])
+
                 # find the coastline longitude (where landmask values change from 1 to 0)
-                coastline_idx = np.where(land_mask[:-1] != land_mask[1:])[0]
+                # have to take the max because the line crosses Delaware River
+                coastline_idx = [np.nanmax(np.where(land_mask[:-1] != land_mask[1:])[0])]
                 coastline_lon = np.mean(lons_interp[coastline_idx[0]:coastline_idx[0] + 2])
                 coastline_lat = np.mean(lats_interp[coastline_idx[0]:coastline_idx[0] + 2])
 
@@ -99,53 +111,49 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
                 for i, lati in enumerate(lats_interp):
                     g = geod.Inverse(coastline_lat, coastline_lon, lati, lons_interp[i])
                     dist_km = g['s12'] * .001
-                    if land_mask[i] == 1:
+                    if i <= coastline_idx[0]:
                         dist_km = -dist_km
                     distance_km = np.append(distance_km, dist_km)
 
             divergence[hour - 1] = div_line
 
-            # # set up map
-            # lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
-            # fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
-            # pf.add_map_features(ax, [-75, -73.6, 38.7, 39.9])
-            # la_polygon, pa_polygon = cf.extract_lease_area_outlines()
-            # pf.add_lease_area_polygon(ax, la_polygon, '#737373')  # lease areas
-            # ax.plot(lons_interp, lats_interp, transform=ccrs.PlateCarree())
-            # # ax.plot(lons_interp, lats_interp, lw=5, transform=ccrs.PlateCarree())
-            # # ax.plot(lons_interp2, lats_interp2, color='r', transform=ccrs.PlateCarree())
-            #
-            # sname = f'hovmoller_map.png'
-            # plt.savefig(os.path.join(save_dir, sname), dpi=200)
-            # plt.close()
-
-        fig, ax = plt.subplots(figsize=(8, 8))
+        fig, ax = plt.subplots(figsize=(9, 8))
 
         # initialize keyword arguments for plotting
         kwargs = dict()
-        kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
-                            0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]  # for contourf only
-        # kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
-        # cmap = plt.get_cmap('RdBu_r')  # for pcolormesh only
-        # kwargs['cmap'] = cmap  # for pcolormesh only
-        # levels = [-2.75, -2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
-        #           0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75]  # for pcolormesh only
-        # norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)  # for pcolormesh only
-        # kwargs['norm_clevs'] = norm  # for pcolormesh only
+        # kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
+        #                     0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]  # for contourf only
+        kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
+        cmap = plt.get_cmap('RdBu_r')  # for pcolormesh only
+        kwargs['cmap'] = cmap  # for pcolormesh only
+        levels = [-2.75, -2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
+                  0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75]  # for pcolormesh only
+        norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)  # for pcolormesh only
+        kwargs['norm_clevs'] = norm  # for pcolormesh only
 
         kwargs['ttl'] = 'Hourly Averaged Seabreeze Days\nDivergence Along Cross-Section: {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
         kwargs['clab'] = 'Divergence x $10^{-4}$ (1/s)'
-        kwargs['shift_subplot_right'] = 0.85
+        kwargs['shift_subplot_right'] = 0.97
+        kwargs['shift_subplot_left'] = 0.2
         kwargs['xlab'] = 'Distance From Shore (km)'
         kwargs['ylab'] = 'Hour'
         kwargs['yticks'] = [5, 10, 15, 20]
-        pf.plot_contourf(fig, ax, distance_km, hours, divergence, plt.get_cmap('RdBu_r'), **kwargs)
-        #pf.plot_pcolormesh(fig, ax, distance_km, hours, divergence, **kwargs)
+        #pf.plot_contourf_2leftaxes(fig, ax, distance_km, hours, plot_elev, divergence, plt.get_cmap('RdBu_r'), **kwargs)
+        pf.plot_pcolormesh_2leftaxes(fig, ax, distance_km, hours, plot_elev, divergence, **kwargs)
+
+        # add a line for the coast
         ylims = ax.get_ylim()
         #ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
-        ax.vlines(0, ylims[0], ylims[1], colors='k', ls='--')
+        ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
+
+        # add lines for the wind energy area (calculated in hovmoller_line_map.py)
+        wea1 = 14.73
+        wea2 = 36.32
+        ax.vlines(wea1, ylims[0], ylims[1], colors='darkgray', ls='--')
+        ax.vlines(wea2, ylims[0], ylims[1], colors='darkgray', ls='--')
+
         ax.set_ylim(ylims)
-        ax.set_xlim([-80, 80])
+        ax.set_xlim([-200, 200])
 
         sname = 'divergence_hovmoller_{}.png'.format(height)
         plt.savefig(os.path.join(save_dir, sname), dpi=200)
@@ -155,7 +163,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
 def main(sDir, sdate, edate, intvl):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
 
-    savedir = os.path.join(sDir, '{}_{}-{}-contourf'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)

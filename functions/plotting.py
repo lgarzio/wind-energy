@@ -119,6 +119,13 @@ def add_map_features(ax, axes_limits, xticks=None, yticks=None, landcolor=None, 
     ax.add_feature(state_lines, zorder=7, edgecolor=ec)
 
 
+def make_patch_spines_invisible(ax):
+    ax.set_frame_on(True)
+    ax.patch.set_visible(False)
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+
+
 def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar_ticks=None, extend=None,
                   shift_subplot_right=None, xlab=None, ylab=None, yticks=None):
     """
@@ -182,6 +189,90 @@ def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar
         ax.set_ylabel(ylab)
     if yticks:
         ax.set_yticks(yticks)
+
+    return fig, ax
+
+
+def plot_contourf_2leftaxes(fig, ax, x, y, y2, c, cmap, levels=None, ttl=None, clab=None, cbar_ticks=None, extend=None,
+                  shift_subplot_right=None, shift_subplot_left=None, xlab=None, ylab=None, yticks=None):
+    """
+    Create a filled contour plot with user-defined levels and colors
+    :param fig: figure object
+    :param ax: plotting axis object
+    :param x: x-axis data
+    :param y: y-axis data
+    :param c: color data
+    :param cmap: colormap
+    :param levels: optional list of data levels
+    :param ttl: optional plot title
+    :param clab: optional colorbar label
+    :param cbar_ticks: optional, specify colorbar ticks
+    :param extend: optional, different colorbar extensions, default is 'both'
+    :param shift_subplot_right: optional, specify shifting the subplot, default is 0.88
+    :param xlab: optional x-label
+    :param ylab: optional y-label
+    :param yticks: specify optional yticks
+    :returns fig, ax objects
+    """
+    ttl = ttl or None
+    levels = levels or None
+    clab = clab or None
+    cbar_ticks = cbar_ticks or None
+    extend = extend or 'both'
+    shift_subplot_right = shift_subplot_right or 0.88
+    shift_subplot_left = shift_subplot_left or None
+    xlab = xlab or None
+    ylab = ylab or None
+    yticks = yticks or None
+
+    if shift_subplot_left:
+        plt.subplots_adjust(right=shift_subplot_right, left=shift_subplot_left)
+    else:
+        plt.subplots_adjust(right=shift_subplot_right)
+    if ttl:
+        plt.title(ttl, fontsize=17)
+    # divider = make_axes_locatable(ax)
+    # cax = divider.new_horizontal(size='5%', pad=0.1, axes_class=plt.Axes)
+    # fig.add_axes(cax)
+
+    if levels:
+        try:
+            cs = ax.contourf(x, y, c, levels=levels, cmap=cmap, extend=extend, transform=ccrs.PlateCarree())
+        except ValueError:
+            cs = ax.contourf(x, y, c, levels=levels, cmap=cmap, extend=extend)
+    else:
+        try:
+            cs = ax.contourf(x, y, c, cmap=cmap, extend=extend, transform=ccrs.PlateCarree())
+        except ValueError:
+            cs = ax.contourf(x, y, c, cmap=cmap, extend=extend)
+
+    if cbar_ticks:
+        cb = plt.colorbar(cs, ticks=cbar_ticks, pad=.02)
+    else:
+        cb = plt.colorbar(cs, pad=.02)
+
+    if clab:
+        cb.set_label(label=clab, fontsize=14)
+
+    if xlab:
+        ax.set_xlabel(xlab)
+    if ylab:
+        ax.set_ylabel(ylab)
+    if yticks:
+        ax.set_yticks(yticks)
+
+    # plot secondary y-axis data
+    ax2 = ax.twinx()
+    p2, = ax2.plot(x, y2, '--', c='gray', lw=.75)
+    ax2.spines["left"].set_position(("axes", -0.15))
+    make_patch_spines_invisible(ax2)
+    ax2.spines["left"].set_visible(True)
+    ax2.yaxis.set_label_position('left')
+    ax2.yaxis.set_ticks_position('left')
+    ax2.set_ylabel("Elevation (m)")
+    ax2.yaxis.label.set_color(p2.get_color())
+    tkw = dict(size=4, width=1.3)
+    ax2.tick_params(axis='y', colors=p2.get_color(), **tkw)
 
     return fig, ax
 
@@ -260,6 +351,99 @@ def plot_pcolormesh(fig, ax, x, y, c, var_lims=None, cmap=None, clab=None, ttl=N
         ax.set_ylabel(ylab)
     if yticks:
         ax.set_yticks(yticks)
+
+
+def plot_pcolormesh_2leftaxes(fig, ax, x, y, y2, c, var_lims=None, cmap=None, clab=None, ttl=None, extend=None,
+                    shift_subplot_right=None, shift_subplot_left=None, xlab=None, ylab=None, yticks=None, shading=None, norm_clevs=None,
+                    cbar_ticks=None):
+    """
+    Create a pseudocolor plot
+    :param fig: figure object
+    :param ax: plotting axis object
+    :param x: x-axis data
+    :param y: y-axis data
+    :param c: color data
+    :param var_lims: optional [min, max] values for plotting (for fixed colorbar)
+    :param cmap: optional color map, default is jet
+    :param clab: optionalcolorbar label
+    :param ttl: optional plot title
+    :param extend: optional, different colorbar extensions, default is 'both'
+    :param shift_subplot_right: optional, specify shifting the subplot, default is 0.88
+    :param xlab: optional x-label
+    :param ylab: optional y-label
+    :param yticks: specify optional yticks
+    :param shading: optional shading ('auto', 'nearest', 'gouraud') default is 'auto'
+    :param norm_clevs: optional normalized levels
+    :param cbar_ticks: optional, specify colorbar ticks
+
+    """
+    var_lims = var_lims or None
+    cmap = cmap or plt.get_cmap('jet')
+    clab = clab or None
+    ttl = ttl or None
+    extend = extend or 'both'
+    shift_subplot_right = shift_subplot_right or 0.88
+    shift_subplot_left = shift_subplot_left or None
+    xlab = xlab or None
+    ylab = ylab or None
+    yticks = yticks or None
+    shading = shading or 'auto'
+    norm_clevs = norm_clevs or None
+    cbar_ticks = cbar_ticks or None
+
+    if shift_subplot_left:
+        plt.subplots_adjust(right=shift_subplot_right, left=shift_subplot_left)
+    else:
+        plt.subplots_adjust(right=shift_subplot_right)
+    if ttl:
+        plt.title(ttl, fontsize=17)
+    # divider = make_axes_locatable(ax)
+    # cax = divider.new_horizontal(size='5%', pad=0.1, axes_class=plt.Axes)
+    # fig.add_axes(cax)
+
+    if var_lims:
+        try:
+            h = ax.pcolormesh(x, y, c, vmin=var_lims[0], vmax=var_lims[1], shading=shading, cmap=cmap,
+                              transform=ccrs.PlateCarree())
+        except ValueError:
+            h = ax.pcolormesh(x, y, c, vmin=var_lims[0], vmax=var_lims[1], shading=shading, cmap=cmap)
+    elif norm_clevs:
+        try:
+            h = ax.pcolormesh(x, y, c, shading=shading, cmap=cmap, norm=norm_clevs, transform=ccrs.PlateCarree())
+        except ValueError:
+            h = ax.pcolormesh(x, y, c, shading=shading, cmap=cmap, norm=norm_clevs)
+    else:
+        try:
+            h = ax.pcolormesh(x, y, c, shading=shading, cmap=cmap, transform=ccrs.PlateCarree())
+        except ValueError:
+            h = ax.pcolormesh(x, y, c, shading=shading, cmap=cmap)
+
+    if cbar_ticks:
+        cb = plt.colorbar(h, extend=extend, ticks=cbar_ticks, pad=.02)
+    else:
+        cb = plt.colorbar(h, extend=extend, pad=.02)
+
+    if clab:
+        cb.set_label(label=clab, fontsize=14)
+    if xlab:
+        ax.set_xlabel(xlab)
+    if ylab:
+        ax.set_ylabel(ylab)
+    if yticks:
+        ax.set_yticks(yticks)
+
+    # plot secondary y-axis data
+    ax2 = ax.twinx()
+    p2, = ax2.plot(x, y2, '--', c='gray', lw=.75)
+    ax2.spines["left"].set_position(("axes", -0.15))
+    make_patch_spines_invisible(ax2)
+    ax2.spines["left"].set_visible(True)
+    ax2.yaxis.set_label_position('left')
+    ax2.yaxis.set_ticks_position('left')
+    ax2.set_ylabel("Elevation (m)")
+    ax2.yaxis.label.set_color(p2.get_color())
+    tkw = dict(size=4, width=1.3)
+    ax2.tick_params(axis='y', colors=p2.get_color(), **tkw)
 
 
 def plot_windrose(axis, wspd, wdir, ttl):
