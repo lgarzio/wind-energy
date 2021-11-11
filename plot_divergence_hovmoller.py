@@ -71,7 +71,8 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
             # get the coordinates for the line that is returned
             if hour == 1:
                 # get the bathymetry along the interpolated line
-                bathymetry = '/Users/garzio/Documents/rucool/bathymetry/GEBCO_2014_2D_-100.0_0.0_-10.0_50.0.nc'
+                # bathymetry = '/Users/garzio/Documents/rucool/bathymetry/GEBCO_2014_2D_-100.0_0.0_-10.0_50.0.nc'
+                bathymetry = '/home/lgarzio/bathymetry_files/GEBCO_2014_2D_-100.0_0.0_-10.0_50.0.nc'  # on server
                 extent = [-78, -70, 37, 41]  # subset the file so it's easier to work with
                 bathy = xr.open_dataset(bathymetry)
                 bathy = bathy.sel(lon=slice(extent[0] - .1, extent[1] + .1),
