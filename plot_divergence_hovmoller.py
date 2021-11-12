@@ -172,11 +172,10 @@ def main(sDir, sdate, edate, intvl):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
 
     if intvl == 'divergence_hourly_cases_hovmoller':
-        savedir = os.path.join(sDir, 'hovmoller_seabreeze_cases', '{}_{}-{}-contourf'.format(intvl,
-                                                                                             sdate.strftime('%Y%m%d'),
-                                                                                             edate.strftime('%Y%m%d')))
+        savedir = os.path.join(sDir, 'hovmoller_seabreeze_cases', '{}_{}-contourf'.format(intvl,
+                                                                                             sdate.strftime('%Y%m%d')))
     else:
-        savedir = os.path.join(sDir, '{}_{}-contourf'.format(intvl, sdate.strftime('%Y%m%d')))
+        savedir = os.path.join(sDir, '{}_{}-{}-contourf'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
