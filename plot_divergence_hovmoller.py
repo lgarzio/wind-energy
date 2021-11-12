@@ -122,15 +122,17 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
 
         if interval_name == 'divergence_hourly_avg_hovmoller':
             ttl = 'Hourly Averaged Seabreeze Days\nDivergence Along Cross-Section: {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
+            levels = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
+                      0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
         else:
             ttl = 'Divergence Along Cross-Section: {}m\n{}'.format(height, sb_t0str)
+            levels = [-5, -4.5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
 
         fig, ax = plt.subplots(figsize=(9, 8))
 
         # initialize keyword arguments for plotting
         kwargs = dict()
-        kwargs['levels'] = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
-                            0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]  # for contourf only
+        kwargs['levels'] = levels  # for contourf only
         # kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
         # cmap = plt.get_cmap('RdBu_r')  # for pcolormesh only
         # kwargs['cmap'] = cmap  # for pcolormesh only
