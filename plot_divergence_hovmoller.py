@@ -104,22 +104,22 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
                     minlon_idx = np.argmin(abs(bathy.lon.values - value.lon))
                     plot_elev = np.append(plot_elev, bathy.elevation[minlat_idx, minlon_idx])
 
-                # find the coastline longitude (where landmask values change from 1 to 0)
-                # have to take the max because the line crosses Delaware River
-                coastline_idx = [np.nanmax(np.where(land_mask[:-1] != land_mask[1:])[0])]
-                coastline_lon = np.mean(lons_interp[coastline_idx[0]:coastline_idx[0] + 2])
-                coastline_lat = np.mean(lats_interp[coastline_idx[0]:coastline_idx[0] + 2])
-
-                # calculate the distance from each coordinate to the coastline
-                # negative values are land-side, positive values are ocean-side
-                distance_km = np.array([])
-                geod = Geodesic.WGS84
-                for i, lati in enumerate(lats_interp):
-                    g = geod.Inverse(coastline_lat, coastline_lon, lati, lons_interp[i])
-                    dist_km = g['s12'] * .001
-                    if i <= coastline_idx[0]:
-                        dist_km = -dist_km
-                    distance_km = np.append(distance_km, dist_km)
+                # # find the coastline longitude (where landmask values change from 1 to 0)
+                # # have to take the max because the line crosses Delaware River
+                # coastline_idx = [np.nanmax(np.where(land_mask[:-1] != land_mask[1:])[0])]
+                # coastline_lon = np.mean(lons_interp[coastline_idx[0]:coastline_idx[0] + 2])
+                # coastline_lat = np.mean(lats_interp[coastline_idx[0]:coastline_idx[0] + 2])
+                #
+                # # calculate the distance from each coordinate to the coastline
+                # # negative values are land-side, positive values are ocean-side
+                # distance_km = np.array([])
+                # geod = Geodesic.WGS84
+                # for i, lati in enumerate(lats_interp):
+                #     g = geod.Inverse(coastline_lat, coastline_lon, lati, lons_interp[i])
+                #     dist_km = g['s12'] * .001
+                #     if i <= coastline_idx[0]:
+                #         dist_km = -dist_km
+                #     distance_km = np.append(distance_km, dist_km)
 
             divergence[hour - 1] = div_line
 
@@ -164,8 +164,8 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
         # add lines for the wind energy area (calculated in hovmoller_line_map.py)
         wea1 = 14.73  # for distance from shore
         wea2 = 36.32  # for distance from shore
-        wea1 = -74.45  # for longitude - edges of the WEA
-        wea2 = -73.95  # for longitude - edges of the WEA
+        wea1 = -74.45  # for longitude: edges of the WEA
+        wea2 = -73.95  # for longitude: edges of the WEA
         ax.vlines(wea1, ylims[0], ylims[1], colors='darkgray', ls='--')
         ax.vlines(wea2, ylims[0], ylims[1], colors='darkgray', ls='--')
 
