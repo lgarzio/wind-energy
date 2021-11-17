@@ -157,10 +157,10 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
         #pf.plot_pcolormesh_2leftaxes(fig, ax, distance_km, hours, plot_elev, divergence, **kwargs)
         pf.plot_pcolormesh_2leftaxes(fig, ax, lons_interp, hours, plot_elev, divergence, **kwargs)
 
-        # add a line for the coast
         ylims = ax.get_ylim()
-        #ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
-        ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
+        # # add a line for the coast
+        # #ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
+        # ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
 
         # add lines for the wind energy area (calculated in hovmoller_line_map.py)
         wea1 = 14.73  # for distance from shore
