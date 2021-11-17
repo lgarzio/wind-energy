@@ -58,7 +58,8 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
 
         hours = np.arange(1, 24)
 
-        divergence = np.empty(shape=(len(hours), 136))
+        #divergence = np.empty(shape=(len(hours), 136))
+        divergence = np.empty(shape=(len(hours), 53))
         divergence[:] = np.nan
 
         for hour in hours:
