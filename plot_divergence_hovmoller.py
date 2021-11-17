@@ -171,7 +171,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
         ax.vlines(wea2, ylims[0], ylims[1], colors='darkgray', ls='--')
 
         ax.set_ylim(ylims)
-        ax.set_xlim([-200, 200])
+        # ax.set_xlim([-200, 200])
 
         sname = 'divergence_hovmoller_{}.png'.format(height)
         plt.savefig(os.path.join(save_dir, sname), dpi=200)
