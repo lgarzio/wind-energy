@@ -44,8 +44,8 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
     point_start = CoordPair(lat=40.7, lon=-76)  # for the line perpendicular to the coast
     point_end = CoordPair(lat=38, lon=-72.8)  # for the line perpendicular to the coast
 
-    point_start = CoordPair(lat=38.7, lon=-74.8)  # for the line parallel to the coast (along the WEA)
-    point_end = CoordPair(lat=39.7, lon=-73.5)  # for the line parallel to the coast (along the WEA)
+    #point_start = CoordPair(lat=38.7, lon=-74.8)  # for the line parallel to the coast (along the WEA)
+    #point_end = CoordPair(lat=39.7, lon=-73.5)  # for the line parallel to the coast (along the WEA)
 
     for height in heights:
         print('plotting {}m'.format(height))
@@ -58,8 +58,8 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
 
         hours = np.arange(1, 24)
 
-        #divergence = np.empty(shape=(len(hours), 136))
-        divergence = np.empty(shape=(len(hours), 53))
+        divergence = np.empty(shape=(len(hours), 136))
+        #divergence = np.empty(shape=(len(hours), 53))
         divergence[:] = np.nan
 
         for hour in hours:
@@ -105,22 +105,22 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
                     minlon_idx = np.argmin(abs(bathy.lon.values - value.lon))
                     plot_elev = np.append(plot_elev, bathy.elevation[minlat_idx, minlon_idx])
 
-                # # find the coastline longitude (where landmask values change from 1 to 0)
-                # # have to take the max because the line crosses Delaware River
-                # coastline_idx = [np.nanmax(np.where(land_mask[:-1] != land_mask[1:])[0])]
-                # coastline_lon = np.mean(lons_interp[coastline_idx[0]:coastline_idx[0] + 2])
-                # coastline_lat = np.mean(lats_interp[coastline_idx[0]:coastline_idx[0] + 2])
-                #
-                # # calculate the distance from each coordinate to the coastline
-                # # negative values are land-side, positive values are ocean-side
-                # distance_km = np.array([])
-                # geod = Geodesic.WGS84
-                # for i, lati in enumerate(lats_interp):
-                #     g = geod.Inverse(coastline_lat, coastline_lon, lati, lons_interp[i])
-                #     dist_km = g['s12'] * .001
-                #     if i <= coastline_idx[0]:
-                #         dist_km = -dist_km
-                #     distance_km = np.append(distance_km, dist_km)
+                # find the coastline longitude (where landmask values change from 1 to 0)
+                # have to take the max because the line crosses Delaware River
+                coastline_idx = [np.nanmax(np.where(land_mask[:-1] != land_mask[1:])[0])]
+                coastline_lon = np.mean(lons_interp[coastline_idx[0]:coastline_idx[0] + 2])
+                coastline_lat = np.mean(lats_interp[coastline_idx[0]:coastline_idx[0] + 2])
+
+                # calculate the distance from each coordinate to the coastline
+                # negative values are land-side, positive values are ocean-side
+                distance_km = np.array([])
+                geod = Geodesic.WGS84
+                for i, lati in enumerate(lats_interp):
+                    g = geod.Inverse(coastline_lat, coastline_lon, lati, lons_interp[i])
+                    dist_km = g['s12'] * .001
+                    if i <= coastline_idx[0]:
+                        dist_km = -dist_km
+                    distance_km = np.append(distance_km, dist_km)
 
             divergence[hour - 1] = div_line
 
@@ -154,24 +154,24 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
         kwargs['ylab'] = 'Hour'
         kwargs['yticks'] = [5, 10, 15, 20]
         # pf.plot_contourf_2leftaxes(fig, ax, distance_km, hours, plot_elev, divergence, plt.get_cmap('RdBu_r'), **kwargs)
-        #pf.plot_pcolormesh_2leftaxes(fig, ax, distance_km, hours, plot_elev, divergence, **kwargs)
-        pf.plot_pcolormesh_2leftaxes(fig, ax, lons_interp, hours, plot_elev, divergence, **kwargs)
+        pf.plot_pcolormesh_2leftaxes(fig, ax, distance_km, hours, plot_elev, divergence, **kwargs)
+        #pf.plot_pcolormesh_2leftaxes(fig, ax, lons_interp, hours, plot_elev, divergence, **kwargs)
 
         ylims = ax.get_ylim()
         # # add a line for the coast
         # #ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
-        # ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
+        ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
 
         # add lines for the wind energy area (calculated in hovmoller_line_map.py)
         wea1 = 14.73  # for distance from shore
         wea2 = 36.32  # for distance from shore
-        wea1 = -74.45  # for longitude: edges of the WEA
-        wea2 = -73.95  # for longitude: edges of the WEA
+        #wea1 = -74.45  # for longitude: edges of the WEA
+        #wea2 = -73.95  # for longitude: edges of the WEA
         ax.vlines(wea1, ylims[0], ylims[1], colors='darkgray', ls='--')
         ax.vlines(wea2, ylims[0], ylims[1], colors='darkgray', ls='--')
 
-        ax.set_ylim(ylims)
-        # ax.set_xlim([-200, 200])
+        # ax.set_ylim(ylims)
+        ax.set_xlim([-200, 200])
 
         sname = 'divergence_hovmoller_{}.png'.format(height)
         plt.savefig(os.path.join(save_dir, sname), dpi=200)
@@ -182,10 +182,9 @@ def main(sDir, sdate, edate, intvl):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
 
     if intvl == 'divergence_hourly_cases_hovmoller':
-        savedir = os.path.join(sDir, 'hovmoller_seabreeze_cases', '{}_{}-alongwea'.format(intvl,
-                                                                                             sdate.strftime('%Y%m%d')))
+        savedir = os.path.join(sDir, 'hovmoller_seabreeze_cases', '{}_{}'.format(intvl, sdate.strftime('%Y%m%d')))
     else:
-        savedir = os.path.join(sDir, '{}_{}-{}-alongwea'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+        savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
@@ -218,7 +217,7 @@ def main(sDir, sdate, edate, intvl):
 if __name__ == '__main__':
     # save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
-    start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
-    end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'divergence_hourly_avg_hovmoller'    # divergence_hourly_avg_hovmoller  divergence_hourly_cases_hovmoller - use this for seabreeze cases
+    start_date = dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
+    end_date = dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
+    interval = 'divergence_hourly_cases_hovmoller'    # divergence_hourly_avg_hovmoller  divergence_hourly_cases_hovmoller - use this for seabreeze cases
     main(save_directory, start_date, end_date, interval)
