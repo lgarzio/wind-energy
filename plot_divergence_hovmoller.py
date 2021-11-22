@@ -150,8 +150,8 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
         kwargs['clab'] = 'Divergence x $10^{-4}$ (1/s)'
         kwargs['shift_subplot_right'] = 0.97
         kwargs['shift_subplot_left'] = 0.2
-        #kwargs['xlab'] = 'Distance From Shore (km)'
-        kwargs['xlab'] = 'Longitude'
+        kwargs['xlab'] = 'Distance From Shore (km)'
+        #kwargs['xlab'] = 'Longitude'
         kwargs['ylab'] = 'Hour'
         kwargs['yticks'] = [5, 10, 15, 20]
         # pf.plot_contourf_2leftaxes(fig, ax, distance_km, hours, plot_elev, divergence, plt.get_cmap('RdBu_r'), **kwargs)
