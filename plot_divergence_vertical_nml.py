@@ -13,8 +13,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import BoundaryNorm
-import cartopy.crs as ccrs
-import functions.common as cf
 import functions.plotting as pf
 import metpy.calc as mc
 from wrf import interplevel, default_fill, interpline, CoordPair, WrfProj
