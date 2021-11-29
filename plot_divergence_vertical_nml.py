@@ -119,7 +119,7 @@ def plot_divergence_vertical(ds_sub, save_dir, interval_name, t0=None, sb_t0str=
         ylims = ax.get_ylim()
         # # add a line for the coast
         coastline_lon = -74.40
-        ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
+        ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='-')
         # ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
 
         # add lines for the wind energy area (calculated in hovmoller_line_map.py)
