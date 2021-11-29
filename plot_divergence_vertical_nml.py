@@ -93,16 +93,25 @@ def plot_divergence_vertical(ds_sub, save_dir, interval_name, t0=None, sb_t0str=
         elif interval_name == 'divergence_nonseabreeze_days_hourly_avg':
             ttl = 'Vertical Divergence Along Cross-Section: H{}\nNon-Sea Breeze Days\n{} to {}'.format(str(hour).zfill(3),
                                                                                                    sb_t0str, sb_t1str)
+        elif interval_name == 'divergence_hourly_cases_vertical':
+            ttl = 'Vertical Divergence Along Cross-Section\n{} H{}'.format(sb_t0str, str(hour).zfill(3))
+
+        if 'cases' in interval_name:
+            levels = [-5, -4.5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
+            ticks = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+        else:
+            levels = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
+                      0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
+            ticks = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
 
         fig, ax = plt.subplots(figsize=(9, 8))
 
         # initialize keyword arguments for plotting
         kwargs = dict()
-        kwargs['cbar_ticks'] = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
+        kwargs['cbar_ticks'] = ticks
         cmap = plt.get_cmap('RdBu_r')  # for pcolormesh only
         kwargs['cmap'] = cmap  # for pcolormesh only
-        levels = [-2.75, -2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
-                  0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75]  # for pcolormesh only
+        levels = levels  # for pcolormesh only
         norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)  # for pcolormesh only
         kwargs['norm_clevs'] = norm  # for pcolormesh only
 
@@ -141,7 +150,10 @@ def plot_divergence_vertical(ds_sub, save_dir, interval_name, t0=None, sb_t0str=
 def main(sDir, sdate, edate, intvl):
     wrf = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_native_levels/WRF_4.1_3km_Native_Levels_Dataset_Best'
 
-    savedir = os.path.join(sDir, '{}_{}-{}-vertical'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    if intvl == 'divergence_hourly_cases_vertical':
+        savedir = os.path.join(sDir, 'hovmoller_seabreeze_cases_vertical', '{}_{}'.format(intvl, sdate.strftime('%Y%m%d')))
+    else:
+        savedir = os.path.join(sDir, '{}_{}-{}-vertical'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
@@ -180,13 +192,14 @@ def main(sDir, sdate, edate, intvl):
         plot_divergence_vertical(ds_nosb, savedir, intvl, **kwargs)
 
     else:
+        # ds = ds.sel(time=slice(dt.datetime(2020, 6, 8, 0, 0), dt.datetime(2020, 6, 8, 5, 0)))  # for debugging
         plot_divergence_vertical(ds, savedir, intvl, **kwargs)
 
 
 if __name__ == '__main__':
     # save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
-    start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
-    end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'divergence_seabreeze_days_hourly_avg'  # divergence_seabreeze_days_hourly_avg divergence_nonseabreeze_days_hourly_avg  divergence_hourly - use this for daily intervals
+    start_date = dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
+    end_date = dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
+    interval = 'divergence_hourly_cases_vertical'  # divergence_seabreeze_days_hourly_avg divergence_nonseabreeze_days_hourly_avg  divergence_hourly_cases_vertical - use this for daily intervals
     main(save_directory, start_date, end_date, interval)
