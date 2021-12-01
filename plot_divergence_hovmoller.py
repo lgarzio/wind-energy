@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 10/26/2021
-Last modified: 11/12/2021
+Last modified: 12/1/2021
 Plot Hovmoller diagram of hourly-averaged wind speed divergence at specified cross-section
 """
 
@@ -28,7 +28,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
     sb_t1str = sb_t1str or None
     heights = [250, 200, 160, 10]
 
-    # bathymetry = '/Users/garzio/Documents/rucool/bathymetry/GEBCO_2014_2D_-100.0_0.0_-10.0_50.0.nc'
+    #bathymetry = '/Users/garzio/Documents/rucool/bathymetry/GEBCO_2014_2D_-100.0_0.0_-10.0_50.0.nc'
     bathymetry = '/home/lgarzio/bathymetry_files/GEBCO_2014_2D_-100.0_0.0_-10.0_50.0.nc'  # on server
     extent = [-78, -70, 37, 41]  # subset the file so it's easier to work with
     bathy = xr.open_dataset(bathymetry)
@@ -41,11 +41,11 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
     lm = ds_sub.LANDMASK.mean('time')
 
     # grab data along the line perpendicular to the coast in southern NJ
-    point_start = CoordPair(lat=40.7, lon=-76)  # for the line perpendicular to the coast
-    point_end = CoordPair(lat=38, lon=-72.8)  # for the line perpendicular to the coast
+    #point_start = CoordPair(lat=40.7, lon=-76)  # for the line perpendicular to the coast
+    #point_end = CoordPair(lat=38, lon=-72.8)  # for the line perpendicular to the coast
 
-    #point_start = CoordPair(lat=38.7, lon=-74.8)  # for the line parallel to the coast (along the WEA)
-    #point_end = CoordPair(lat=39.7, lon=-73.5)  # for the line parallel to the coast (along the WEA)
+    point_start = CoordPair(lat=38.7, lon=-74.8)  # for the line parallel to the coast (along the WEA)
+    point_end = CoordPair(lat=39.7, lon=-73.5)  # for the line parallel to the coast (along the WEA)
 
     for height in heights:
         print('plotting {}m'.format(height))
@@ -58,8 +58,8 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
 
         hours = np.arange(1, 24)
 
-        divergence = np.empty(shape=(len(hours), 136))
-        #divergence = np.empty(shape=(len(hours), 53))
+        #divergence = np.empty(shape=(len(hours), 136))
+        divergence = np.empty(shape=(len(hours), 53))
         divergence[:] = np.nan
 
         for hour in hours:
@@ -130,7 +130,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
                       0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
             ticks = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
         else:
-            ttl = 'Divergence Along Cross-Section: {}m\n{}'.format(height, sb_t0str)
+            ttl = 'Divergence Parallel to Coast: {}m\n{}'.format(height, sb_t0str)
             levels = [-5, -4.5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
             ticks = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
 
@@ -150,29 +150,29 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, t0=None, sb_t0str
         kwargs['clab'] = 'Divergence x $10^{-4}$ (1/s)'
         kwargs['shift_subplot_right'] = 0.97
         kwargs['shift_subplot_left'] = 0.2
-        kwargs['xlab'] = 'Distance From Shore (km)'
-        #kwargs['xlab'] = 'Longitude'
+        #kwargs['xlab'] = 'Distance From Shore (km)'
+        kwargs['xlab'] = 'Longitude'
         kwargs['ylab'] = 'Hour'
         kwargs['yticks'] = [5, 10, 15, 20]
         # pf.plot_contourf_2leftaxes(fig, ax, distance_km, hours, plot_elev, divergence, plt.get_cmap('RdBu_r'), **kwargs)
-        pf.plot_pcolormesh_2leftaxes(fig, ax, distance_km, hours, plot_elev, divergence, **kwargs)
-        #pf.plot_pcolormesh_2leftaxes(fig, ax, lons_interp, hours, plot_elev, divergence, **kwargs)
+        #pf.plot_pcolormesh_2leftaxes(fig, ax, distance_km, hours, plot_elev, divergence, **kwargs)
+        pf.plot_pcolormesh_2leftaxes(fig, ax, lons_interp, hours, plot_elev, divergence, **kwargs)
 
         ylims = ax.get_ylim()
         # # add a line for the coast
         # #ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
-        ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
+        # ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
 
         # add lines for the wind energy area (calculated in hovmoller_line_map.py)
-        wea1 = 14.73  # for distance from shore
-        wea2 = 36.32  # for distance from shore
-        #wea1 = -74.45  # for longitude: edges of the WEA
-        #wea2 = -73.95  # for longitude: edges of the WEA
+        #wea1 = 14.73  # for distance from shore
+        #wea2 = 36.32  # for distance from shore
+        wea1 = -74.45  # for longitude: edges of the WEA
+        wea2 = -73.95  # for longitude: edges of the WEA
         ax.vlines(wea1, ylims[0], ylims[1], colors='darkgray', ls='--')
         ax.vlines(wea2, ylims[0], ylims[1], colors='darkgray', ls='--')
 
         # ax.set_ylim(ylims)
-        ax.set_xlim([-200, 200])
+        #ax.set_xlim([-200, 200])
 
         sname = 'divergence_hovmoller_{}.png'.format(height)
         plt.savefig(os.path.join(save_dir, sname), dpi=200)
@@ -183,7 +183,7 @@ def main(sDir, sdate, edate, intvl):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
 
     if intvl == 'divergence_hourly_cases_hovmoller':
-        savedir = os.path.join(sDir, 'hovmoller_seabreeze_cases', '{}_{}'.format(intvl, sdate.strftime('%Y%m%d')))
+        savedir = os.path.join(sDir, 'hovmoller_seabreeze_cases-alongwea', '{}_{}'.format(intvl, sdate.strftime('%Y%m%d')))
     else:
         savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
@@ -211,12 +211,12 @@ def main(sDir, sdate, edate, intvl):
 
         plot_divergence_hovmoller(ds, savedir, intvl, **kwargs)
     else:
-        # ds = ds.sel(time=slice(dt.datetime(2020, 6, 8, 0, 0), dt.datetime(2020, 6, 8, 5, 0)))  # for debugging
+        #ds = ds.sel(time=slice(dt.datetime(2020, 6, 8, 0, 0), dt.datetime(2020, 6, 8, 5, 0)))  # for debugging
         plot_divergence_hovmoller(ds, savedir, intvl, **kwargs)
 
 
 if __name__ == '__main__':
-    # save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
+    #save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
