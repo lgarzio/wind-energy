@@ -2,8 +2,8 @@
 
 """
 Author: Lori Garzio on 11/17/2021
-Last modified: 11/29/2021
-Plot vertical slices of divergence of hourly-averaged wind speeds from the native model level files
+Last modified: 12/9/2021
+Plot horizontal slices of divergence of hourly-averaged wind speeds from the native model level files
 """
 
 import datetime as dt
@@ -17,15 +17,16 @@ import functions.plotting as pf
 import metpy.calc as mc
 from wrf import interplevel, default_fill, interpline, CoordPair, WrfProj
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
+np.set_printoptions(suppress=True)
 
 
-def plot_divergence_vertical(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1str=None):
+def plot_divergence_horizontal(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1str=None):
     t0 = t0 or None
     sb_t0str = sb_t0str or None
     sb_t1str = sb_t1str or None
     heights = np.arange(100, 2100, 100)
 
-    # bathymetry = '/Users/garzio/Documents/rucool/bathymetry/GEBCO_2014_2D_-100.0_0.0_-10.0_50.0.nc'
+    #bathymetry = '/Users/garzio/Documents/rucool/bathymetry/GEBCO_2014_2D_-100.0_0.0_-10.0_50.0.nc'
     bathymetry = '/home/lgarzio/bathymetry_files/GEBCO_2014_2D_-100.0_0.0_-10.0_50.0.nc'  # on server
     extent = [-78, -70, 37, 41]  # subset the file so it's easier to work with
     bathy = xr.open_dataset(bathymetry)
@@ -87,14 +88,18 @@ def plot_divergence_vertical(ds_sub, save_dir, interval_name, t0=None, sb_t0str=
                 minlon_idx = np.argmin(abs(bathy.lon.values - value.lon))
                 plot_elev = np.append(plot_elev, bathy.elevation[minlat_idx, minlon_idx])
 
+            # find the edge of the continental shelf
+            elev_mask = plot_elev < -1000
+            elev_idx = np.where(elev_mask[:-1] != elev_mask[1:])[0]
+
         if interval_name == 'divergence_seabreeze_days_hourly_avg':
-            ttl = 'Vertical Divergence Along Cross-Section: H{}\nSea Breeze Days\n{} to {}'.format(str(hour).zfill(3),
+            ttl = 'Cross-section of Horizontal Divergence: H{}\nSea Breeze Days\n{} to {}'.format(str(hour).zfill(3),
                                                                                                    sb_t0str, sb_t1str)
         elif interval_name == 'divergence_nonseabreeze_days_hourly_avg':
-            ttl = 'Vertical Divergence Along Cross-Section: H{}\nNon-Sea Breeze Days\n{} to {}'.format(str(hour).zfill(3),
+            ttl = 'Cross-section of Horizontal Divergence: H{}\nNon-Sea Breeze Days\n{} to {}'.format(str(hour).zfill(3),
                                                                                                    sb_t0str, sb_t1str)
-        elif interval_name == 'divergence_hourly_cases_vertical':
-            ttl = 'Vertical Divergence Along Cross-Section\n{} H{}'.format(sb_t0str, str(hour).zfill(3))
+        elif interval_name == 'divergence_hourly_cases_horizontal':
+            ttl = 'Cross-section of Horizontal Divergence\n{} H{}'.format(sb_t0str, str(hour).zfill(3))
 
         if 'cases' in interval_name:
             levels = [-5, -4.5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
@@ -123,7 +128,7 @@ def plot_divergence_vertical(ds_sub, save_dir, interval_name, t0=None, sb_t0str=
         kwargs['xlab'] = 'Longitude'
         kwargs['ylab'] = 'Height (m)'
         #kwargs['yticks'] = [5, 10, 15, 20]
-        pf.plot_pcolormesh_2leftaxes(fig, ax, lons_interp, heights, plot_elev, div_line.values, **kwargs)
+        pf.plot_pcolormesh(fig, ax, lons_interp, heights, div_line.values, **kwargs)
 
         ylims = ax.get_ylim()
         # # add a line for the coast
@@ -139,10 +144,13 @@ def plot_divergence_vertical(ds_sub, save_dir, interval_name, t0=None, sb_t0str=
         ax.vlines(wea1, ylims[0], ylims[1], colors='darkgray', ls='--')
         ax.vlines(wea2, ylims[0], ylims[1], colors='darkgray', ls='--')
 
+        # add a dot at the shelf break
+        ax.plot(lons_interp[elev_idx], 0, 'ko', markersize=20)
+
         ax.set_ylim(ylims)
         # ax.set_xlim([-200, 200])
 
-        sname = '{}_vertical_H{}.png'.format(interval_name.split('_hourly_avg')[0], str(hour).zfill(3))
+        sname = '{}_horizontal_H{}.png'.format(interval_name.split('_hourly_avg')[0], str(hour).zfill(3))
         plt.savefig(os.path.join(save_dir, sname), dpi=200)
         plt.close()
 
@@ -150,10 +158,10 @@ def plot_divergence_vertical(ds_sub, save_dir, interval_name, t0=None, sb_t0str=
 def main(sDir, sdate, edate, intvl):
     wrf = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_native_levels/WRF_4.1_3km_Native_Levels_Dataset_Best'
 
-    if intvl == 'divergence_hourly_cases_vertical':
-        savedir = os.path.join(sDir, 'hovmoller_seabreeze_cases_vertical', '{}_{}'.format(intvl, sdate.strftime('%Y%m%d')))
+    if intvl == 'divergence_hourly_cases_horizontal':
+        savedir = os.path.join(sDir, 'hovmoller_seabreeze_cases_horizontal', '{}_{}'.format(intvl, sdate.strftime('%Y%m%d')))
     else:
-        savedir = os.path.join(sDir, '{}_{}-{}-vertical'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+        savedir = os.path.join(sDir, '{}_{}-{}-horizontal'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
@@ -176,7 +184,7 @@ def main(sDir, sdate, edate, intvl):
         # grab the WRF data for the seabreeze dates
         ds = ds.sel(time=sb_datetimes)
         # ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 5, 0)))  # for debugging
-        plot_divergence_vertical(ds, savedir, intvl, **kwargs)
+        plot_divergence_horizontal(ds, savedir, intvl, **kwargs)
 
     elif intvl == 'divergence_nonseabreeze_days_hourly_avg':
         df = pd.read_csv(os.path.join(sDir, 'radar_seabreezes_2020.csv'))
@@ -189,11 +197,11 @@ def main(sDir, sdate, edate, intvl):
         nosb_datetimes = [t for t in ds.time.values if t not in sb_datetimes]
         ds_nosb = ds.sel(time=nosb_datetimes)
         # ds_nosb = ds.sel(time=slice(dt.datetime(2020, 6, 2, 0, 0), dt.datetime(2020, 6, 2, 5, 0)))  # for debugging
-        plot_divergence_vertical(ds_nosb, savedir, intvl, **kwargs)
+        plot_divergence_horizontal(ds_nosb, savedir, intvl, **kwargs)
 
     else:
-        # ds = ds.sel(time=slice(dt.datetime(2020, 6, 8, 0, 0), dt.datetime(2020, 6, 8, 5, 0)))  # for debugging
-        plot_divergence_vertical(ds, savedir, intvl, **kwargs)
+        # ds = ds.sel(time=slice(dt.datetime(2020, 6, 8, 0, 0), dt.datetime(2020, 6, 8, 2, 0)))  # for debugging
+        plot_divergence_horizontal(ds, savedir, intvl, **kwargs)
 
 
 if __name__ == '__main__':
@@ -201,5 +209,5 @@ if __name__ == '__main__':
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'divergence_hourly_cases_vertical'  # divergence_seabreeze_days_hourly_avg divergence_nonseabreeze_days_hourly_avg  divergence_hourly_cases_vertical - use this for daily intervals
+    interval = 'divergence_hourly_cases_horizontal'  # divergence_seabreeze_days_hourly_avg divergence_nonseabreeze_days_hourly_avg  divergence_hourly_cases_horizontal - use this for daily intervals
     main(save_directory, start_date, end_date, interval)
