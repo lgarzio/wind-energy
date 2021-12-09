@@ -122,8 +122,7 @@ def plot_divergence_horizontal(ds_sub, save_dir, interval_name, t0=None, sb_t0st
 
         kwargs['ttl'] = ttl
         kwargs['clab'] = 'Divergence x $10^{-4}$ (1/s)'
-        kwargs['shift_subplot_right'] = 0.97
-        kwargs['shift_subplot_left'] = 0.2
+        #kwargs['shift_subplot_right'] = 0.97
         # kwargs['xlab'] = 'Distance From Shore (km)'
         kwargs['xlab'] = 'Longitude'
         kwargs['ylab'] = 'Height (m)'
