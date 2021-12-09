@@ -144,7 +144,7 @@ def plot_divergence_horizontal(ds_sub, save_dir, interval_name, t0=None, sb_t0st
         ax.vlines(wea2, ylims[0], ylims[1], colors='darkgray', ls='--')
 
         # add a dot at the shelf break
-        ax.plot(lons_interp[elev_idx], ylims[0], 'ko', markersize=20)
+        ax.plot(lons_interp[elev_idx], ylims[0] * 1.05, 'ko', markersize=10)
 
         ax.set_ylim(ylims)
         # ax.set_xlim([-200, 200])
