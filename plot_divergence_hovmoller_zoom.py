@@ -144,9 +144,13 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb
         if '_perpendicular' in line:
             xlab = 'Distance From Shore (km)'
             xvar = distance_km
+            wea1 = 14.73  # lines for WEA
+            wea2 = 36.32  # lines for WEA
         else:
             xlab = 'Longitude'
             xvar = lons_interp
+            wea1 = -74.45  # for longitude: edges of the WEA
+            wea2 = -73.95  # for longitude: edges of the WEA
 
         kwargs['ttl'] = ttl
         kwargs['title_size'] = 12
@@ -163,10 +167,6 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb
         ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
 
         # add lines for the wind energy area (calculated in hovmoller_line_map.py)
-        wea1 = 14.73  # for distance from shore
-        wea2 = 36.32  # for distance from shore
-        #wea1 = -74.45  # for longitude: edges of the WEA
-        #wea2 = -73.95  # for longitude: edges of the WEA
         ax.vlines(wea1, ylims[0], ylims[1], colors='darkgray', ls='--')
         ax.vlines(wea2, ylims[0], ylims[1], colors='darkgray', ls='--')
 
