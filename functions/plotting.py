@@ -345,7 +345,7 @@ def plot_pcolormesh(fig, ax, x, y, c, var_lims=None, cmap=None, clab=None, ttl=N
         cb = plt.colorbar(h, cax=cax, extend=extend)
 
     if clab:
-        cb.set_label(label=clab, fontsize=14)
+        cb.set_label(label=clab, fontsize=12)
     if xlab:
         ax.set_xlabel(xlab)
     if ylab:
