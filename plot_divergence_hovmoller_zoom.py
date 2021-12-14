@@ -142,6 +142,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb
         kwargs['norm_clevs'] = norm  # for pcolormesh only
 
         kwargs['ttl'] = ttl
+        kwargs['title_size'] = 12
         kwargs['clab'] = 'Divergence x $10^{-4}$ (1/s)'
         kwargs['xlab'] = 'Distance From Shore (km)'
         #kwargs['xlab'] = 'Longitude'
