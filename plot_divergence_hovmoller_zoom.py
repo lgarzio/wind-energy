@@ -201,7 +201,7 @@ def main(sDir, sdate, edate, intvl, line):
 
         plot_divergence_hovmoller(ds, savedir, intvl, line, **kwargs)
     else:
-        ds = ds.sel(time=slice(dt.datetime(2020, 6, 8, 13, 0), dt.datetime(2020, 6, 8, 15, 0)))  # for debugging
+        # ds = ds.sel(time=slice(dt.datetime(2020, 6, 8, 13, 0), dt.datetime(2020, 6, 8, 15, 0)))  # for debugging
         plot_divergence_hovmoller(ds, savedir, intvl, line, **kwargs)
 
 
