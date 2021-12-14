@@ -118,7 +118,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb
 
             divergence[hour_idx] = div_line
 
-        if interval_name == 'divergence_hourly_avg_hovmoller':
+        if interval_name == 'divergence_hourly_avg_hovmoller_zoomed':
             ttl = 'Hourly Averaged Seabreeze Days\nDivergence Along Cross-Section: {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
             levels = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
                       0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
@@ -191,7 +191,7 @@ def main(sDir, sdate, edate, intvl, line):
     kwargs['sb_t0str'] = dst0
     kwargs['sb_t1str'] = dst1
 
-    if intvl == 'divergence_hourly_avg_hovmoller':
+    if intvl == 'divergence_hourly_avg_hovmoller_zoomed':
         df = pd.read_csv(os.path.join(sDir, 'radar_seabreezes_2020.csv'))
         df = df[df['Seabreeze'] == 'y']
         sb_dates = np.array(pd.to_datetime(df['Date']))
@@ -200,7 +200,7 @@ def main(sDir, sdate, edate, intvl, line):
 
         # grab the WRF data for the seabreeze dates
         ds = ds.sel(time=sb_datetimes)
-        # ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 5, 0)))  # for debugging
+        # ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
 
         plot_divergence_hovmoller(ds, savedir, intvl, line, **kwargs)
     else:
@@ -211,8 +211,8 @@ def main(sDir, sdate, edate, intvl, line):
 if __name__ == '__main__':
     #save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
-    start_date = dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
-    end_date = dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'divergence_hourly_cases_hovmoller_zoomed'    # divergence_hourly_avg_hovmoller  divergence_hourly_cases_hovmoller - use this for seabreeze cases
+    start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
+    end_date = dt.datetime(2020, 7, 31, 23, 0)  #dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
+    interval = 'divergence_hourly_avg_hovmoller_zoomed'    # divergence_hourly_avg_hovmoller  divergence_hourly_cases_hovmoller - use this for seabreeze cases
     line = 'short_perpendicular'
     main(save_directory, start_date, end_date, interval, line)
