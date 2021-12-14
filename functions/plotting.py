@@ -279,7 +279,7 @@ def plot_contourf_2leftaxes(fig, ax, x, y, y2, c, cmap, levels=None, ttl=None, c
 
 def plot_pcolormesh(fig, ax, x, y, c, var_lims=None, cmap=None, clab=None, ttl=None, extend=None,
                     shift_subplot_right=None, xlab=None, ylab=None, yticks=None, shading=None, norm_clevs=None,
-                    cbar_ticks=None, title_size=None):
+                    cbar_ticks=None, title_size=None, cax_size=None):
     """
     Create a pseudocolor plot
     :param fig: figure object
@@ -299,7 +299,8 @@ def plot_pcolormesh(fig, ax, x, y, c, var_lims=None, cmap=None, clab=None, ttl=N
     :param shading: optional shading ('auto', 'nearest', 'gouraud') default is 'auto'
     :param norm_clevs: optional normalized levels
     :param cbar_ticks: optional, specify colorbar ticks
-
+    :param title_size: optional, specify title size, default 17
+    :param cax_size: optional, color axis size, default 5%
     """
     var_lims = var_lims or None
     cmap = cmap or plt.get_cmap('jet')
@@ -313,13 +314,14 @@ def plot_pcolormesh(fig, ax, x, y, c, var_lims=None, cmap=None, clab=None, ttl=N
     shading = shading or 'auto'
     norm_clevs = norm_clevs or None
     cbar_ticks = cbar_ticks or None
-    title_size = title_size or None
+    title_size = title_size or 17
+    cax_size = cax_size or '5%'
 
     plt.subplots_adjust(right=shift_subplot_right)
     if ttl:
         plt.title(ttl, fontsize=title_size)
     divider = make_axes_locatable(ax)
-    cax = divider.new_horizontal(size='5%', pad=0.1, axes_class=plt.Axes)
+    cax = divider.new_horizontal(size=cax_size, pad=0.1, axes_class=plt.Axes)
     fig.add_axes(cax)
 
     if var_lims:
