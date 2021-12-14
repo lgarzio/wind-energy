@@ -144,20 +144,20 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb
         kwargs['clab'] = 'Divergence x $10^{-4}$ (1/s)'
         kwargs['xlab'] = 'Distance From Shore (km)'
         #kwargs['xlab'] = 'Longitude'
-        kwargs['ylab'] = 'Hour'
+        kwargs['ylab'] = 'Hour (EDT)'
         #kwargs['yticks'] = [5, 10, 15, 20]
-        pf.plot_pcolormesh(fig, ax, distance_km, hours, divergence, **kwargs)
+        pf.plot_pcolormesh(fig, ax, distance_km, hours - 4, divergence, **kwargs)
 
         ylims = ax.get_ylim()
         # # add a line for the coast
         # #ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
-        # ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
+        ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
 
         # add lines for the wind energy area (calculated in hovmoller_line_map.py)
-        #wea1 = 14.73  # for distance from shore
-        #wea2 = 36.32  # for distance from shore
-        wea1 = -74.45  # for longitude: edges of the WEA
-        wea2 = -73.95  # for longitude: edges of the WEA
+        wea1 = 14.73  # for distance from shore
+        wea2 = 36.32  # for distance from shore
+        #wea1 = -74.45  # for longitude: edges of the WEA
+        #wea2 = -73.95  # for longitude: edges of the WEA
         ax.vlines(wea1, ylims[0], ylims[1], colors='darkgray', ls='--')
         ax.vlines(wea2, ylims[0], ylims[1], colors='darkgray', ls='--')
 
