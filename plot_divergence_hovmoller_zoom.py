@@ -42,7 +42,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb
         point_start = CoordPair(lat=40.7, lon=-76)  # for the line perpendicular to the coast (long line)
         point_end = CoordPair(lat=38, lon=-72.8)  # for the line perpendicular to the coast  (long line)
         div_shape = 136
-    elif line == 'wea':
+    elif line == 'wea_parallel':
         point_start = CoordPair(lat=38.7, lon=-74.8)  # for the line parallel to the coast (along the WEA)
         point_end = CoordPair(lat=39.7, lon=-73.5)  # for the line parallel to the coast (along the WEA)
         div_shape = 53
@@ -141,15 +141,21 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb
         norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)  # for pcolormesh only
         kwargs['norm_clevs'] = norm  # for pcolormesh only
 
+        if '_perpendicular' in line:
+            xlab = 'Distance From Shore (km)'
+            xvar = distance_km
+        else:
+            xlab = 'Longitude'
+            xvar = lons_interp
+
         kwargs['ttl'] = ttl
         kwargs['title_size'] = 12
         kwargs['clab'] = 'Divergence x $10^{-4}$ (1/s)'
         kwargs['cax_size'] = '3%'
-        kwargs['xlab'] = 'Distance From Shore (km)'
-        #kwargs['xlab'] = 'Longitude'
+        kwargs['xlab'] = xlab
         kwargs['ylab'] = 'Hour (EDT)'
         #kwargs['yticks'] = [5, 10, 15, 20]
-        pf.plot_pcolormesh(fig, ax, distance_km, hours - 4, divergence, **kwargs)
+        pf.plot_pcolormesh(fig, ax, xvar, hours - 4, divergence, **kwargs)
 
         ylims = ax.get_ylim()
         # # add a line for the coast
@@ -214,5 +220,5 @@ if __name__ == '__main__':
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  #dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
     interval = 'divergence_hourly_avg_hovmoller_zoomed'    # divergence_hourly_avg_hovmoller  divergence_hourly_cases_hovmoller - use this for seabreeze cases
-    line = 'short_perpendicular'
+    line = 'short_perpendicular'   # 'short_perpendicular'  'wea_parallel'
     main(save_directory, start_date, end_date, interval, line)
