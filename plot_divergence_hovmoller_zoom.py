@@ -42,7 +42,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb
         point_start = CoordPair(lat=40.7, lon=-76)  # for the line perpendicular to the coast (long line)
         point_end = CoordPair(lat=38, lon=-72.8)  # for the line perpendicular to the coast  (long line)
         div_shape = 136
-    elif line == 'wea_parallel':
+    elif line == 'wea':
         point_start = CoordPair(lat=38.7, lon=-74.8)  # for the line parallel to the coast (along the WEA)
         point_end = CoordPair(lat=39.7, lon=-73.5)  # for the line parallel to the coast (along the WEA)
         div_shape = 53
@@ -185,6 +185,8 @@ def main(sDir, sdate, edate, intvl, line):
         savedir = os.path.join(sDir, 'hovmoller_seabreeze_cases', '{}_{}'.format(intvl, sdate.strftime('%Y%m%d')))
     else:
         savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    if line == 'wea':
+        savedir = f'{savedir}_wea'
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
@@ -220,5 +222,5 @@ if __name__ == '__main__':
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  #dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
     interval = 'divergence_hourly_avg_hovmoller_zoomed'    # divergence_hourly_avg_hovmoller  divergence_hourly_cases_hovmoller - use this for seabreeze cases
-    line = 'short_perpendicular'   # 'short_perpendicular'  'wea_parallel'
+    line = 'wea'   # 'short_perpendicular'  'wea'
     main(save_directory, start_date, end_date, interval, line)
