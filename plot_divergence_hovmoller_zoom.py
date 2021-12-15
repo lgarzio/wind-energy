@@ -99,22 +99,23 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb
                     i, j = np.unravel_index(a.argmin(), a.shape)
                     land_mask = np.append(land_mask, lm[i, j].values)
 
-                # find the coastline longitude (where landmask values change from 1 to 0)
-                # have to take the max because the line crosses Delaware River
-                coastline_idx = [np.nanmax(np.where(land_mask[:-1] != land_mask[1:])[0])]
-                coastline_lon = np.mean(lons_interp[coastline_idx[0]:coastline_idx[0] + 2])
-                coastline_lat = np.mean(lats_interp[coastline_idx[0]:coastline_idx[0] + 2])
+                if '_perpendicular' in line:
+                    # find the coastline longitude (where landmask values change from 1 to 0)
+                    # have to take the max because the line crosses Delaware River
+                    coastline_idx = [np.nanmax(np.where(land_mask[:-1] != land_mask[1:])[0])]
+                    coastline_lon = np.mean(lons_interp[coastline_idx[0]:coastline_idx[0] + 2])
+                    coastline_lat = np.mean(lats_interp[coastline_idx[0]:coastline_idx[0] + 2])
 
-                # calculate the distance from each coordinate to the coastline
-                # negative values are land-side, positive values are ocean-side
-                distance_km = np.array([])
-                geod = Geodesic.WGS84
-                for i, lati in enumerate(lats_interp):
-                    g = geod.Inverse(coastline_lat, coastline_lon, lati, lons_interp[i])
-                    dist_km = g['s12'] * .001
-                    if i <= coastline_idx[0]:
-                        dist_km = -dist_km
-                    distance_km = np.append(distance_km, dist_km)
+                    # calculate the distance from each coordinate to the coastline
+                    # negative values are land-side, positive values are ocean-side
+                    distance_km = np.array([])
+                    geod = Geodesic.WGS84
+                    for i, lati in enumerate(lats_interp):
+                        g = geod.Inverse(coastline_lat, coastline_lon, lati, lons_interp[i])
+                        dist_km = g['s12'] * .001
+                        if i <= coastline_idx[0]:
+                            dist_km = -dist_km
+                        distance_km = np.append(distance_km, dist_km)
 
             divergence[hour_idx] = div_line
 
