@@ -55,7 +55,7 @@ def plot_divergence_horizontal(ds_sub, save_dir, interval_name, line, t0=None, s
     hours = np.arange(13, 23)
 
     for hour_idx, hour in enumerate(hours):
-        hour_edt = hour - 4
+        hour_edt_str = f'{str(hour - 4).zfill(2)}:00'
         u_hour = u[u.time.dt.hour == hour]
         v_hour = v[v.time.dt.hour == hour]
 
@@ -101,13 +101,13 @@ def plot_divergence_horizontal(ds_sub, save_dir, interval_name, line, t0=None, s
             elev_idx = np.where(elev_mask[:-1] != elev_mask[1:])[0]
 
         if interval_name == 'divergence_seabreeze_days_hourly_avg_zoomed':
-            ttl = 'Cross-section of Horizontal Divergence: H{} EDT\nSea Breeze Days\n{} to {}'.format(str(hour_edt).zfill(3),
+            ttl = 'Cross-section of Horizontal Divergence: {} EDT\nSea Breeze Days\n{} to {}'.format(hour_edt_str,
                                                                                                    sb_t0str, sb_t1str)
         elif interval_name == 'divergence_nonseabreeze_days_hourly_avg_zoomed':
-            ttl = 'Cross-section of Horizontal Divergence: H{} EDT\nNon-Sea Breeze Days\n{} to {}'.format(str(hour_edt).zfill(3),
+            ttl = 'Cross-section of Horizontal Divergence: {} EDT\nNon-Sea Breeze Days\n{} to {}'.format(hour_edt_str,
                                                                                                    sb_t0str, sb_t1str)
         elif interval_name == 'divergence_hourly_cases_horizontal_zoomed':
-            ttl = 'Cross-section of Horizontal Divergence\n{} H{} EDT'.format(sb_t0str, str(hour_edt).zfill(3))
+            ttl = 'Cross-section of Horizontal Divergence\n{} {} EDT'.format(sb_t0str, hour_edt_str)
 
         if 'cases' in interval_name:
             levels = [-5, -4.5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
