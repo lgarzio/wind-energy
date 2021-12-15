@@ -163,9 +163,11 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb
         pf.plot_pcolormesh(fig, ax, xvar, hours - 4, divergence, **kwargs)
 
         ylims = ax.get_ylim()
-        # # add a line for the coast
-        # #ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
-        ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
+
+        if '_perpendicular' in line:
+            # add a line for the coast
+            # #ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
+            ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
 
         # add lines for the wind energy area (calculated in hovmoller_line_map.py)
         ax.vlines(wea1, ylims[0], ylims[1], colors='darkgray', ls='--')
