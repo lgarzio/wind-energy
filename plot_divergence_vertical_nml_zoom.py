@@ -193,7 +193,7 @@ def main(sDir, sdate, edate, intvl, line):
         # grab the WRF data for the seabreeze dates
         ds = ds.sel(time=sb_datetimes)
         # ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 5, 0)))  # for debugging
-        plot_divergence_horizontal(ds, savedir, intvl, line **kwargs)
+        plot_divergence_horizontal(ds, savedir, intvl, line, **kwargs)
 
     elif intvl == 'divergence_nonseabreeze_days_hourly_avg_zoomed':
         df = pd.read_csv(os.path.join(sDir, 'radar_seabreezes_2020.csv'))
