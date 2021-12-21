@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/12/2021
-Last modified: 9/14/2021
+Last modified: 12/20/2021
 Plot average WRF windspeeds at 10m, 160m, 200m and 250m at user-defined grouping intervals (monthly and seabreeze vs
 non-seabreeze days)
 """
@@ -102,13 +102,17 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                     elif interval_name == 'noseabreeze_days':
                         nm = 'Non-sea breeze days'
                     elif interval_name == 'seabreeze_morning':
-                        nm = 'Sea breeze days (00Z - 13Z)'
+                        # nm = 'Sea breeze days (00Z - 13Z)'
+                        nm = 'Sea breeze days (11PM - 8AM EDT)'
                     elif interval_name == 'seabreeze_afternoon':
-                        nm = 'Sea breeze days (14Z - 23Z)'
+                        # nm = 'Sea breeze days (14Z - 23Z)'
+                        nm = 'Sea breeze days (9AM - 6PM EDT)'
                     elif interval_name == 'noseabreeze_morning':
-                        nm = 'Non-sea breeze days (00Z - 13Z)'
+                        # nm = 'Non-sea breeze days (00Z - 13Z)'
+                        nm = 'Non-sea breeze days (11PM - 8AM EDT)'
                     elif interval_name == 'noseabreeze_afternoon':
-                        nm = 'Non-sea breeze days (14Z - 23Z)'
+                        # nm = 'Non-sea breeze days (14Z - 23Z)'
+                        nm = 'Non-sea breeze days (9AM - 6PM EDT)'
                     elif interval_name == 'summer2020_all':
                         nm = 'Overall'
                     ttl = '{} {}m\n{}\n{} to {}'.format(plt_info['title'], height, nm, sb_t0str, sb_t1str)
@@ -147,6 +151,7 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
                 if region_info['lease_area']:
                     pf.add_lease_area_polygon(ax, la_polygon, '#737373')  # lease areas
                     pf.add_lease_area_polygon(ax, pa_polygon, '#969696')  # planning areas
+                    #leasing_areas.plot(ax=ax, lw=.8, color='magenta', transform=ccrs.LambertConformal())
 
                 # add NYSERDA buoy locations
                 # nyserda_buoys = cf.nyserda_buoys()
@@ -331,7 +336,7 @@ def plot_windspeed_differences(ds1, ds2, save_dir, interval_name, t0=None, sb_t0
 def main(sDir, sdate, edate, intvl):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
 
-    savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+    savedir = os.path.join(sDir, '{}_{}-{}-modified_hours'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
@@ -354,24 +359,24 @@ def main(sDir, sdate, edate, intvl):
 
         # grab the WRF data for the seabreeze dates
         ds_sb = ds.sel(time=sb_datetimes)
-        # ds_sb = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 5, 0)))  # for debugging
+        # ds_sb = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
 
         # grab the WRF data for the non-seabreeze dates
         nosb_datetimes = [t for t in ds.time.values if t not in sb_datetimes]
         ds_nosb = ds.sel(time=nosb_datetimes)
-        # ds_nosb = ds.sel(time=slice(dt.datetime(2020, 6, 2, 0, 0), dt.datetime(2020, 6, 2, 5, 0)))  # for debugging
+        # ds_nosb = ds.sel(time=slice(dt.datetime(2020, 6, 2, 0, 0), dt.datetime(2020, 6, 2, 15, 0)))  # for debugging
 
         if intvl == 'seabreeze_days':
             plot_averages(ds_sb, savedir, 'seabreeze_days', **kwargs)
             plot_averages(ds_nosb, savedir, 'noseabreeze_days', **kwargs)
         else:
             hours_sb = pd.to_datetime(ds_sb.time.values).hour
-            ds_sb_morn = ds_sb.isel(time=np.logical_and(hours_sb >= 0, hours_sb < 14))  # subset morning hours
-            ds_sb_aft = ds_sb.isel(time=np.logical_and(hours_sb >= 14, hours_sb < 24))  # subset afternoon hours
+            ds_sb_morn = ds_sb.isel(time=np.logical_and(hours_sb >= 3, hours_sb < 13))  # subset morning hours
+            ds_sb_aft = ds_sb.isel(time=np.logical_and(hours_sb >= 13, hours_sb < 23))  # subset afternoon hours
 
             hours_nosb = pd.to_datetime(ds_nosb.time.values).hour
-            ds_nosb_morn = ds_nosb.isel(time=np.logical_and(hours_nosb >= 0, hours_nosb < 14))  # subset morning hours
-            ds_nosb_aft = ds_nosb.isel(time=np.logical_and(hours_nosb >= 14, hours_nosb < 24))  # subset afternoon hours
+            ds_nosb_morn = ds_nosb.isel(time=np.logical_and(hours_nosb >= 3, hours_nosb < 13))  # subset morning hours
+            ds_nosb_aft = ds_nosb.isel(time=np.logical_and(hours_nosb >= 13, hours_nosb < 23))  # subset afternoon hours
 
             if intvl == 'seabreeze_hours':
                 plot_averages(ds_sb_morn, savedir, 'seabreeze_morning', **kwargs)
@@ -415,5 +420,5 @@ if __name__ == '__main__':
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'seabreeze_days'  # 'monthly' 'seabreeze_days' 'seabreeze_hours' 'seabreeze_diff' 'summer2020_all'
+    interval = 'seabreeze_hours'  # 'monthly' 'seabreeze_days' 'seabreeze_hours' 'seabreeze_diff' 'summer2020_all'
     main(save_directory, start_date, end_date, interval)
