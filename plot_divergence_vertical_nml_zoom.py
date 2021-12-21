@@ -222,6 +222,7 @@ def main(sDir, sdate, edate, intvl, line):
         for dr in daterange:
             print(dr)
             sdir = os.path.join(savedir, dr.strftime('%Y%m%d'))
+            os.makedirs(sdir, exist_ok=True)
             ds_dr = ds.sel(time=slice(dr, dr + dt.timedelta(hours=23)))
             kwargs['sb_t0str'] = dr.strftime('%Y-%m-%d')
             kwargs['sb_t1str'] = dr.strftime('%Y-%m-%d')
