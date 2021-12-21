@@ -224,7 +224,7 @@ def main(sDir, sdate, edate, intvl, line):
             ds_dr = ds.sel(time=slice(dr, dr + dt.timedelta(hours=23)))
             kwargs['sb_t0str'] = dr.strftime('%Y-%m-%d')
             kwargs['sb_t1str'] = dr.strftime('%Y-%m-%d')
-            ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
+            # ds_dr = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
             plot_divergence_hovmoller(ds_dr, savedir, intvl, line, **kwargs)
     else:
         # ds = ds.sel(time=slice(dt.datetime(2020, 6, 8, 13, 0), dt.datetime(2020, 6, 8, 15, 0)))  # for debugging
