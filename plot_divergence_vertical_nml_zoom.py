@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 11/17/2021
-Last modified: 12/15/2021
+Last modified: 12/20/2021
 Plot horizontal slices of divergence of hourly-averaged wind speeds from the native model level files
 """
 
@@ -109,7 +109,13 @@ def plot_divergence_horizontal(ds_sub, save_dir, interval_name, line, t0=None, s
         elif interval_name == 'divergence_hourly_cases_horizontal_zoomed':
             ttl = 'Cross-section of Horizontal Divergence\n{} {} EDT'.format(sb_t0str, hour_edt_str)
 
+        elif interval_name == 'divergence_hourly_zoomed':
+            ttl = 'Cross-section of Horizontal Divergence\n{} {} EDT'.format(sb_t0str, hour_edt_str)
+
         if 'cases' in interval_name:
+            levels = [-5, -4.5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
+            ticks = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+        elif interval_name == 'divergence_hourly_zoomed':
             levels = [-5, -4.5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
             ticks = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
         else:
@@ -158,6 +164,8 @@ def plot_divergence_horizontal(ds_sub, save_dir, interval_name, line, t0=None, s
         # ax.set_xlim([-200, 200])
 
         sname = '{}_horizontal_H{}.png'.format(interval_name.split('_hourly_avg')[0], str(hour).zfill(3))
+        if interval_name == 'divergence_hourly_zoomed':
+            sname = f'{sname.split(".png")[0]}_{pd.to_datetime(sb_t0str).strftime("%Y%m%d")}.png'
         plt.savefig(os.path.join(save_dir, sname), dpi=200)
         plt.close()
 
@@ -208,6 +216,18 @@ def main(sDir, sdate, edate, intvl, line):
         # ds_nosb = ds.sel(time=slice(dt.datetime(2020, 6, 2, 0, 0), dt.datetime(2020, 6, 2, 5, 0)))  # for debugging
         plot_divergence_horizontal(ds_nosb, savedir, intvl, line, **kwargs)
 
+    elif intvl == 'divergence_hourly_zoomed':
+        # plot divergence for a series of days
+        daterange = pd.date_range(sdate, edate)
+        for dr in daterange:
+            print(dr)
+            sdir = os.path.join(savedir, dr.strftime('%Y%m%d'))
+            ds_dr = ds.sel(time=slice(dr, dr + dt.timedelta(hours=23)))
+            kwargs['sb_t0str'] = dr.strftime('%Y-%m-%d')
+            kwargs['sb_t1str'] = dr.strftime('%Y-%m-%d')
+            ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
+            plot_divergence_horizontal(ds_dr, sdir, intvl, line, **kwargs)
+
     else:
         # ds = ds.sel(time=slice(dt.datetime(2020, 6, 8, 0, 0), dt.datetime(2020, 6, 8, 2, 0)))  # for debugging
         plot_divergence_horizontal(ds, savedir, intvl, line, **kwargs)
@@ -218,6 +238,7 @@ if __name__ == '__main__':
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'divergence_seabreeze_days_hourly_avg_zoomed'  # divergence_hourly_cases_horizontal_zoomed - use this for daily intervals
+    interval = 'divergence_hourly_zoomed'  # divergence_hourly_cases_horizontal_zoomed - use this for daily intervals
+    # 'divergence_hourly_zoomed' - use this for daily plots
     line = 'short_perpendicular'
     main(save_directory, start_date, end_date, interval, line)

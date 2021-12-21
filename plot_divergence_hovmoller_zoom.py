@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 10/26/2021
-Last modified: 12/14/2021
+Last modified: 12/20/2021
 Plot Hovmoller diagram of hourly-averaged wind speed divergence at specified cross-section
 """
 
@@ -176,7 +176,9 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb
         # ax.set_ylim(ylims)
         #ax.set_xlim([-200, 200])
 
-        sname = 'divergence_hovmoller_{}.png'.format(height)
+        sname = 'divergence_hovmoller_{}m.png'.format(height)
+        if interval_name == 'divergence_hovmoller_zoomed':
+            sname = f'{sname.split(".png")[0]}_{pd.to_datetime(sb_t0str).strftime("%Y%m%d")}.png'
         plt.savefig(os.path.join(save_dir, sname), dpi=200)
         plt.close()
 
@@ -214,6 +216,16 @@ def main(sDir, sdate, edate, intvl, line):
         # ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
 
         plot_divergence_hovmoller(ds, savedir, intvl, line, **kwargs)
+    elif intvl == 'divergence_hovmoller_zoomed':
+        # plot divergence for a series of days
+        daterange = pd.date_range(sdate, edate)
+        for dr in daterange:
+            print(dr)
+            ds_dr = ds.sel(time=slice(dr, dr + dt.timedelta(hours=23)))
+            kwargs['sb_t0str'] = dr.strftime('%Y-%m-%d')
+            kwargs['sb_t1str'] = dr.strftime('%Y-%m-%d')
+            ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
+            plot_divergence_hovmoller(ds_dr, savedir, intvl, line, **kwargs)
     else:
         # ds = ds.sel(time=slice(dt.datetime(2020, 6, 8, 13, 0), dt.datetime(2020, 6, 8, 15, 0)))  # for debugging
         plot_divergence_hovmoller(ds, savedir, intvl, line, **kwargs)
@@ -224,6 +236,7 @@ if __name__ == '__main__':
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  #dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'divergence_hourly_avg_hovmoller_zoomed'    # divergence_hourly_avg_hovmoller  divergence_hourly_cases_hovmoller - use this for seabreeze cases
-    line = 'wea'   # 'short_perpendicular'  'wea'
+    interval = 'divergence_hovmoller_zoomed'    # divergence_hourly_avg_hovmoller_zoomed
+    # divergence_hourly_cases_hovmoller_zoomed - use this for seabreeze cases  'divergence_hovmoller_zoomed' - use this for daily plots
+    line = 'short_perpendicular'   # 'short_perpendicular'  'wea'
     main(save_directory, start_date, end_date, interval, line)
