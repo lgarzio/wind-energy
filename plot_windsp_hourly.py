@@ -24,12 +24,12 @@ def plot_windspeed_power(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None
     heights = [250, 200, 160, 10]
 
     plt_regions = cf.plot_regions(interval_name)
-    plt_vars = dict(meanws=dict(color_label='Wind Speed (m/s)',
-                                title='Wind Speed',
-                                cmap=plt.get_cmap('BuPu')),
-                    meanpower=dict(color_label='Estimated 15MW Wind Power (kW)',
-                                   title='Wind Power (15MW)',
-                                   cmap='OrRd')
+    plt_vars = dict(ws=dict(color_label='Wind Speed (m/s)',
+                            title='Wind Speed',
+                            cmap=plt.get_cmap('BuPu')),
+                    power=dict(color_label='Estimated 15MW Wind Power (kW)',
+                               title='Wind Power (15MW)',
+                               cmap='OrRd')
                     )
 
     la_polygon, pa_polygon = cf.extract_lease_area_outlines()
@@ -50,6 +50,7 @@ def plot_windspeed_power(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None
 
         # plot each hour
         for hour in hours:
+            hour_edt_str = f'{str(hour - 4).zfill(2)}:00'
             u_hour = np.squeeze(u[u.time.dt.hour == hour])
             v_hour = np.squeeze(v[v.time.dt.hour == hour])
             ws_hour = np.squeeze(cf.wind_uv_to_spd(u_hour, v_hour))
@@ -61,8 +62,8 @@ def plot_windspeed_power(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None
             # calculate wind power
             power = xr.DataArray(np.interp(ws_hour, power_curve['Wind Speed'], power_curve['Power']), coords=ws_hour.coords)
 
-            plt_vars['meanws']['data'] = ws_hour
-            plt_vars['meanpower']['data'] = power
+            plt_vars['ws']['data'] = ws_hour
+            plt_vars['power']['data'] = power
 
             for pv, plt_info in plt_vars.items():
                 for pr, region_info in plt_regions.items():
@@ -74,8 +75,7 @@ def plot_windspeed_power(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None
                         ttl = '{} {}m: H{}\n{} to {}'.format(plt_info['title'], height, str(hour).zfill(3),
                                                              sb_t0str, sb_t1str)
                     elif interval_name == 'hourly_cases':
-                        ttl = '{} {}m: H{}\n{} to {}'.format(plt_info['title'], height, str(hour).zfill(3),
-                                                             sb_t0str, sb_t1str)
+                        ttl = '{} {}m\n{} {}'.format(plt_info['title'], height, sb_t0str, hour_edt_str)
                     else:
                         if interval_name == 'seabreeze_days_hourly_avg':
                             nm = 'Sea breeze days'
@@ -89,7 +89,7 @@ def plot_windspeed_power(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None
                     # set up the map
                     lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
                     fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
-                    if pv == 'meanws':
+                    if pv == 'ws':
                         pf.add_map_features(ax, region_info['extent'], region_info['xticks'], region_info['yticks'])
                         quiver_color = 'k'
                     else:
@@ -101,7 +101,7 @@ def plot_windspeed_power(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None
                     if region_info['subset']:
                         extent = np.add(region_info['extent'], [-.5, .5, -.5, .5]).tolist()
                         data = cf.subset_grid(data, extent)
-                        if pv == 'meanws':
+                        if pv == 'ws':
                             u_hour_standardize = cf.subset_grid(u_hour_standardize, extent)
                             v_hour_standardize = cf.subset_grid(v_hour_standardize, extent)
 
@@ -120,7 +120,7 @@ def plot_windspeed_power(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None
                     # plot data
                     # pcolormesh: coarser resolution, shows the actual resolution of the model data
                     # contourf: smooths the resolution of the model data, plots are less pixelated, can define discrete levels
-                    if pv == 'meanpower':
+                    if pv == 'power':
                         kwargs['levels'] = list(np.arange(0, 15001, 1000))
                         kwargs['extend'] = 'neither'
                     elif pv == 'sdpower':
@@ -141,7 +141,7 @@ def plot_windspeed_power(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None
                     pf.plot_contourf(fig, ax, lon, lat, data, plt_info['cmap'], **kwargs)
 
                     # subset the quivers and add as a layer for meanws only
-                    if pv == 'meanws':
+                    if pv == 'ws':
                         if region_info['quiver_subset']:
                             quiver_scale = region_info['quiver_scale']
                             qs = region_info['quiver_subset']['_{}m'.format(height)]
