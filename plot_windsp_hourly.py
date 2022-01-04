@@ -50,9 +50,9 @@ def plot_windspeed_power(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None
 
         # plot each hour
         for hour in hours:
-            u_hour = u[u.time.dt.hour == hour]
-            v_hour = v[v.time.dt.hour == hour]
-            ws_hour = cf.wind_uv_to_spd(u_hour, v_hour)
+            u_hour = np.squeeze(u[u.time.dt.hour == hour])
+            v_hour = np.squeeze(v[v.time.dt.hour == hour])
+            ws_hour = np.squeeze(cf.wind_uv_to_spd(u_hour, v_hour))
 
             # standardize the vectors so they only represent direction
             u_hour_standardize = u_hour / cf.wind_uv_to_spd(u_hour, v_hour)
