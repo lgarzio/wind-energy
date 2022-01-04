@@ -66,6 +66,8 @@ def plot_windspeed_power(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None
             plt_vars['power']['data'] = power
 
             for pv, plt_info in plt_vars.items():
+                if np.logical_and(pv == 'power', height != 160):
+                    continue
                 for pr, region_info in plt_regions.items():
                     region_savedir = os.path.join(save_dir, pr)
                     os.makedirs(region_savedir, exist_ok=True)
