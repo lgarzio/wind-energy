@@ -75,7 +75,7 @@ def plot_windspeed_power(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None
                         ttl = '{} {}m: H{}\n{} to {}'.format(plt_info['title'], height, str(hour).zfill(3),
                                                              sb_t0str, sb_t1str)
                     elif interval_name == 'hourly_cases':
-                        ttl = '{} {}m\n{} {}'.format(plt_info['title'], height, sb_t0str, hour_edt_str)
+                        ttl = '{} {}m\n{} H{}'.format(plt_info['title'], height, sb_t0str, str(hour).zfill(3))
                     else:
                         if interval_name == 'seabreeze_days_hourly_avg':
                             nm = 'Sea breeze days'
