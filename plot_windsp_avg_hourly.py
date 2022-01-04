@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 10/5/2021
-Last modified: 11/9/2021
+Last modified: 1/4/2022
 Plot hourly-averaged WRF windspeeds and variance at 10m, 160m, 200m and 250m at user-defined grouping intervals (overall and
 seabreeze vs non-seabreeze days)
 """
@@ -23,20 +23,31 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
     t0 = t0 or None
     sb_t0str = sb_t0str or None
     sb_t1str = sb_t1str or None
-    heights = [250, 200, 160, 10]
+    # heights = [250, 200, 160, 10]
+    heights = [160]
 
     plt_regions = cf.plot_regions(interval_name)
-    plt_vars = dict(meanws=dict(color_label='Average Wind Speed (m/s)',
-                                title='Average Wind Speed',
-                                cmap=plt.get_cmap('BuPu')),
-                    sdwind=dict(color_label='Variance (m/s)',
-                                title='Wind Speed Variance',
-                                cmap='BuPu'),
-                    sdwind_norm=dict(color_label='Normalized Variance',
-                                     title='Normalized Wind Speed Variance',
-                                     cmap='BuPu'))
+    # plt_vars = dict(meanws=dict(color_label='Average Wind Speed (m/s)',
+    #                             title='Average Wind Speed',
+    #                             cmap=plt.get_cmap('BuPu')),
+    #                 sdwind=dict(color_label='Variance (m/s)',
+    #                             title='Wind Speed Variance',
+    #                             cmap='BuPu'),
+    #                 sdwind_norm=dict(color_label='Normalized Variance',
+    #                                  title='Normalized Wind Speed Variance',
+    #                                  cmap='BuPu'))
+    plt_vars = dict(meanpower=dict(color_label='Average Estimated 15MW Wind Power (kW)',
+                                   title='Average Wind Power (15MW)',
+                                   cmap='OrRd'),
+                    sdpower=dict(color_label='Variance (kW)',
+                                 title='Power Variance',
+                                 cmap='OrRd'))
 
     la_polygon, pa_polygon = cf.extract_lease_area_outlines()
+
+    # for calculating power
+    power_curve = pd.read_csv('/home/lgarzio/rucool/bpu/wrf/wrf_lw15mw_power.csv')  # on server
+    #power_curve = pd.read_csv('/Users/garzio/Documents/rucool/bpu/wrf/wrf_lw15mw_power.csv')
 
     for height in heights:
         if height == 10:
@@ -70,9 +81,16 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
             # variance normalized to mean wind speed
             sd_wind_hourly_norm = sd_wind_hourly / ws_hourly_mean
 
-            plt_vars['meanws']['data'] = ws_hourly_mean
-            plt_vars['sdwind']['data'] = sd_wind_hourly
-            plt_vars['sdwind_norm']['data'] = sd_wind_hourly_norm
+            # calculate wind power
+            power = xr.DataArray(np.interp(ws_hour, power_curve['Wind Speed'], power_curve['Power']), coords=ws_hour.coords)
+            meanpower = power.mean('time')
+            sdpower = power.std('time')  # power variance
+
+            # plt_vars['meanws']['data'] = ws_hourly_mean
+            # plt_vars['sdwind']['data'] = sd_wind_hourly
+            # plt_vars['sdwind_norm']['data'] = sd_wind_hourly_norm
+            plt_vars['meanpower']['data'] = meanpower
+            plt_vars['sdpower']['data'] = sdpower
 
             for pv, plt_info in plt_vars.items():
                 for pr, region_info in plt_regions.items():
@@ -189,7 +207,7 @@ def main(sDir, sdate, edate, intvl):
 
         # grab the WRF data for the seabreeze dates
         ds_sb = ds.sel(time=sb_datetimes)
-        # ds_sb = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
+        # ds_sb = ds.sel(time=slice(dt.datetime(2020, 6, 1, 0, 0), dt.datetime(2020, 6, 1, 5, 0)))  # for debugging
 
         # grab the WRF data for the non-seabreeze dates
         nosb_datetimes = [t for t in ds.time.values if t not in sb_datetimes]
