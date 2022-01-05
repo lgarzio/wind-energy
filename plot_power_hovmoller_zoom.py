@@ -137,7 +137,7 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
         kwargs = dict()
         # kwargs['levels'] = levels  # for contourf only
         #kwargs['cbar_ticks'] = ticks
-        cmap = 'OrRd'  # for pcolormesh only
+        cmap = plt.get_cmap('OrRd')  # for pcolormesh only
         kwargs['cmap'] = cmap  # for pcolormesh only
         levels = levels  # for pcolormesh only
         norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)  # for pcolormesh only
