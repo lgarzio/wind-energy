@@ -137,7 +137,7 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
         kwargs = dict()
         # kwargs['levels'] = levels  # for contourf only
         #kwargs['cbar_ticks'] = ticks
-        cmap = plt.get_cmap('RdBu_r')  # for pcolormesh only
+        cmap = 'OrRd'  # for pcolormesh only
         kwargs['cmap'] = cmap  # for pcolormesh only
         levels = levels  # for pcolormesh only
         norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)  # for pcolormesh only
@@ -160,6 +160,7 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
         kwargs['cax_size'] = '3%'
         kwargs['xlab'] = xlab
         kwargs['ylab'] = 'Hour (EDT)'
+        kwargs['extend'] = 'neither'
         #kwargs['yticks'] = [5, 10, 15, 20]
         pf.plot_pcolormesh(fig, ax, xvar, hours - 4, power_final, **kwargs)
 
