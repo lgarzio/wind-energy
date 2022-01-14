@@ -122,8 +122,11 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
 
             power_final[hour_idx] = power_line
 
-        if interval_name == 'power_hourly_avg_hovmoller_zoomed':
+        if interval_name == 'power_hourly_avg_hovmoller_zoomed_seabreeze':
             ttl = 'Hourly Averaged Seabreeze Days\nEstimated 15MW Wind Power (kW) Along Cross-Section: {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
+
+        elif interval_name == 'power_hourly_avg_hovmoller_zoomed_noseabreeze':
+            ttl = 'Hourly Averaged Non-Seabreeze Days\nEstimated 15MW Wind Power (kW) Along Cross-Section: {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
 
         else:
             ttl = 'Estimated 15MW Wind Power (kW) Along Cross_Section: {}m\n{}'.format(height, sb_t0str)
@@ -181,6 +184,10 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
         sname = 'power_hovmoller_{}m.png'.format(height)
         if interval_name == 'power_hovmoller_zoomed':
             sname = f'{sname.split(".png")[0]}_{pd.to_datetime(sb_t0str).strftime("%Y%m%d")}.png'
+        elif interval_name == 'power_hourly_avg_hovmoller_zoomed_seabreeze':
+            sname = 'power_hovmoller_hourlyavg_seabreeze_{}m.png'.format(height)
+        elif interval_name == 'power_hourly_avg_hovmoller_zoomed_noseabreeze':
+            sname = 'power_hovmoller_hourlyavg_noseabreeze_{}m.png'.format(height)
         plt.savefig(os.path.join(save_dir, sname), dpi=200)
         plt.close()
 
@@ -214,10 +221,16 @@ def main(sDir, sdate, edate, intvl, line):
         sb_datetimes = pd.to_datetime(sorted([inner for outer in sb_datetimes for inner in outer]))
 
         # grab the WRF data for the seabreeze dates
-        ds = ds.sel(time=sb_datetimes)
-        # ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
+        ds_sb = ds.sel(time=sb_datetimes)
+        # ds_sb = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
 
-        plot_power_hovmoller(ds, savedir, intvl, line, **kwargs)
+        # grab the WRF data for the non-seabreeze dates
+        nosb_datetimes = [t for t in ds.time.values if t not in sb_datetimes]
+        ds_nosb = ds.sel(time=nosb_datetimes)
+        # ds_nosb = ds.sel(time=slice(dt.datetime(2020, 6, 2, 0, 0), dt.datetime(2020, 6, 2, 15, 0)))  # for debugging
+
+        plot_power_hovmoller(ds_sb, savedir, 'power_hourly_avg_hovmoller_zoomed_seabreeze', line, **kwargs)
+        plot_power_hovmoller(ds_nosb, savedir, 'power_hourly_avg_hovmoller_zoomed_noseabreeze', line, **kwargs)
     elif intvl == 'power_hovmoller_zoomed':
         # plot divergence for a series of days
         daterange = pd.date_range(sdate, edate)
@@ -234,10 +247,10 @@ def main(sDir, sdate, edate, intvl, line):
 
 
 if __name__ == '__main__':
-    #save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
+    # save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  #dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'power_hovmoller_zoomed'  # 'power_hourly_avg_hovmoller_zoomed' 'power_hovmoller_zoomed' - use this for daily plots
+    interval = 'power_hourly_avg_hovmoller_zoomed'  # 'power_hourly_avg_hovmoller_zoomed' 'power_hovmoller_zoomed' - use this for daily plots
     line = 'short_perpendicular'   # 'short_perpendicular'  'wea'
     main(save_directory, start_date, end_date, interval, line)
