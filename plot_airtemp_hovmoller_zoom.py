@@ -13,8 +13,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import BoundaryNorm
-import cartopy.crs as ccrs
-import functions.common as cf
+import cmocean as cmo
 import functions.plotting as pf
 from wrf import interpline, CoordPair, WrfProj
 from geographiclib.geodesic import Geodesic
@@ -111,7 +110,7 @@ def plot_airtemp_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0
     else:
         ttl = '2m Air Temperature (\N{DEGREE SIGN}C) Along Cross_Section\n{}'.format(sb_t0str)
 
-    levels = [10, 12, 14, 16, 18, 20, 22, 24]
+    levels = np.arange(12, 25, 1)
     #ticks = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
     #fig, ax = plt.subplots(figsize=(9, 8))
     fig, ax = plt.subplots(figsize=(9, 5))
@@ -120,7 +119,7 @@ def plot_airtemp_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0
     kwargs = dict()
     # kwargs['levels'] = levels  # for contourf only
     #kwargs['cbar_ticks'] = ticks
-    cmap = plt.get_cmap('jet')  # for pcolormesh only
+    cmap = cmo.cm.thermal  # for pcolormesh only
     kwargs['cmap'] = cmap  # for pcolormesh only
     levels = levels  # for pcolormesh only
     norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)  # for pcolormesh only
