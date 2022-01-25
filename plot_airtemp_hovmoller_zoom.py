@@ -219,7 +219,7 @@ def main(sDir, sdate, edate, intvl, line):
             ds_dr = ds.sel(time=slice(dr, dr + dt.timedelta(hours=23)))
             kwargs['sb_t0str'] = dr.strftime('%Y-%m-%d')
             kwargs['sb_t1str'] = dr.strftime('%Y-%m-%d')
-            ds_dr = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
+            # ds_dr = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
             plot_airtemp_hovmoller(ds_dr, savedir, intvl, line, **kwargs)
     else:
         # ds = ds.sel(time=slice(dt.datetime(2020, 6, 8, 13, 0), dt.datetime(2020, 6, 8, 15, 0)))  # for debugging
@@ -227,8 +227,8 @@ def main(sDir, sdate, edate, intvl, line):
 
 
 if __name__ == '__main__':
-    save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
-    # save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
+    # save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
+    save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  #dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
     interval = 'airtemp_hovmoller_zoomed'  # 'airtemp_hourly_avg_hovmoller_zoomed' 'airtemp_hovmoller_zoomed' - use this for daily plots
