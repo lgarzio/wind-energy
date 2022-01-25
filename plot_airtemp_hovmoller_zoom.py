@@ -102,13 +102,13 @@ def plot_airtemp_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0
         t2_final[hour_idx] = mean_t2_line
 
     if interval_name == 'airtemp_hourly_avg_hovmoller_zoomed_seabreeze':
-        ttl = 'Hourly Averaged Seabreeze Days\n2m Air Temperature (\N{DEGREE SIGN}C) Along Cross-Section\n{} to {}'.format(sb_t0str, sb_t1str)
+        ttl = 'Hourly Averaged Seabreeze Days\n2m Air Temperature (\N{DEGREE SIGN}C)\n{} to {}'.format(sb_t0str, sb_t1str)
 
     elif interval_name == 'airtemp_hourly_avg_hovmoller_zoomed_noseabreeze':
-        ttl = 'Hourly Averaged Non-Seabreeze Days\n2m Air Temperature (\N{DEGREE SIGN}C) Along Cross-Section\n{} to {}'.format(sb_t0str, sb_t1str)
+        ttl = 'Hourly Averaged Non-Seabreeze Days\n2m Air Temperature (\N{DEGREE SIGN}C)\n{} to {}'.format(sb_t0str, sb_t1str)
 
     else:
-        ttl = '2m Air Temperature (\N{DEGREE SIGN}C) Along Cross_Section\n{}'.format(sb_t0str)
+        ttl = '2m Air Temperature (\N{DEGREE SIGN}C)\n{}'.format(sb_t0str)
 
     levels = np.arange(12, 25, 1)
     #ticks = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
