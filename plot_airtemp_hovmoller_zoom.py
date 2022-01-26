@@ -110,7 +110,7 @@ def plot_airtemp_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0
     else:
         ttl = '2m Air Temperature (\N{DEGREE SIGN}C)\n{}'.format(sb_t0str)
 
-    levels = np.arange(16, 31, 1)
+    levels = np.arange(16, 37, 1)
     #ticks = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
     #fig, ax = plt.subplots(figsize=(9, 8))
     fig, ax = plt.subplots(figsize=(9, 5))
