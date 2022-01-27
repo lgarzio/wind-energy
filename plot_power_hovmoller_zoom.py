@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 1/4/2022
-Last modified: 1/4/2022
+Last modified: 1/27/2022
 Plot Hovmoller diagram of hourly-averaged power at specified cross-section
 """
 
@@ -198,7 +198,7 @@ def main(sDir, sdate, edate, intvl, line):
     if intvl == 'divergence_hourly_cases_hovmoller_zoomed':
         savedir = os.path.join(sDir, 'hovmoller_seabreeze_cases', '{}_{}'.format(intvl, sdate.strftime('%Y%m%d')))
     else:
-        savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+        savedir = os.path.join(sDir, '{}_{}-{}-new_sb_dates'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     if line == 'wea':
         savedir = f'{savedir}_wea'
     os.makedirs(savedir, exist_ok=True)
@@ -215,9 +215,10 @@ def main(sDir, sdate, edate, intvl, line):
 
     if intvl == 'power_hourly_avg_hovmoller_zoomed':
         df = pd.read_csv(os.path.join(sDir, 'radar_seabreezes_2020.csv'))
-        df = df[df['Seabreeze'] == 'y']
-        sb_dates = np.array(pd.to_datetime(df['Date']))
-        sb_datetimes = [pd.date_range(pd.to_datetime(x), pd.to_datetime(x) + dt.timedelta(hours=23), freq='H') for x in sb_dates]
+        df_sb = df[df['Seabreeze'] == 'y']
+        sb_dates = np.array(pd.to_datetime(df_sb['Date']))
+        sb_datetimes = [pd.date_range(pd.to_datetime(x), pd.to_datetime(x) + dt.timedelta(hours=23), freq='H') for x in
+                        sb_dates]
         sb_datetimes = pd.to_datetime(sorted([inner for outer in sb_datetimes for inner in outer]))
 
         # grab the WRF data for the seabreeze dates
@@ -225,7 +226,11 @@ def main(sDir, sdate, edate, intvl, line):
         # ds_sb = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
 
         # grab the WRF data for the non-seabreeze dates
-        nosb_datetimes = [t for t in ds.time.values if t not in sb_datetimes]
+        df_nosb = df[df['Seabreeze'] == 'n']
+        nosb_dates = np.array(pd.to_datetime(df_nosb['Date']))
+        nosb_datetimes = [pd.date_range(pd.to_datetime(x), pd.to_datetime(x) + dt.timedelta(hours=23), freq='H') for x
+                          in nosb_dates]
+        nosb_datetimes = pd.to_datetime(sorted([inner for outer in nosb_datetimes for inner in outer]))
         ds_nosb = ds.sel(time=nosb_datetimes)
         # ds_nosb = ds.sel(time=slice(dt.datetime(2020, 6, 2, 0, 0), dt.datetime(2020, 6, 2, 15, 0)))  # for debugging
 
