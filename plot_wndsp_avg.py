@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/12/2021
-Last modified: 12/20/2021
+Last modified: 1/27/2022
 Plot average WRF windspeeds at 10m, 160m, 200m and 250m at user-defined grouping intervals (monthly and seabreeze vs
 non-seabreeze days)
 """

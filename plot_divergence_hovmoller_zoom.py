@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 10/26/2021
-Last modified: 12/20/2021
+Last modified: 1/27/2022
 Plot Hovmoller diagram of hourly-averaged wind speed divergence at specified cross-section
 """
 
@@ -189,7 +189,7 @@ def main(sDir, sdate, edate, intvl, line):
     if intvl == 'divergence_hourly_cases_hovmoller_zoomed':
         savedir = os.path.join(sDir, 'hovmoller_seabreeze_cases', '{}_{}'.format(intvl, sdate.strftime('%Y%m%d')))
     else:
-        savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+        savedir = os.path.join(sDir, '{}_{}-{}-new_sb_dates'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     if line == 'wea':
         savedir = f'{savedir}_wea'
     os.makedirs(savedir, exist_ok=True)
@@ -206,9 +206,10 @@ def main(sDir, sdate, edate, intvl, line):
 
     if intvl == 'divergence_hourly_avg_hovmoller_zoomed':
         df = pd.read_csv(os.path.join(sDir, 'radar_seabreezes_2020.csv'))
-        df = df[df['Seabreeze'] == 'y']
-        sb_dates = np.array(pd.to_datetime(df['Date']))
-        sb_datetimes = [pd.date_range(pd.to_datetime(x), pd.to_datetime(x) + dt.timedelta(hours=23), freq='H') for x in sb_dates]
+        df_sb = df[df['Seabreeze'] == 'y']
+        sb_dates = np.array(pd.to_datetime(df_sb['Date']))
+        sb_datetimes = [pd.date_range(pd.to_datetime(x), pd.to_datetime(x) + dt.timedelta(hours=23), freq='H') for x in
+                        sb_dates]
         sb_datetimes = pd.to_datetime(sorted([inner for outer in sb_datetimes for inner in outer]))
 
         # grab the WRF data for the seabreeze dates
@@ -236,7 +237,7 @@ if __name__ == '__main__':
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
     end_date = dt.datetime(2020, 7, 31, 23, 0)  #dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'divergence_hovmoller_zoomed'    # divergence_hourly_avg_hovmoller_zoomed
+    interval = 'divergence_hourly_avg_hovmoller_zoomed'    # divergence_hourly_avg_hovmoller_zoomed
     # divergence_hourly_cases_hovmoller_zoomed - use this for seabreeze cases  'divergence_hovmoller_zoomed' - use this for daily plots
     line = 'short_perpendicular'   # 'short_perpendicular'  'wea'
     main(save_directory, start_date, end_date, interval, line)
