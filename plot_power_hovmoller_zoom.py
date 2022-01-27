@@ -3,7 +3,7 @@
 """
 Author: Lori Garzio on 1/4/2022
 Last modified: 1/27/2022
-Plot Hovmoller diagram of hourly-averaged power at specified cross-section
+Plot Hovmoller diagram of hourly-averaged and standard deviation of power at specified cross-section
 """
 
 import datetime as dt
@@ -63,8 +63,10 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
         hours = np.arange(13, 23)
 
         power_final = np.empty(shape=(len(hours), div_shape))
+        sdpower_final = np.empty(shape=(len(hours), div_shape))
 
         power_final[:] = np.nan
+        sdpower_final[:] = np.nan
 
         for hour_idx, hour in enumerate(hours):
             u_hour = u[u.time.dt.hour == hour]
@@ -75,6 +77,7 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
             power = xr.DataArray(np.interp(ws_hour, power_curve['Wind Speed'], power_curve['Power']),
                                  coords=ws_hour.coords)
             meanpower = power.mean('time')
+            sdpower = power.std('time')
 
             # get values along specified line
             wrf_projection = WrfProj(map_proj=1, dx=3000, dy=3000, truelat1=38.8, truelat2=38.8,
@@ -82,6 +85,8 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
             ll_point = CoordPair(lat=34.321144, lon=-79.763733)
             power_line = interpline(meanpower, start_point=point_start, end_point=point_end, projection=wrf_projection,
                                     ll_point=ll_point, latlon=True)
+            sdpower_line = interpline(sdpower, start_point=point_start, end_point=point_end, projection=wrf_projection,
+                                      ll_point=ll_point, latlon=True)
 
             # get the coordinates for the line that is returned
             if hour_idx == 0:
@@ -121,75 +126,95 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
                         distance_km = np.append(distance_km, dist_km)
 
             power_final[hour_idx] = power_line
+            sdpower_final[hour_idx] = sdpower_line
 
-        if interval_name == 'power_hourly_avg_hovmoller_zoomed_seabreeze':
-            ttl = 'Hourly Averaged Seabreeze Days\nEstimated 15MW Wind Power (kW) Along Cross-Section: {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
+        data = dict(power=power_final,
+                    sdpower=sdpower_final)
 
-        elif interval_name == 'power_hourly_avg_hovmoller_zoomed_noseabreeze':
-            ttl = 'Hourly Averaged Non-Seabreeze Days\nEstimated 15MW Wind Power (kW) Along Cross-Section: {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
+        for key, values in data.items():
 
-        else:
-            ttl = 'Estimated 15MW Wind Power (kW) Along Cross_Section: {}m\n{}'.format(height, sb_t0str)
+            if interval_name == 'power_hourly_avg_hovmoller_zoomed_seabreeze':
+                if key == 'power':
+                    ttl = 'Hourly Averaged Seabreeze Days\nEstimated 15MW Wind Power (kW): {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
+                else:
+                    ttl = 'Hourly Averaged Seabreeze Days\nEstimated 15MW Wind Power Standard Deviation (kW): {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
 
-        levels = list(np.arange(0, 15001, 1000))
-        #ticks = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
-        #fig, ax = plt.subplots(figsize=(9, 8))
-        fig, ax = plt.subplots(figsize=(9, 5))
+            elif interval_name == 'power_hourly_avg_hovmoller_zoomed_noseabreeze':
+                if key == 'power':
+                    ttl = 'Hourly Averaged Non-Seabreeze Days\nEstimated 15MW Wind Power (kW): {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
+                else:
+                    ttl = 'Hourly Averaged Non-Seabreeze Days\nEstimated 15MW Wind Power Standard Deviation (kW): {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
 
-        # initialize keyword arguments for plotting
-        kwargs = dict()
-        # kwargs['levels'] = levels  # for contourf only
-        #kwargs['cbar_ticks'] = ticks
-        cmap = plt.get_cmap('OrRd')  # for pcolormesh only
-        kwargs['cmap'] = cmap  # for pcolormesh only
-        levels = levels  # for pcolormesh only
-        norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)  # for pcolormesh only
-        kwargs['norm_clevs'] = norm  # for pcolormesh only
+            else:
+                if key == 'power':
+                    ttl = 'Estimated 15MW Wind Power (kW): {}m\n{}'.format(height, sb_t0str)
+                else:
+                    ttl = 'Estimated 15MW Wind Power Standard Deviation (kW): {}m\n{}'.format(height, sb_t0str)
 
-        if '_perpendicular' in line:
-            xlab = 'Distance From Shore (km)'
-            xvar = distance_km
-            wea1 = 14.73  # lines for WEA
-            wea2 = 36.32  # lines for WEA
-        else:
-            xlab = 'Longitude'
-            xvar = lons_interp
-            wea1 = -74.45  # for longitude: edges of the WEA
-            wea2 = -73.95  # for longitude: edges of the WEA
+            if key == 'power':
+                levels = list(np.arange(0, 15001, 1000))
+                color_label = 'Estimated 15MW Wind Power (kW)'
+            else:
+                levels = list(np.arange(0, 15001, 1000))
+                color_label = 'Estimated 15MW Wind Power Standard Deviation (kW)'
+            #ticks = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+            #fig, ax = plt.subplots(figsize=(9, 8))
+            fig, ax = plt.subplots(figsize=(9, 5))
 
-        kwargs['ttl'] = ttl
-        kwargs['title_size'] = 12
-        kwargs['clab'] = 'Estimated 15MW Wind Power (kW)'
-        kwargs['cax_size'] = '3%'
-        kwargs['xlab'] = xlab
-        kwargs['ylab'] = 'Hour (EDT)'
-        kwargs['extend'] = 'neither'
-        #kwargs['yticks'] = [5, 10, 15, 20]
-        pf.plot_pcolormesh(fig, ax, xvar, hours - 4, power_final, **kwargs)
+            # initialize keyword arguments for plotting
+            kwargs = dict()
+            # kwargs['levels'] = levels  # for contourf only
+            #kwargs['cbar_ticks'] = ticks
+            cmap = plt.get_cmap('OrRd')  # for pcolormesh only
+            kwargs['cmap'] = cmap  # for pcolormesh only
+            levels = levels  # for pcolormesh only
+            norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)  # for pcolormesh only
+            kwargs['norm_clevs'] = norm  # for pcolormesh only
 
-        ylims = ax.get_ylim()
+            if '_perpendicular' in line:
+                xlab = 'Distance From Shore (km)'
+                xvar = distance_km
+                wea1 = 14.73  # lines for WEA
+                wea2 = 36.32  # lines for WEA
+            else:
+                xlab = 'Longitude'
+                xvar = lons_interp
+                wea1 = -74.45  # for longitude: edges of the WEA
+                wea2 = -73.95  # for longitude: edges of the WEA
 
-        if '_perpendicular' in line:
-            # add a line for the coast
-            # #ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
-            ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
+            kwargs['ttl'] = ttl
+            kwargs['title_size'] = 12
+            kwargs['clab'] = color_label
+            kwargs['cax_size'] = '3%'
+            kwargs['xlab'] = xlab
+            kwargs['ylab'] = 'Hour (EDT)'
+            kwargs['extend'] = 'neither'
+            #kwargs['yticks'] = [5, 10, 15, 20]
+            pf.plot_pcolormesh(fig, ax, xvar, hours - 4, power_final, **kwargs)
 
-        # add lines for the wind energy area (calculated in hovmoller_line_map.py)
-        ax.vlines(wea1, ylims[0], ylims[1], colors='darkgray', ls='--')
-        ax.vlines(wea2, ylims[0], ylims[1], colors='darkgray', ls='--')
+            ylims = ax.get_ylim()
 
-        # ax.set_ylim(ylims)
-        #ax.set_xlim([-200, 200])
+            if '_perpendicular' in line:
+                # add a line for the coast
+                # #ax.vlines(coastline_lon, ylims[0], ylims[1], colors='k', ls='--')
+                ax.vlines(0, ylims[0], ylims[1], colors='k', ls='-')
 
-        sname = 'power_hovmoller_{}m.png'.format(height)
-        if interval_name == 'power_hovmoller_zoomed':
-            sname = f'{sname.split(".png")[0]}_{pd.to_datetime(sb_t0str).strftime("%Y%m%d")}.png'
-        elif interval_name == 'power_hourly_avg_hovmoller_zoomed_seabreeze':
-            sname = 'power_hovmoller_hourlyavg_seabreeze_{}m.png'.format(height)
-        elif interval_name == 'power_hourly_avg_hovmoller_zoomed_noseabreeze':
-            sname = 'power_hovmoller_hourlyavg_noseabreeze_{}m.png'.format(height)
-        plt.savefig(os.path.join(save_dir, sname), dpi=200)
-        plt.close()
+            # add lines for the wind energy area (calculated in hovmoller_line_map.py)
+            ax.vlines(wea1, ylims[0], ylims[1], colors='darkgray', ls='--')
+            ax.vlines(wea2, ylims[0], ylims[1], colors='darkgray', ls='--')
+
+            # ax.set_ylim(ylims)
+            #ax.set_xlim([-200, 200])
+
+            sname = '{}_hovmoller_{}m.png'.format(key, height)
+            if interval_name == 'power_hovmoller_zoomed':
+                sname = f'{sname.split(".png")[0]}_{pd.to_datetime(sb_t0str).strftime("%Y%m%d")}.png'
+            elif interval_name == 'power_hourly_avg_hovmoller_zoomed_seabreeze':
+                sname = '{}_hovmoller_hourlyavg_seabreeze_{}m.png'.format(key, height)
+            elif interval_name == 'power_hourly_avg_hovmoller_zoomed_noseabreeze':
+                sname = '{}_hovmoller_hourlyavg_noseabreeze_{}m.png'.format(key, height)
+            plt.savefig(os.path.join(save_dir, sname), dpi=200)
+            plt.close()
 
 
 def main(sDir, sdate, edate, intvl, line):
