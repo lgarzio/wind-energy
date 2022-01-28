@@ -137,13 +137,13 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
                 if key == 'power':
                     ttl = 'Hourly Averaged Seabreeze Days\nEstimated 15MW Wind Power (kW): {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
                 else:
-                    ttl = 'Hourly Averaged Seabreeze Days\nEstimated 15MW Wind Power Standard Deviation (kW): {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
+                    ttl = 'Hourly Averaged Seabreeze Days\nEstimated 15MW Wind Power Stdev (kW): {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
 
             elif interval_name == 'power_hourly_avg_hovmoller_zoomed_noseabreeze':
                 if key == 'power':
                     ttl = 'Hourly Averaged Non-Seabreeze Days\nEstimated 15MW Wind Power (kW): {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
                 else:
-                    ttl = 'Hourly Averaged Non-Seabreeze Days\nEstimated 15MW Wind Power Standard Deviation (kW): {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
+                    ttl = 'Hourly Averaged Non-Seabreeze Days\nEstimated 15MW Wind Power Stdev (kW): {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
 
             else:
                 if key == 'power':
@@ -156,7 +156,7 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
                 color_label = 'Estimated 15MW Wind Power (kW)'
             else:
                 levels = list(np.arange(0, 15001, 1000))
-                color_label = 'Estimated 15MW Wind Power Standard Deviation (kW)'
+                color_label = 'Estimated 15MW Wind Power Stdev (kW)'
             #ticks = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
             #fig, ax = plt.subplots(figsize=(9, 8))
             fig, ax = plt.subplots(figsize=(9, 5))
@@ -190,7 +190,7 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
             kwargs['ylab'] = 'Hour (EDT)'
             kwargs['extend'] = 'neither'
             #kwargs['yticks'] = [5, 10, 15, 20]
-            pf.plot_pcolormesh(fig, ax, xvar, hours - 4, power_final, **kwargs)
+            pf.plot_pcolormesh(fig, ax, xvar, hours - 4, values, **kwargs)
 
             ylims = ax.get_ylim()
 
