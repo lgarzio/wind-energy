@@ -219,7 +219,7 @@ def main(sDir, sdate, edate, intvl, line):
 
         # grab the WRF data for the seabreeze dates
         ds_sb = ds.sel(time=sb_datetimes)
-        ds_sb = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
+        # ds_sb = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
 
         # grab the WRF data for the non-seabreeze dates
         df_nosb = df[df['Seabreeze'] == 'n']
