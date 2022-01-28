@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 10/26/2021
-Last modified: 1/27/2022
+Last modified: 1/28/2022
 Plot Hovmoller diagram of hourly-averaged wind speed divergence at specified cross-section
 """
 
@@ -119,15 +119,23 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb
 
             divergence[hour_idx] = div_line
 
-        if interval_name == 'divergence_hourly_avg_hovmoller_zoomed':
-            ttl = 'Hourly Averaged Seabreeze Days\nDivergence Along Cross-Section: {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
+        if interval_name == 'divergence_hourly_avg_hovmoller_zoomed_sb':
+            ttl = 'Hourly Averaged Seabreeze Days\nDivergence: {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
             levels = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
                       0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
             ticks = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
+            sname = 'divergence_hourly_avg_hovmoller_{}m_seabreeze.png'.format(height)
+        elif interval_name == 'divergence_hourly_avg_hovmoller_zoomed_nosb':
+            ttl = 'Hourly Averaged Non-Seabreeze Days\nDivergence: {}m\n{} to {}'.format(height, sb_t0str, sb_t1str)
+            levels = [-2.5, -2.25, -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, -0.25,
+                      0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5]
+            ticks = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
+            sname = 'divergence_hourly_avg_hovmoller_{}m_noseabreeze.png'.format(height)
         else:
             ttl = 'Divergence Along Cross_Section: {}m\n{}'.format(height, sb_t0str)
             levels = [-5, -4.5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
             ticks = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+            sname = 'divergence_hovmoller_{}m_{}.png'.format(height, pd.to_datetime(sb_t0str).strftime("%Y%m%d"))
 
         #fig, ax = plt.subplots(figsize=(9, 8))
         fig, ax = plt.subplots(figsize=(9, 5))
@@ -176,9 +184,6 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb
         # ax.set_ylim(ylims)
         #ax.set_xlim([-200, 200])
 
-        sname = 'divergence_hovmoller_{}m.png'.format(height)
-        if interval_name == 'divergence_hovmoller_zoomed':
-            sname = f'{sname.split(".png")[0]}_{pd.to_datetime(sb_t0str).strftime("%Y%m%d")}.png'
         plt.savefig(os.path.join(save_dir, sname), dpi=200)
         plt.close()
 
@@ -213,10 +218,19 @@ def main(sDir, sdate, edate, intvl, line):
         sb_datetimes = pd.to_datetime(sorted([inner for outer in sb_datetimes for inner in outer]))
 
         # grab the WRF data for the seabreeze dates
-        ds = ds.sel(time=sb_datetimes)
-        # ds = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
+        ds_sb = ds.sel(time=sb_datetimes)
+        ds_sb = ds.sel(time=slice(dt.datetime(2020, 6, 1, 13, 0), dt.datetime(2020, 6, 1, 15, 0)))  # for debugging
 
-        plot_divergence_hovmoller(ds, savedir, intvl, line, **kwargs)
+        # grab the WRF data for the non-seabreeze dates
+        df_nosb = df[df['Seabreeze'] == 'n']
+        nosb_dates = np.array(pd.to_datetime(df_nosb['Date']))
+        nosb_datetimes = [pd.date_range(pd.to_datetime(x), pd.to_datetime(x) + dt.timedelta(hours=23), freq='H') for x
+                          in nosb_dates]
+        nosb_datetimes = pd.to_datetime(sorted([inner for outer in nosb_datetimes for inner in outer]))
+        ds_nosb = ds.sel(time=nosb_datetimes)
+
+        plot_divergence_hovmoller(ds_sb, savedir, 'divergence_hourly_avg_hovmoller_zoomed_sb', line, **kwargs)
+        plot_divergence_hovmoller(ds_nosb, savedir, 'divergence_hourly_avg_hovmoller_zoomed_nosb', line, **kwargs)
     elif intvl == 'divergence_hovmoller_zoomed':
         # plot divergence for a series of days
         daterange = pd.date_range(sdate, edate)
