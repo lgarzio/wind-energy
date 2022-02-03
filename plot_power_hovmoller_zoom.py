@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 1/4/2022
-Last modified: 1/27/2022
+Last modified: 2/2/2022
 Plot Hovmoller diagram of hourly-averaged and standard deviation of power at specified cross-section
 """
 
@@ -127,6 +127,20 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
 
             power_final[hour_idx] = power_line
             sdpower_final[hour_idx] = sdpower_line
+
+        if interval_name == 'power_hourly_avg_hovmoller_zoomed_seabreeze':
+            stype = 'seabreeze'
+        elif interval_name == 'power_hourly_avg_hovmoller_zoomed_noseabreeze':
+            stype = 'noseabreeze'
+        power_df = pd.DataFrame(power_final)
+        power_df.columns = distance_km
+        power_df.index = hours - 4
+        power_df.to_csv(os.path.join(save_dir, f'power_average_{stype}.csv'))
+
+        sdpower_df = pd.DataFrame(sdpower_final)
+        sdpower_df.columns = distance_km
+        sdpower_df.index = hours - 4
+        sdpower_df.to_csv(os.path.join(save_dir, f'power_stdev_{stype}.csv'))
 
         data = dict(power=power_final,
                     sdpower=sdpower_final)
