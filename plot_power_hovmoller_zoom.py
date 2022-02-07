@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 1/4/2022
-Last modified: 2/2/2022
+Last modified: 2/7/2022
 Plot Hovmoller diagram of hourly-averaged and standard deviation of power at specified cross-section
 """
 
@@ -64,9 +64,15 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
 
         power_final = np.empty(shape=(len(hours), div_shape))
         sdpower_final = np.empty(shape=(len(hours), div_shape))
+        medianpower_final = np.empty(shape=(len(hours), div_shape))
+        power25_final = np.empty(shape=(len(hours), div_shape))  # 25th percentile
+        power75_final = np.empty(shape=(len(hours), div_shape))  # 75th percentil
 
         power_final[:] = np.nan
         sdpower_final[:] = np.nan
+        medianpower_final[:] = np.nan
+        power25_final[:] = np.nan
+        power75_final[:] = np.nan
 
         for hour_idx, hour in enumerate(hours):
             u_hour = u[u.time.dt.hour == hour]
@@ -78,6 +84,9 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
                                  coords=ws_hour.coords)
             meanpower = power.mean('time')
             sdpower = power.std('time')
+            medpower = power.quantile(.5, dim='time')
+            power25 = power.quantile(.25, dim='time')
+            power75 = power.quantile(.75, dim='time')
 
             # get values along specified line
             wrf_projection = WrfProj(map_proj=1, dx=3000, dy=3000, truelat1=38.8, truelat2=38.8,
@@ -86,6 +95,12 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
             power_line = interpline(meanpower, start_point=point_start, end_point=point_end, projection=wrf_projection,
                                     ll_point=ll_point, latlon=True)
             sdpower_line = interpline(sdpower, start_point=point_start, end_point=point_end, projection=wrf_projection,
+                                      ll_point=ll_point, latlon=True)
+            medpower_line = interpline(medpower, start_point=point_start, end_point=point_end,
+                                       projection=wrf_projection, ll_point=ll_point, latlon=True)
+            power25_line = interpline(power25, start_point=point_start, end_point=point_end, projection=wrf_projection,
+                                      ll_point=ll_point, latlon=True)
+            power75_line = interpline(power75, start_point=point_start, end_point=point_end, projection=wrf_projection,
                                       ll_point=ll_point, latlon=True)
 
             # get the coordinates for the line that is returned
@@ -127,6 +142,9 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
 
             power_final[hour_idx] = power_line
             sdpower_final[hour_idx] = sdpower_line
+            medianpower_final[hour_idx] = medpower_line
+            power25_final[hour_idx] = power25_line
+            power75_final[hour_idx] = power75_line
 
         if interval_name == 'power_hourly_avg_hovmoller_zoomed_seabreeze':
             stype = 'seabreeze'
@@ -141,6 +159,21 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
         sdpower_df.columns = distance_km
         sdpower_df.index = hours - 4
         sdpower_df.to_csv(os.path.join(save_dir, f'power_stdev_{stype}.csv'))
+
+        medpower_df = pd.DataFrame(medianpower_final)
+        medpower_df.columns = distance_km
+        medpower_df.index = hours - 4
+        medpower_df.to_csv(os.path.join(save_dir, f'power_median_{stype}.csv'))
+
+        power25_df = pd.DataFrame(power25_final)
+        power25_df.columns = distance_km
+        power25_df.index = hours - 4
+        power25_df.to_csv(os.path.join(save_dir, f'power_25qartile_{stype}.csv'))
+
+        power75_df = pd.DataFrame(power75_final)
+        power75_df.columns = distance_km
+        power75_df.index = hours - 4
+        power75_df.to_csv(os.path.join(save_dir, f'power_75qartile_{stype}.csv'))
 
         data = dict(power=power_final,
                     sdpower=sdpower_final)
