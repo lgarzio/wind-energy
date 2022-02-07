@@ -168,12 +168,12 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
         power25_df = pd.DataFrame(power25_final)
         power25_df.columns = distance_km
         power25_df.index = hours - 4
-        power25_df.to_csv(os.path.join(save_dir, f'power_25qartile_{stype}.csv'))
+        power25_df.to_csv(os.path.join(save_dir, f'power_25quartile_{stype}.csv'))
 
         power75_df = pd.DataFrame(power75_final)
         power75_df.columns = distance_km
         power75_df.index = hours - 4
-        power75_df.to_csv(os.path.join(save_dir, f'power_75qartile_{stype}.csv'))
+        power75_df.to_csv(os.path.join(save_dir, f'power_75quartile_{stype}.csv'))
 
         data = dict(power=power_final,
                     sdpower=sdpower_final)
