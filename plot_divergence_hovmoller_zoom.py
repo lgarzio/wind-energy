@@ -132,7 +132,7 @@ def plot_divergence_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb
             ticks = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
             sname = 'divergence_hourly_avg_hovmoller_{}m_noseabreeze.png'.format(height)
         else:
-            ttl = 'Divergence Along Cross_Section: {}m\n{}'.format(height, sb_t0str)
+            ttl = 'Divergence: {}m {}'.format(height, sb_t0str)
             levels = [-5, -4.5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
             ticks = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
             sname = 'divergence_hovmoller_{}m_{}.png'.format(height, pd.to_datetime(sb_t0str).strftime("%Y%m%d"))
@@ -193,6 +193,8 @@ def main(sDir, sdate, edate, intvl, line):
 
     if intvl == 'divergence_hourly_cases_hovmoller_zoomed':
         savedir = os.path.join(sDir, 'hovmoller_seabreeze_cases', '{}_{}'.format(intvl, sdate.strftime('%Y%m%d')))
+    elif intvl == 'divergence_hovmoller_zoomed':
+        savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     else:
         savedir = os.path.join(sDir, '{}_{}-{}-new_sb_dates'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     if line == 'wea':
@@ -247,11 +249,11 @@ def main(sDir, sdate, edate, intvl, line):
 
 
 if __name__ == '__main__':
-    #save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
+    # save_directory = '/Users/garzio/Documents/rucool/bpu/wrf/windspeed_averages'
     save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2020, 6, 8, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
-    end_date = dt.datetime(2020, 7, 31, 23, 0)  #dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
-    interval = 'divergence_hourly_avg_hovmoller_zoomed'    # divergence_hourly_avg_hovmoller_zoomed
+    end_date = dt.datetime(2020, 8, 31, 23, 0)  #dt.datetime(2020, 6, 8, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
+    interval = 'divergence_hovmoller_zoomed'    # divergence_hourly_avg_hovmoller_zoomed
     # divergence_hourly_cases_hovmoller_zoomed - use this for seabreeze cases  'divergence_hovmoller_zoomed' - use this for daily plots
     line = 'short_perpendicular'   # 'short_perpendicular'  'wea'
     main(save_directory, start_date, end_date, interval, line)
