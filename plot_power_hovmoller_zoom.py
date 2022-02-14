@@ -270,7 +270,7 @@ def main(sDir, sdate, edate, intvl, line):
 
     if intvl == 'divergence_hourly_cases_hovmoller_zoomed':
         savedir = os.path.join(sDir, 'hovmoller_seabreeze_cases', '{}_{}'.format(intvl, sdate.strftime('%Y%m%d')))
-    elif intvl == 'divergence_hovmoller_zoomed':
+    elif intvl == 'power_hovmoller_zoomed':
         savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     else:
         savedir = os.path.join(sDir, '{}_{}-{}-new_sb_dates'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
