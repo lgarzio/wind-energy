@@ -60,8 +60,8 @@ def plot_power_hovmoller(ds_sub, save_dir, interval_name, line, t0=None, sb_t0st
             u = ds_sub.sel(height=height)['U']
             v = ds_sub.sel(height=height)['V']
 
-        #hours = np.arange(13, 23)
-        hours = np.arange(1, 23)
+        hours = np.arange(13, 23)
+        # hours = np.arange(1, 23)
 
         power_final = np.empty(shape=(len(hours), div_shape))
         sdpower_final = np.empty(shape=(len(hours), div_shape))
