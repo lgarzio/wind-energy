@@ -141,7 +141,14 @@ def plot_regions(plot_version):
                          xticks=[-75, -74.5, -74, -73.5],
                          yticks=[39, 39.5, 40],
                          subset=True,
-                         lease_area=True)
+                         lease_area=True),
+        windturb=dict(quiver_subset=dict(_10m=3, _160m=3, _200m=3, _250m=3, _500m=3),
+                      quiver_scale=40,
+                      extent=[-74.8, -73.7, 38.8, 39.8],
+                      xticks=[-74.7, -74.4, -74.1, -73.8],
+                      yticks=[39, 39.3, 39.6],
+                      subset=True,
+                      lease_area=True)
     )
 
     if 'monthly' in plot_version:

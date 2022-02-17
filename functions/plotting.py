@@ -48,6 +48,7 @@ def add_lease_area_polygon(ax, lease_area_dict, line_color):
                         poly_lats = [v[i - 1][1], coord[1]]
                         ax.plot(poly_lons, poly_lats, ls='-', lw=.8, color=line_color, transform=ccrs.PlateCarree())
 def add_lease_area_polygon(ax, lease_area_dict, line_color):
+def add_lease_area_polygon(ax, lease_area_dict, line_color, lw=.8):
     """
     Adds polygon outlines for wind energy lease areas to map
     :param ax: plotting axis object
@@ -60,7 +61,7 @@ def add_lease_area_polygon(ax, lease_area_dict, line_color):
                 if i > 0:
                     poly_lons = [v[i - 1][0], coord[0]]
                     poly_lats = [v[i - 1][1], coord[1]]
-                    ax.plot(poly_lons, poly_lats, ls='-', lw=.8, color=line_color, transform=ccrs.PlateCarree())
+                    ax.plot(poly_lons, poly_lats, ls='-', lw=lw, color=line_color, transform=ccrs.PlateCarree())
 
 
 def add_map_features(ax, axes_limits, xticks=None, yticks=None, landcolor=None, ecolor=None):
