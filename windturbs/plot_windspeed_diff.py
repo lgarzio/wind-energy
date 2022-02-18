@@ -35,7 +35,7 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
 
         splitter = f.split('_')
 
-        save_name = 'windspeed_diff_{}_{}_{}.png'.format(fname.split('/')[-3], splitter[2], splitter[-1].split('.nc')[0])
+        save_name = 'windspeed_diff_{}_{}.png'.format(splitter[2], splitter[-1].split('.nc')[0])
 
         if plot_vec:
             sdir = os.path.join(savedir, 'windspeed_160m_diff_vectors')

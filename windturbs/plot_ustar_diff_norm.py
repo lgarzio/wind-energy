@@ -35,7 +35,7 @@ def main(fdir, fdir_ctrl, savedir):
         splitter = f.split('_')
 
         for pv in plt_vars:
-            save_name = '{}_{}_{}_{}.png'.format(pv, fname.split('/')[-3], splitter[2], splitter[-1].split('.nc')[0])
+            save_name = '{}_{}_{}.png'.format(pv, splitter[2], splitter[-1].split('.nc')[0])
 
             sdir = os.path.join(savedir, pv)
             save_file = os.path.join(sdir, save_name)
