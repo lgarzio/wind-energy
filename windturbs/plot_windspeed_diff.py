@@ -3,7 +3,8 @@
 """
 Author: Lori Garzio on 2/17/2022
 Last modified: 2/17/2022
-Plot wind speed difference at hub height (160m), wind farm minus control WRF output
+Plot wind speed difference at hub height (160m), wind farm minus control WRF output. Plot optional vectors
+from the control run.
 """
 
 import os
@@ -18,7 +19,7 @@ import functions.plotting as pf
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
 
 
-def main(fdir, fdir_ctrl, savedir):
+def main(fdir, fdir_ctrl, savedir, plot_vec):
     files = sorted(glob.glob(fdir + '*.nc'))
     plt_region = cf.plot_regions('1km')
     extent = plt_region['windturb']['extent']
@@ -36,7 +37,10 @@ def main(fdir, fdir_ctrl, savedir):
 
         save_name = 'windspeed_diff_{}_{}_{}.png'.format(fname.split('/')[-3], splitter[2], splitter[-1].split('.nc')[0])
 
-        sdir = os.path.join(savedir, 'windspeed_160m_diff')
+        if plot_vec:
+            sdir = os.path.join(savedir, 'windspeed_160m_diff_vectors')
+        else:
+            sdir = os.path.join(savedir, 'windspeed_160m_diff')
         save_file = os.path.join(sdir, save_name)
         os.makedirs(sdir, exist_ok=True)
 
@@ -45,6 +49,10 @@ def main(fdir, fdir_ctrl, savedir):
 
         u = np.squeeze(ds.sel(height=160)['U'])
         v = np.squeeze(ds.sel(height=160)['V'])
+
+        # standardize the vectors so they only represent direction
+        u_standardize = u / cf.wind_uv_to_spd(u, v)
+        v_standardize = v / cf.wind_uv_to_spd(u, v)
 
         uctrl = np.squeeze(ds_ctrl.sel(height=160)['U'])
         vctrl = np.squeeze(ds_ctrl.sel(height=160)['V'])
@@ -83,6 +91,12 @@ def main(fdir, fdir_ctrl, savedir):
         kwargs['extend'] = 'both'
         pf.plot_contourf(fig, ax, lon, lat, diff, **kwargs)
 
+        if plot_vec:
+            qs = 5
+            ax.quiver(lon[::qs, ::qs], lat[::qs, ::qs], u_standardize.values[::qs, ::qs],
+                      v_standardize.values[::qs, ::qs], scale=30, width=.002, headlength=4,
+                      transform=ccrs.PlateCarree())
+
         plt.savefig(save_file, dpi=200)
         plt.close()
 
@@ -91,4 +105,5 @@ if __name__ == '__main__':
     file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20220116/'
     file_dir_ctrl = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmctrl/20220116/'
     save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/'
-    main(file_dir, file_dir_ctrl, save_dir)
+    plot_vectors = True
+    main(file_dir, file_dir_ctrl, save_dir, plot_vectors)
