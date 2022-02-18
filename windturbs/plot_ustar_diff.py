@@ -71,7 +71,7 @@ def main(fdir, fdir_ctrl, savedir):
             la_polygon, pa_polygon = cf.extract_lease_area_outlines()
             kwargs = dict()
             kwargs['lw'] = 1.2
-            pf.add_lease_area_polygon(ax, la_polygon, 'magenta', **kwargs)  # lease areas  '#969696'  '#737373'
+            pf.add_lease_area_polygon(ax, la_polygon, '#969696', **kwargs)  # lease areas  '#969696'  '#737373'
 
             # set color map
             cmap = plt.get_cmap('RdBu')
