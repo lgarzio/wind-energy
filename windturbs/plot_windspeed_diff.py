@@ -108,5 +108,5 @@ if __name__ == '__main__':
     file_dir = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20220116/'  # server
     file_dir_ctrl = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmctrl/20220116/'  # server
     save_dir = '/www/home/lgarzio/public_html/bpu/windturbs/'  # server
-    plot_vectors = True
+    plot_vectors = False
     main(file_dir, file_dir_ctrl, save_dir, plot_vectors)
