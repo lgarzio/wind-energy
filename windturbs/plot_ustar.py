@@ -83,7 +83,7 @@ def main(fdir, savedir):
 
 if __name__ == '__main__':
     # file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20220116/'
-    file_dir = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmctrl/20220116/'  # server
+    file_dir = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20220116/'  # server
     # save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/'
     save_dir = '/www/home/lgarzio/public_html/bpu/windturbs/'  # server
     main(file_dir, save_dir)
