@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 2/16/2022
-Last modified: 2/16/2022
+Last modified: 2/17/2022
 Plot U*
 """
 
@@ -42,11 +42,11 @@ def main(fdir, savedir):
             ust = np.squeeze(ds['UST'])
             levels = list(np.arange(0, 1.05, .05))
             zero_value = 1.e-04
-            color_label = 'Friction Velocity (m/s)'
+            color_label = 'UST (m/s)'
 
             if pv == 'ustar_squared':
                 ust = ust * ust
-                color_label = ' '.join(('Friction Velocity Squared', r'$\rm (m^{2}/s^{2}$)'))
+                color_label = ' '.join((r'$\rmUST^{2}$', r'$\rm (m^{2}/s^{2}$)'))
                 levels = list(np.arange(0, .525, .025))
                 zero_value = 9.999999e-09
 
