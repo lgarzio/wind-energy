@@ -28,7 +28,7 @@ def main(f, save_file):
     pf.add_lease_area_polygon_single(ax, la_polygon[9], '#737373')  # cut out of lease area by Atlantic City
 
     # plot all points
-    ax.scatter(df.lon, df.lat, s=.25, transform=ccrs.PlateCarree())
+    ax.scatter(df.lon, df.lat, s=2.5, transform=ccrs.PlateCarree())
 
     plt.savefig(save_file, dpi=200)
     plt.close()
@@ -36,5 +36,5 @@ def main(f, save_file):
 
 if __name__ == '__main__':
     file = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/turbine_locations_draft.csv'
-    savefile = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/wrf_1km_turbine_locations.png'
+    savefile = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/wrf_1km_turbine_locations_final.png'
     main(file, savefile)

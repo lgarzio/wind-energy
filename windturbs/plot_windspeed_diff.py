@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 2/17/2022
-Last modified: 2/17/2022
+Last modified: 2/20/2022
 Plot wind speed difference at hub height (160m), wind farm minus control WRF output. Plot optional vectors
 from the control run.
 """
@@ -66,8 +66,10 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
 
         diff = speed - speed_ctrl
 
-        mask = np.logical_and(diff == 0, diff == 0)
-        diff.values[mask] = np.nan
+        # create a masked array
+        masked_diff = np.ma.masked_inside(diff, -0.5, 0.5)
+        # mask = np.logical_and(diff == 0, diff == 0)
+        # diff.values[mask] = np.nan
 
         # set up the map
         lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
@@ -80,8 +82,10 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
         pf.add_lease_area_polygon(ax, la_polygon, '#969696', **kwargs)  # lease areas  '#969696'  '#737373'
 
         # set color map
-        cmap = plt.get_cmap('RdBu')
-        levels = list(np.arange(-3, 3.5, .5))
+        cmap = plt.get_cmap('RdBu_r')
+        cmap.set_bad('white')
+        #levels = list(np.arange(-3, 3.5, .5))
+        levels = [-3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
 
         kwargs = dict()
         kwargs['ttl'] = '{} {}'.format(color_label, pd.to_datetime(ds.Time.values[0]).strftime('%Y-%m-%d %H:%M'))
@@ -89,7 +93,8 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
         kwargs['clab'] = color_label
         kwargs['levels'] = levels
         kwargs['extend'] = 'both'
-        pf.plot_contourf(fig, ax, lon, lat, diff, **kwargs)
+        kwargs['cbar_ticks'] = [-3, -2, -1, 0, 1, 2, 3]
+        pf.plot_contourf(fig, ax, lon, lat, masked_diff, **kwargs)
 
         if plot_vec:
             qs = 5
