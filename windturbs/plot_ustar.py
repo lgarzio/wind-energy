@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 2/16/2022
-Last modified: 2/17/2022
+Last modified: 2/20/2022
 Plot U*
 """
 
@@ -82,8 +82,8 @@ def main(fdir, savedir):
 
 
 if __name__ == '__main__':
-    # file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20220116/'
-    file_dir = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20220116/'  # server
-    # save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/'
-    save_dir = '/www/home/lgarzio/public_html/bpu/windturbs/'  # server
+    file_dir = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210901/'  # server
+    save_dir = '/www/home/lgarzio/public_html/bpu/windturbs/20210901/'  # server
+    # file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210901/'
+    # save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/20210901/'
     main(file_dir, save_dir)
