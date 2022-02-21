@@ -26,6 +26,7 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
     xticks = plt_region['windturb']['xticks']
     yticks = plt_region['windturb']['yticks']
     color_label = 'Wind Speed Difference (m/s)'
+    heights = [160, 10]
 
     for fname in files:
         f = fname.split('/')[-1]
@@ -35,83 +36,90 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
 
         splitter = f.split('_')
 
-        save_name = 'windspeed_diff_{}_{}.png'.format(splitter[2], splitter[-1].split('.nc')[0])
+        for ht in heights:
 
-        if plot_vec:
-            sdir = os.path.join(savedir, 'windspeed_160m_diff_vectors')
-        else:
-            sdir = os.path.join(savedir, 'windspeed_160m_diff')
-        save_file = os.path.join(sdir, save_name)
-        os.makedirs(sdir, exist_ok=True)
+            save_name = 'windspeed_diff_{}m_{}_{}.png'.format(ht, splitter[2], splitter[-1].split('.nc')[0])
 
-        ds = xr.open_dataset(fname)
-        ds_ctrl = xr.open_dataset(fname_ctrl)
+            if plot_vec:
+                sdir = os.path.join(savedir, f'windspeed_{ht}m_diff_vectors')
+            else:
+                sdir = os.path.join(savedir, f'windspeed_{ht}m_diff')
+            save_file = os.path.join(sdir, save_name)
+            os.makedirs(sdir, exist_ok=True)
 
-        u = np.squeeze(ds.sel(height=160)['U'])
-        v = np.squeeze(ds.sel(height=160)['V'])
+            ds = xr.open_dataset(fname)
+            ds_ctrl = xr.open_dataset(fname_ctrl)
 
-        # standardize the vectors so they only represent direction
-        u_standardize = u / cf.wind_uv_to_spd(u, v)
-        v_standardize = v / cf.wind_uv_to_spd(u, v)
+            if ht == 10:
+                u = np.squeeze(ds['U10'])
+                v = np.squeeze(ds['V10'])
+                uctrl = np.squeeze(ds_ctrl['U10'])
+                vctrl = np.squeeze(ds_ctrl['V10'])
+            else:
+                u = np.squeeze(ds.sel(height=ht)['U'])
+                v = np.squeeze(ds.sel(height=ht)['V'])
+                uctrl = np.squeeze(ds_ctrl.sel(height=ht)['U'])
+                vctrl = np.squeeze(ds_ctrl.sel(height=ht)['V'])
 
-        uctrl = np.squeeze(ds_ctrl.sel(height=160)['U'])
-        vctrl = np.squeeze(ds_ctrl.sel(height=160)['V'])
+            # standardize the vectors so they only represent direction
+            u_standardize = u / cf.wind_uv_to_spd(u, v)
+            v_standardize = v / cf.wind_uv_to_spd(u, v)
 
-        # calculate wind speed from u and v
-        speed = cf.wind_uv_to_spd(u, v)
-        lon = speed.XLONG.values
-        lat = speed.XLAT.values
+            # calculate wind speed from u and v
+            speed = cf.wind_uv_to_spd(u, v)
+            lon = speed.XLONG.values
+            lat = speed.XLAT.values
 
-        speed_ctrl = cf.wind_uv_to_spd(uctrl, vctrl)
+            speed_ctrl = cf.wind_uv_to_spd(uctrl, vctrl)
 
-        diff = speed - speed_ctrl
+            diff = speed - speed_ctrl
 
-        # create a masked array
-        masked_diff = np.ma.masked_inside(diff, -0.5, 0.5)
-        # mask = np.logical_and(diff == 0, diff == 0)
-        # diff.values[mask] = np.nan
+            # create a masked array
+            masked_diff = np.ma.masked_inside(diff, -0.5, 0.5)
+            # mask = np.logical_and(diff == 0, diff == 0)
+            # diff.values[mask] = np.nan
 
-        # set up the map
-        lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
-        fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
-        pf.add_map_features(ax, extent, xticks=xticks, yticks=yticks)
+            # set up the map
+            lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
+            fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
+            pf.add_map_features(ax, extent, xticks=xticks, yticks=yticks)
 
-        la_polygon, pa_polygon = cf.extract_lease_area_outlines()
-        kwargs = dict()
-        kwargs['lw'] = 1.2
-        pf.add_lease_area_polygon(ax, la_polygon, '#969696', **kwargs)  # lease areas  '#969696'  '#737373'
+            la_polygon, pa_polygon = cf.extract_lease_area_outlines()
+            kwargs = dict()
+            kwargs['lw'] = 1.2
+            pf.add_lease_area_polygon(ax, la_polygon, '#969696', **kwargs)  # lease areas  '#969696'  '#737373'
 
-        # set color map
-        cmap = plt.get_cmap('RdBu_r')
-        cmap.set_bad('white')
-        #levels = list(np.arange(-3, 3.5, .5))
-        levels = [-3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
+            # set color map
+            cmap = plt.get_cmap('RdBu_r')
+            cmap.set_bad('white')
+            #levels = list(np.arange(-3, 3.5, .5))
+            levels = [-3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
 
-        kwargs = dict()
-        kwargs['ttl'] = '{} {}'.format(color_label, pd.to_datetime(ds.Time.values[0]).strftime('%Y-%m-%d %H:%M'))
-        kwargs['cmap'] = cmap
-        kwargs['clab'] = color_label
-        kwargs['levels'] = levels
-        kwargs['extend'] = 'both'
-        kwargs['cbar_ticks'] = [-3, -2, -1, 0, 1, 2, 3]
-        pf.plot_contourf(fig, ax, lon, lat, masked_diff, **kwargs)
+            kwargs = dict()
+            kwargs['ttl'] = '{} {}'.format(color_label, pd.to_datetime(ds.Time.values[0]).strftime('%Y-%m-%d %H:%M'))
+            kwargs['cmap'] = cmap
+            kwargs['clab'] = color_label
+            kwargs['levels'] = levels
+            kwargs['extend'] = 'both'
+            kwargs['cbar_ticks'] = [-3, -2, -1, 0, 1, 2, 3]
+            pf.plot_contourf(fig, ax, lon, lat, masked_diff, **kwargs)
 
-        if plot_vec:
-            qs = 5
-            ax.quiver(lon[::qs, ::qs], lat[::qs, ::qs], u_standardize.values[::qs, ::qs],
-                      v_standardize.values[::qs, ::qs], scale=30, width=.002, headlength=4,
-                      transform=ccrs.PlateCarree())
+            if plot_vec:
+                qs = 5
+                ax.quiver(lon[::qs, ::qs], lat[::qs, ::qs], u_standardize.values[::qs, ::qs],
+                          v_standardize.values[::qs, ::qs], scale=30, width=.002, headlength=4,
+                          transform=ccrs.PlateCarree())
 
-        plt.savefig(save_file, dpi=200)
-        plt.close()
+            plt.savefig(save_file, dpi=200)
+            plt.close()
 
 
 if __name__ == '__main__':
-    # file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20220116/'
-    # file_dir_ctrl = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmctrl/20220116/'
-    # save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/'
-    file_dir = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20220116/'  # server
-    file_dir_ctrl = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmctrl/20220116/'  # server
-    save_dir = '/www/home/lgarzio/public_html/bpu/windturbs/'  # server
+    # file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210901/'
+    # file_dir_ctrl = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmctrl/20210901/'
+    # save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/20210901/'
+    file_dir = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210901/'  # server
+    file_dir_ctrl = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmctrl/20210901/'  # server
+    save_dir = '/www/home/lgarzio/public_html/bpu/windturbs/20210901/'  # server
     plot_vectors = False
     main(file_dir, file_dir_ctrl, save_dir, plot_vectors)
