@@ -73,7 +73,7 @@ def add_lease_area_polygon_single(ax, lease_area_list, line_color, lw=.8):
             ax.plot(poly_lons, poly_lats, ls='-', lw=lw, color=line_color, transform=ccrs.PlateCarree())
 
 
-def add_map_features(ax, axes_limits, xticks=None, yticks=None, landcolor=None, ecolor=None):
+def add_map_features(ax, axes_limits, xticks=None, yticks=None, landcolor=None, ecolor=None, zoom_shore=None):
     """
     Adds latitude and longitude gridlines and labels, coastlines, and statelines to a cartopy map object
     :param ax: plotting axis object
@@ -82,6 +82,7 @@ def add_map_features(ax, axes_limits, xticks=None, yticks=None, landcolor=None, 
     :param yticks: optiona list of y tick locations
     :param landcolor: optional, specify land color
     :param ecolor: optional, specify edge color, default is black
+    :param zoom_shore: optional, set to True if zooming into the shoreline (provides more resolution)
     """
     gl = ax.gridlines(draw_labels=True, linewidth=1, color='gray', alpha=0.5, linestyle='dotted', x_inline=False)
     gl.top_labels = False
@@ -105,7 +106,10 @@ def add_map_features(ax, axes_limits, xticks=None, yticks=None, landcolor=None, 
     if yticks:
         gl.ylocator = mticker.FixedLocator(yticks)
 
-    land = cfeature.NaturalEarthFeature('physical', 'land', '10m')
+    if zoom_shore:
+        land = cfeature.GSHHSFeature(scale='full')
+    else:
+        land = cfeature.NaturalEarthFeature('physical', 'land', '10m')
 
     if landcolor is not None:
         lc = landcolor
