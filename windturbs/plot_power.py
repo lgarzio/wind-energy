@@ -50,7 +50,7 @@ def main(fdir, savedir):
         # set up the map
         lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
         fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
-        pf.add_map_features(ax, extent, xticks=xticks, yticks=yticks)
+        pf.add_map_features(ax, extent, xticks=xticks, yticks=yticks, landcolor='tan', zoom_shore=True)
 
         la_polygon, pa_polygon = cf.extract_lease_area_outlines()
         pf.add_lease_area_polygon(ax, la_polygon, '#737373')  # lease areas
