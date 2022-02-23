@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 2/17/2022
-Last modified: 2/20/2022
+Last modified: 2/22/2022
 Plot difference in U*, wind farm minus control WRF output
 """
 
@@ -18,7 +18,7 @@ import functions.plotting as pf
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
 
 
-def main(fdir, fdir_ctrl, savedir):
+def main(fdir, fdir_ctrl, savedir, plot_turbs):
     files = sorted(glob.glob(fdir + '*.nc'))
     plt_region = cf.plot_regions('1km')
     extent = plt_region['windturb']['extent']
@@ -46,21 +46,30 @@ def main(fdir, fdir_ctrl, savedir):
 
             ust = np.squeeze(ds['UST'])
             ust_ctrl = np.squeeze(ds_ctrl['UST'])
-            #levels = list(np.arange(-.15, .175, .025))
-            levels = [-0.15, -0.125, -0.1, -0.075, -0.05, -0.025, 0.025, 0.05, 0.075, 0.1, 0.125, 0.15]
-            cbar_ticks = [-0.15, -0.1, -0.05, 0, 0.05, 0.1, 0.15]
+            levels = [-0.1, -0.09, -0.08, -0.07, -0.06, -0.05, -0.04, -0.03, -0.02, -0.01,
+                      0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]
+            cbar_ticks = [-0.1, -0.08, -0.06, -0.04, -0.02,  0, 0.02, 0.04, 0.06, 0.08, 0.1]
             color_label = 'UST Difference (m/s)'
 
             if pv == 'ustar_squared_diff':
                 ust = ust * ust
                 ust_ctrl = ust_ctrl * ust_ctrl
                 color_label = ' '.join((r'$\rmUST^{2}$ Difference', r'$\rm (m^{2}/s^{2}$)'))
-                #levels = list(np.arange(-.15, .175, .025))
 
             diff = ust - ust_ctrl
 
+            # mask the land values
+            landmask = ds['LANDMASK']  # 1=land, 0=water
+            lakemask = ds['LAKEMASK']  # 1=lake, 0=non-lake
+
+            ldmask = np.logical_and(landmask == 1, landmask == 1)
+            diff.values[ldmask] = np.nan
+
+            lkmask = np.logical_and(lakemask == 1, lakemask == 1)
+            diff.values[lkmask] = np.nan
+
             # create a masked array
-            masked_diff = np.ma.masked_inside(diff, -0.025, 0.025)
+            masked_diff = np.ma.masked_inside(diff, -0.01, 0.01)
 
             # mask = np.logical_and(diff == 0, diff == 0)
             # diff.values[mask] = np.nan
@@ -71,7 +80,7 @@ def main(fdir, fdir_ctrl, savedir):
             # set up the map
             lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
             fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
-            pf.add_map_features(ax, extent, xticks=xticks, yticks=yticks)
+            pf.add_map_features(ax, extent, xticks=xticks, yticks=yticks, landcolor='tan', zoom_shore=True)
 
             la_polygon, pa_polygon = cf.extract_lease_area_outlines()
             kwargs = dict()
@@ -91,15 +100,21 @@ def main(fdir, fdir_ctrl, savedir):
             kwargs['cbar_ticks'] = cbar_ticks
             pf.plot_contourf(fig, ax, lon, lat, masked_diff, **kwargs)
 
+            if plot_turbs:
+                df = pd.read_csv(plot_turbs)
+                ax.scatter(df.lon, df.lat, s=.5, color='k', transform=ccrs.PlateCarree())
+
             plt.savefig(save_file, dpi=200)
             plt.close()
 
 
 if __name__ == '__main__':
-    # file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210901/'
-    # file_dir_ctrl = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmctrl/20210901/'
-    # save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/20210901/'
     file_dir = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210901/'  # server
     file_dir_ctrl = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmctrl/20210901/'  # server
     save_dir = '/www/home/lgarzio/public_html/bpu/windturbs/20210901/'  # server
-    main(file_dir, file_dir_ctrl, save_dir)
+    plot_turbines = '/www/home/lgarzio/public_html/bpu/windturbs/turbine_locations_final.csv'  # server
+    # file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210901/'
+    # file_dir_ctrl = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmctrl/20210901/'
+    # save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/20210901/'
+    # plot_turbines = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/turbine_locations_final.csv'
+    main(file_dir, file_dir_ctrl, save_dir, plot_turbines)
