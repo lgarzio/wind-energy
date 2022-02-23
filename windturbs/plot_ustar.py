@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 2/16/2022
-Last modified: 2/20/2022
+Last modified: 2/22/2022
 Plot U*
 """
 
@@ -18,7 +18,7 @@ import functions.plotting as pf
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
 
 
-def main(fdir, savedir):
+def main(fdir, savedir, plot_turbs):
     files = sorted(glob.glob(fdir + '*.nc'))
     plt_region = cf.plot_regions('1km')
     extent = plt_region['windturb']['extent']
@@ -53,13 +53,23 @@ def main(fdir, savedir):
             mask = np.logical_and(ust == zero_value, ust == zero_value)
             ust.values[mask] = np.nan
 
+            # mask the land values
+            landmask = ds['LANDMASK']  # 1=land, 0=water
+            lakemask = ds['LAKEMASK']  # 1=lake, 0=non-lake
+
+            ldmask = np.logical_and(landmask == 1, landmask == 1)
+            ust.values[ldmask] = np.nan
+
+            lkmask = np.logical_and(lakemask == 1, lakemask == 1)
+            ust.values[lkmask] = np.nan
+
             lon = ust.XLONG.values
             lat = ust.XLAT.values
 
             # set up the map
             lccproj = ccrs.LambertConformal(central_longitude=-74.5, central_latitude=38.8)
             fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=lccproj))
-            pf.add_map_features(ax, extent, xticks=xticks, yticks=yticks)
+            pf.add_map_features(ax, extent, xticks=xticks, yticks=yticks, landcolor='tan', zoom_shore=True)
 
             la_polygon, pa_polygon = cf.extract_lease_area_outlines()
             kwargs = dict()
@@ -77,6 +87,10 @@ def main(fdir, savedir):
             kwargs['extend'] = 'max'
             pf.plot_contourf(fig, ax, lon, lat, ust, **kwargs)
 
+            if plot_turbs:
+                df = pd.read_csv(plot_turbs)
+                ax.scatter(df.lon, df.lat, s=.5, color='k', transform=ccrs.PlateCarree())
+
             plt.savefig(save_file, dpi=200)
             plt.close()
 
@@ -84,6 +98,8 @@ def main(fdir, savedir):
 if __name__ == '__main__':
     file_dir = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210901/'  # server
     save_dir = '/www/home/lgarzio/public_html/bpu/windturbs/20210901/'  # server
+    plot_turbines = '/www/home/lgarzio/public_html/bpu/windturbs/turbine_locations_final.csv'  # server
     # file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210901/'
     # save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/20210901/'
-    main(file_dir, save_dir)
+    # plot_turbines = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/turbine_locations_final.csv'
+    main(file_dir, save_dir, plot_turbines)
