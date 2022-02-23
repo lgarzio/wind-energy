@@ -81,7 +81,7 @@ def main(fdir, savedir, plot_turbs):
 
         if plot_turbs:
             df = pd.read_csv(plot_turbs)
-            ax.scatter(df.lon, df.lat, s=1, color='k', transform=ccrs.PlateCarree())
+            ax.scatter(df.lon, df.lat, s=.5, color='k', transform=ccrs.PlateCarree())
 
         plt.savefig(save_file, dpi=200)
         plt.close()
