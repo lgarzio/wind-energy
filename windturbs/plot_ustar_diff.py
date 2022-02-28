@@ -111,7 +111,7 @@ def main(fdir, fdir_ctrl, savedir, plot_turbs):
 if __name__ == '__main__':
     file_dir = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210902/'  # server
     file_dir_ctrl = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmctrl/20210902/'  # server
-    save_dir = '/www/home/lgarzio/public_html/bpu/windturbs/202109012/'  # server
+    save_dir = '/www/home/lgarzio/public_html/bpu/windturbs/20210902/'  # server
     plot_turbines = '/www/home/lgarzio/public_html/bpu/windturbs/turbine_locations_final.csv'  # server
     # file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210901/'
     # file_dir_ctrl = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmctrl/20210901/'
