@@ -2,9 +2,9 @@
 
 """
 Author: Lori Garzio on 3/21/2022
-Last modified: 3/21/2022
-Plot hourly energy demand (downloaded from https://dataminer2.pjm.com/feed/hrl_load_metered) vs estimated wind power at
-160m at the "Endurance" point in the middle of the WEA off of Atlantic City, NJ
+Last modified: 3/22/2022
+Plot hourly energy demand (downloaded from https://dataminer2.pjm.com/feed/hrl_load_metered) vs windspeed and estimated
+wind power at 160m at the "Endurance" point in the middle of the WEA off of Atlantic City, NJ. Separated by month
 """
 
 import datetime as dt
@@ -22,13 +22,11 @@ plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise
 def main(sDir, pjm_dir, sdate, edate):
     wrf = 'http://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
     point = [39.17745, -74.18033]
+    plt_vars = ['windspeed', 'power']
 
     # for calculating power
     # power_curve = pd.read_csv('/home/lgarzio/rucool/bpu/wrf/wrf_lw15mw_power.csv')  # on server
     power_curve = pd.read_csv('/Users/garzio/Documents/rucool/bpu/wrf/wrf_lw15mw_power.csv')
-
-    savedir = os.path.join(sDir, 'demand_vs_power')
-    os.makedirs(savedir, exist_ok=True)
 
     ds = xr.open_dataset(wrf)
 
@@ -46,14 +44,15 @@ def main(sDir, pjm_dir, sdate, edate):
     u = ds.sel(height=160)['U'][:, i, j]
     v = ds.sel(height=160)['V'][:, i, j]
     ws = cf.wind_uv_to_spd(u, v)
+    ws_df = ws.to_dataframe('windspeed')
 
     # estimated 15MW wind power (kW)
     power = xr.DataArray(np.interp(ws, power_curve['Wind Speed'], power_curve['Power']), coords=ws.coords)
-    power_df = power.to_dataframe('power_kw')
-    power_df['power_mw'] = power_df['power_kw'] * .001
+    power_df = power.to_dataframe('power')
+    power_df['power'] = power_df['power'] * .001  # convert kw to mw
 
     # read in the PJM energy demand data
-    csv_files = glob.glob(os.path.join(pjm_dir, '*.csv'))
+    csv_files = glob.glob(os.path.join(pjm_dir, '*.csv'))  # '*_AE.csv'
     df = pd.DataFrame()
     for csv_file in csv_files:
         df1 = pd.read_csv(csv_file)
@@ -64,33 +63,46 @@ def main(sDir, pjm_dir, sdate, edate):
     df.set_index('time', inplace=True)
     df_total = df.groupby('time').sum()
 
-    merged = df_total.merge(power_df, on='time', how='outer')
+    merged1 = df_total.merge(power_df, on='time', how='outer')
+    merged = merged1.merge(ws_df, on='time', how='outer')
     merged.dropna(inplace=True)
     merged['month'] = merged.index.month_name()
 
-    fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(16, 6), sharex=True, sharey=True)
-    plt.subplots_adjust(left=0.08, right=0.92)
+    for pv in plt_vars:
+        savedir = os.path.join(sDir, f'demand_vs_{pv}')
+        os.makedirs(savedir, exist_ok=True)
 
-    ax1.scatter(merged.power_mw, merged.mw, color='lightgray', s=25)
-    ax2.scatter(merged.power_mw, merged.mw, color='lightgray', s=25)
+        fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(16, 6), sharex=True, sharey=True)
+        plt.subplots_adjust(left=0.08, right=0.92)
 
-    jun = merged[merged['month'] == 'June']
-    jul = merged[merged['month'] == 'July']
+        jun = merged[merged['month'] == 'June']
+        jul = merged[merged['month'] == 'July']
 
-    ax1.scatter(jun.power_mw, jun.mw, color='mediumblue', edgecolor='k', s=25, linewidth=.5)
-    ax2.scatter(jul.power_mw, jul.mw, color='darkorange', edgecolor='k', s=25, linewidth=.5)
+        ax1.scatter(merged[pv], merged.mw, color='lightgray', s=25)
+        ax2.scatter(merged[pv], merged.mw, color='lightgray', s=25)
 
-    ax1.set_title('June 2020')
-    ax2.set_title('July 2020')
+        ax1.scatter(jun[pv], jun.mw, color='mediumblue', edgecolor='k', s=25, linewidth=.5)
+        ax2.scatter(jul[pv], jul.mw, color='darkorange', edgecolor='k', s=25, linewidth=.5)
 
-    ax1.set_ylabel('Electricity Demand (MWh)')
-    ax1.set_xlabel('Estimated 15MW Wind Power at 160m (MWh)')
-    ax2.set_xlabel('Estimated 15MW Wind Power at 160m (MWh)')
+        ax1.set_title('June 2020')
+        ax2.set_title('July 2020')
 
-    save_filename = 'demand_vs_power_{}-{}'.format(sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d'))
-    sfile = os.path.join(savedir, save_filename)
-    plt.savefig(sfile, dpi=300)
-    plt.close()
+        ax1.set_ylabel('Electricity Demand (MW)')
+        if pv == 'power':
+            xaxis = 'Estimated Power from 15 MW Wind Turbine (MW)'
+        elif pv == 'windspeed':
+            xaxis = 'Wind Speed at 160m (m/s)'
+            xposition = [3, 10.9]
+            for xc in xposition:
+                ax1.axvline(x=xc, color='dimgray', linestyle='--')
+                ax2.axvline(x=xc, color='dimgray', linestyle='--')
+        ax1.set_xlabel(xaxis)
+        ax2.set_xlabel(xaxis)
+
+        save_filename = 'demand_vs_{}_months_{}-{}.png'.format(pv, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d'))  # -AE
+        sfile = os.path.join(savedir, save_filename)
+        plt.savefig(sfile, dpi=300)
+        plt.close()
 
 
 if __name__ == '__main__':
