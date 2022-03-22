@@ -112,7 +112,7 @@ def find_coords(elem, findstr):
     return coordlist
 
 
-def plot_regions(plot_version):
+def plot_regions(plot_version=None):
     regions = dict(
         full_grid=dict(quiver_subset=dict(_10m=11, _160m=13, _200m=13, _250m=13, _500m=13),
                        quiver_scale=45,
@@ -151,38 +151,39 @@ def plot_regions(plot_version):
                       lease_area=True)
     )
 
-    if 'monthly' in plot_version:
-        for k, v in regions.items():
-            v.update(
-                meanws=dict(limits=dict(_10m=dict(vmin=4, vmax=10, rint=.5), _160m=dict(vmin=6, vmax=14, rint=.5),
-                                        _200m=dict(vmin=4, vmax=10, rint=.5), _250m=dict(vmin=6, vmax=14, rint=.5))),
-                sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12, rint=.5), _160m=dict(vmin=6, vmax=12, rint=.5),
-                                        _200m=dict(vmin=6, vmax=12, rint=.5), _250m=dict(vmin=6, vmax=12, rint=.5))),
-                sdwind_norm=dict(
-                    limits=dict(_10m=dict(vmin=.9, vmax=1.2, rint=.05), _160m=dict(vmin=.9, vmax=1.2, rint=.05),
-                                _200m=dict(vmin=.9, vmax=1.2, rint=.05), _250m=dict(vmin=.9, vmax=1.2, rint=.05)))
-            )
+    if plot_version:
+        if 'monthly' in plot_version:
+            for k, v in regions.items():
+                v.update(
+                    meanws=dict(limits=dict(_10m=dict(vmin=4, vmax=10, rint=.5), _160m=dict(vmin=6, vmax=14, rint=.5),
+                                            _200m=dict(vmin=4, vmax=10, rint=.5), _250m=dict(vmin=6, vmax=14, rint=.5))),
+                    sdwind=dict(limits=dict(_10m=dict(vmin=6, vmax=12, rint=.5), _160m=dict(vmin=6, vmax=12, rint=.5),
+                                            _200m=dict(vmin=6, vmax=12, rint=.5), _250m=dict(vmin=6, vmax=12, rint=.5))),
+                    sdwind_norm=dict(
+                        limits=dict(_10m=dict(vmin=.9, vmax=1.2, rint=.05), _160m=dict(vmin=.9, vmax=1.2, rint=.05),
+                                    _200m=dict(vmin=.9, vmax=1.2, rint=.05), _250m=dict(vmin=.9, vmax=1.2, rint=.05)))
+                )
 
-    elif plot_version in ['summer2020_all', 'seabreeze_days', 'noseabreeze_days', 'seabreeze_morning',
-                          'seabreeze_afternoon', 'noseabreeze_morning', 'noseabreeze_afternoon', 'hourly_avg',
-                          'seabreeze_days_hourly_avg', 'noseabreeze_days_hourly_avg']:
-        for k, v in regions.items():
-            v.update(
-                meanws=dict(limits=dict(_10m=dict(vmin=2, vmax=10, rint=.5), _160m=dict(vmin=2, vmax=10, rint=.5),
-                                        _200m=dict(vmin=2, vmax=10, rint=.5), _250m=dict(vmin=2, vmax=10, rint=.5))),
-                sdwind=dict(limits=dict(_10m=dict(vmin=2, vmax=10, rint=.5), _160m=dict(vmin=2, vmax=10, rint=.5),
-                                        _200m=dict(vmin=2, vmax=10, rint=.5), _250m=dict(vmin=2, vmax=10, rint=.5))),
-                sdwind_norm=dict(
-                    limits=dict(_10m=dict(vmin=.6, vmax=1.2, rint=.05), _160m=dict(vmin=.6, vmax=1.2, rint=.05),
-                                _200m=dict(vmin=.6, vmax=1.2, rint=.05), _250m=dict(vmin=.6, vmax=1.2, rint=.05)))
-            )
+        elif plot_version in ['summer2020_all', 'seabreeze_days', 'noseabreeze_days', 'seabreeze_morning',
+                              'seabreeze_afternoon', 'noseabreeze_morning', 'noseabreeze_afternoon', 'hourly_avg',
+                              'seabreeze_days_hourly_avg', 'noseabreeze_days_hourly_avg']:
+            for k, v in regions.items():
+                v.update(
+                    meanws=dict(limits=dict(_10m=dict(vmin=2, vmax=10, rint=.5), _160m=dict(vmin=2, vmax=10, rint=.5),
+                                            _200m=dict(vmin=2, vmax=10, rint=.5), _250m=dict(vmin=2, vmax=10, rint=.5))),
+                    sdwind=dict(limits=dict(_10m=dict(vmin=2, vmax=10, rint=.5), _160m=dict(vmin=2, vmax=10, rint=.5),
+                                            _200m=dict(vmin=2, vmax=10, rint=.5), _250m=dict(vmin=2, vmax=10, rint=.5))),
+                    sdwind_norm=dict(
+                        limits=dict(_10m=dict(vmin=.6, vmax=1.2, rint=.05), _160m=dict(vmin=.6, vmax=1.2, rint=.05),
+                                    _200m=dict(vmin=.6, vmax=1.2, rint=.05), _250m=dict(vmin=.6, vmax=1.2, rint=.05)))
+                )
 
-    elif plot_version in ['diff_morning', 'diff_afternoon', 'diff_seabreeze', 'diff_noseabreeze']:
-        for k, v in regions.items():
-            v.update(
-                meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.5), _160m=dict(vmin=-3, vmax=3, rint=.5),
-                                    _200m=dict(vmin=-3, vmax=3, rint=.5), _250m=dict(vmin=-3, vmax=3, rint=.5)))
-            )
+        elif plot_version in ['diff_morning', 'diff_afternoon', 'diff_seabreeze', 'diff_noseabreeze']:
+            for k, v in regions.items():
+                v.update(
+                    meanws_diff=dict(limits=dict(_10m=dict(vmin=-3, vmax=3, rint=.5), _160m=dict(vmin=-3, vmax=3, rint=.5),
+                                        _200m=dict(vmin=-3, vmax=3, rint=.5), _250m=dict(vmin=-3, vmax=3, rint=.5)))
+                )
 
     return regions
 
