@@ -86,7 +86,7 @@ def main(sDir, pjm_dir, sdate, edate):
 
             ax.scatter(hour_df[pv], hour_df.mw, color=cmap(hour), edgecolor='k', s=25, linewidth=.5)
 
-            ax.set_title('June-July 2020: Hour {:02d}'.format(hour))
+            ax.set_title('June-Aug 2020: Hour {:02d}'.format(hour))
 
             ax.set_ylabel('Electricity Demand (MW)')
             if pv == 'power':
@@ -110,5 +110,5 @@ if __name__ == '__main__':
     pjm_loc = '/Users/garzio/Documents/rucool/bpu/wrf/PJM_energy_load'
     #save_directory = '/www/home/lgarzio/public_html/bpu/windspeed_averages'  # on server
     start_date = dt.datetime(2020, 6, 1, 0, 0)  # dt.datetime(2019, 9, 1, 0, 0)
-    end_date = dt.datetime(2020, 7, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
+    end_date = dt.datetime(2020, 8, 31, 23, 0)  # dt.datetime(2020, 9, 1, 0, 0)
     main(save_directory, pjm_loc, start_date, end_date)
