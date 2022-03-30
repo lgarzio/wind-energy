@@ -273,7 +273,7 @@ def main(sDir, sdate, edate, intvl, line):
     elif intvl == 'power_hovmoller_zoomed':
         savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     else:
-        savedir = os.path.join(sDir, '{}_{}-{}-new_sb_dates'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
+        savedir = os.path.join(sDir, '{}_{}-{}'.format(intvl, sdate.strftime('%Y%m%d'), edate.strftime('%Y%m%d')))
     if line == 'wea':
         savedir = f'{savedir}_wea'
     os.makedirs(savedir, exist_ok=True)
