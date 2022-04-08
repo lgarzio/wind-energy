@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/12/2021
-Last modified: 1/27/2022
+Last modified: 4/8/2022
 Plot average WRF windspeeds at 10m, 160m, 200m and 250m at user-defined grouping intervals (monthly and seabreeze vs
 non-seabreeze days)
 """
@@ -89,6 +89,8 @@ def plot_averages(ds_sub, save_dir, interval_name, t0=None, sb_t0str=None, sb_t1
 
         for pv, plt_info in plt_vars.items():
             for pr, region_info in plt_regions.items():
+                if pr == 'windturb':
+                    continue
                 region_savedir = os.path.join(save_dir, pr)
                 os.makedirs(region_savedir, exist_ok=True)
 
@@ -260,6 +262,8 @@ def plot_windspeed_differences(ds1, ds2, save_dir, interval_name, t0=None, sb_t0
 
         for pv, plt_info in plt_vars.items():
             for pr, region_info in plt_regions.items():
+                if pr == 'windturb':
+                    continue
                 region_savedir = os.path.join(save_dir, pr)
                 os.makedirs(region_savedir, exist_ok=True)
 
