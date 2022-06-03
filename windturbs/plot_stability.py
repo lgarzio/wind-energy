@@ -30,7 +30,7 @@ def main(fdir, savedir, plot_turbs):
     for fname in files:
         splitter = fname.split('/')[-1].split('_')
 
-        save_name = '{}_{}_{}.png'.format(pv, splitter[2], splitter[-1].split('.nc')[0])
+        save_name = '{}_{}_{}_{}.png'.format(pv, fname.split('/')[-3], splitter[2], splitter[-1].split('.nc')[0])
 
         sdir = os.path.join(savedir, pv)
         save_file = os.path.join(sdir, save_name)
