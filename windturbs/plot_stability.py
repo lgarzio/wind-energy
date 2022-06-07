@@ -32,7 +32,7 @@ def main(fdir, savedir, plot_turbs):
 
         save_name = '{}_{}_{}_{}.png'.format(pv, fname.split('/')[-3], splitter[2], splitter[-1].split('.nc')[0])
 
-        sdir = os.path.join(savedir, pv)
+        sdir = os.path.join(savedir, f'{pv}-no_lmask')
         save_file = os.path.join(sdir, save_name)
         os.makedirs(sdir, exist_ok=True)
 
@@ -48,15 +48,15 @@ def main(fdir, savedir, plot_turbs):
 
         diff = tsk - airtemp
 
-        # mask the land values
-        landmask = ds['LANDMASK']  # 1=land, 0=water
-        lakemask = ds['LAKEMASK']  # 1=lake, 0=non-lake
-
-        ldmask = np.logical_and(landmask == 1, landmask == 1)
-        diff.values[ldmask] = np.nan
-
-        lkmask = np.logical_and(lakemask == 1, lakemask == 1)
-        diff.values[lkmask] = np.nan
+        # # mask the land values
+        # landmask = ds['LANDMASK']  # 1=land, 0=water
+        # lakemask = ds['LAKEMASK']  # 1=lake, 0=non-lake
+        #
+        # ldmask = np.logical_and(landmask == 1, landmask == 1)
+        # diff.values[ldmask] = np.nan
+        #
+        # lkmask = np.logical_and(lakemask == 1, lakemask == 1)
+        # diff.values[lkmask] = np.nan
 
         # create a masked array
         masked_diff = np.ma.masked_inside(diff, -0.01, 0.01)
