@@ -12,6 +12,7 @@ import matplotlib.cm as cm
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from shapely.geometry import Polygon
 
 
 def add_contours(ax, londata, latdata, vardata, clist, label_format=None):
@@ -73,7 +74,8 @@ def add_lease_area_polygon_single(ax, lease_area_list, line_color, lw=.8):
             ax.plot(poly_lons, poly_lats, ls='-', lw=lw, color=line_color, transform=ccrs.PlateCarree())
 
 
-def add_map_features(ax, axes_limits, xticks=None, yticks=None, landcolor=None, ecolor=None, zoom_shore=None):
+def add_map_features(ax, axes_limits, xticks=None, yticks=None, landcolor=None, ecolor=None, zoom_shore=None,
+                     add_ocean_color=None):
     """
     Adds latitude and longitude gridlines and labels, coastlines, and statelines to a cartopy map object
     :param ax: plotting axis object
@@ -83,6 +85,7 @@ def add_map_features(ax, axes_limits, xticks=None, yticks=None, landcolor=None, 
     :param landcolor: optional, specify land color
     :param ecolor: optional, specify edge color, default is black
     :param zoom_shore: optional, set to True if zooming into the shoreline (provides more resolution)
+    :param add_ocean_color: optional, add ocean color
     """
     gl = ax.gridlines(draw_labels=True, linewidth=1, color='gray', alpha=0.5, linestyle='dotted', x_inline=False)
     gl.top_labels = False
@@ -131,6 +134,9 @@ def add_map_features(ax, axes_limits, xticks=None, yticks=None, landcolor=None, 
 
     ax.add_feature(cfeature.BORDERS, zorder=6, edgecolor=ec)
     ax.add_feature(state_lines, zorder=7, edgecolor=ec)
+
+    if add_ocean_color:
+        ax.add_feature(cfeature.OCEAN)
 
 
 def make_patch_spines_invisible(ax):
