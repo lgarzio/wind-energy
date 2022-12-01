@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 2/16/2022
-Last modified: 2/20/2022
+Last modified: 12/1/2022
 Plot power from simulated wind turbines in RU-WRF
 """
 
@@ -19,8 +19,10 @@ import functions.plotting as pf
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
 
 
-def main(fdir, savedir, plot_turbs):
-    files = sorted(glob.glob(fdir + '*.nc'))
+def main(fdir, savedir):
+    files = sorted(glob.glob(os.path.join(fdir, '*.nc')))
+    if files[0].endswith('_M00.nc'):
+        files = sorted(glob.glob(os.path.join(fdir, '*_M00.nc')))
     plt_region = cf.plot_regions('1km')
     extent = plt_region['windturb']['extent']
     xticks = plt_region['windturb']['xticks']
@@ -28,16 +30,21 @@ def main(fdir, savedir, plot_turbs):
     color_label = 'Wind Power (kW)'
 
     for fname in files:
+        run_type = fname.split('/')[-3]
+        if 'ctrl' in run_type:
+            plot_turbs = False
+        else:
+            plot_turbs = '/www/web/rucool/windenergy/ru-wrf/windturbs/turbine_locations_final.csv'  # server
+            #plot_turbs = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/turbine_locations_final.csv'
 
-        splitter = fname.split('/')[-1].split('_')
+        ds = xr.open_dataset(fname)
+        tm = pd.to_datetime(ds.Time.values[0])
 
-        save_name = 'power_{}_{}_{}.png'.format(fname.split('/')[-3], splitter[2], splitter[-1].split('.nc')[0])
+        save_name = 'power_{}_{}_H{:03d}.png'.format(run_type, tm.strftime('%Y%m%d'), tm.hour)
 
         sdir = os.path.join(savedir, 'power')
         save_file = os.path.join(sdir, save_name)
         os.makedirs(sdir, exist_ok=True)
-
-        ds = xr.open_dataset(fname)
 
         power = np.squeeze(ds.POWER) / 1000  # power in kW
 
@@ -88,10 +95,8 @@ def main(fdir, savedir, plot_turbs):
 
 
 if __name__ == '__main__':
-    file_dir = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210902/'  # server
-    save_dir = '/www/home/lgarzio/public_html/bpu/windturbs/20210902/'  # server
-    plot_turbines = '/www/home/lgarzio/public_html/bpu/windturbs/turbine_locations_final.csv'  # server
-    # file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210901/'
-    # save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/20210901/'
-    # plot_turbines = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/turbine_locations_final.csv'
-    main(file_dir, save_dir, plot_turbines)
+    file_dir = '/home/coolgroup/ru-wrf/real-time/v4.1_parallel/wrfout_windturbs/constdt/1km_wf2km/processed/20220810'  # server
+    save_dir = '/www/web/rucool/windenergy/ru-wrf/windturbs'  # server
+    #file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20220810'
+    #save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/20220810/'
+    main(file_dir, save_dir)
