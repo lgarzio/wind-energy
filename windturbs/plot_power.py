@@ -42,7 +42,7 @@ def main(fdir, savedir):
 
         save_name = 'power_{}_{}_H{:03d}.png'.format(run_type, tm.strftime('%Y%m%d'), tm.hour)
 
-        sdir = os.path.join(savedir, 'power')
+        sdir = os.path.join(savedir, tm.strftime('%Y%m%d'), 'power')
         save_file = os.path.join(sdir, save_name)
         os.makedirs(sdir, exist_ok=True)
 
