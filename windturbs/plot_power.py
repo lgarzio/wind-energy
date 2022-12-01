@@ -30,7 +30,7 @@ def main(fdir, savedir):
     color_label = 'Wind Power (kW)'
 
     for fname in files:
-        run_type = fname.split('/')[-3]
+        run_type = fname.split('/')[-4]
         if 'ctrl' in run_type:
             plot_turbs = False
         else:
