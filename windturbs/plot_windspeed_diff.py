@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 2/17/2022
-Last modified: 2/22/2022
+Last modified: 12/1/2022
 Plot wind speed difference at hub height (160m), wind farm minus control WRF output. Plot optional vectors
 from the control run.
 """
@@ -19,8 +19,10 @@ import functions.plotting as pf
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
 
 
-def main(fdir, fdir_ctrl, savedir, plot_vec, plot_turbs):
-    files = sorted(glob.glob(fdir + '*.nc'))
+def main(fdir, fdir_ctrl, savedir, plot_vec):
+    files = sorted(glob.glob(os.path.join(fdir, '*.nc')))
+    if files[0].endswith('_M00.nc'):
+        files = sorted(glob.glob(os.path.join(fdir, '*_M00.nc')))
     plt_region = cf.plot_regions('1km')
     extent = plt_region['windturb']['extent']
     xticks = plt_region['windturb']['xticks']
@@ -34,16 +36,24 @@ def main(fdir, fdir_ctrl, savedir, plot_vec, plot_turbs):
         # find the corresponding control file
         fname_ctrl = os.path.join(fdir_ctrl, f)
 
-        splitter = f.split('_')
+        run_type = fname.split('/')[-4]
+        if 'ctrl' in run_type:
+            plot_turbs = False
+        else:
+            plot_turbs = '/www/web/rucool/windenergy/ru-wrf/windturbs/turbine_locations_final.csv'  # server
+            # plot_turbs = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/turbine_locations_final.csv'
 
         for ht in heights:
 
-            save_name = 'windspeed_diff_{}m_{}_{}.png'.format(ht, splitter[2], splitter[-1].split('.nc')[0])
+            ds = xr.open_dataset(fname)
+            tm = pd.to_datetime(ds.Time.values[0])
+
+            save_name = 'windspeed_diff_{}m_{}_H{:03d}.png'.format(ht, tm.strftime('%Y%m%d'), tm.hour)
 
             if plot_vec:
-                sdir = os.path.join(savedir, f'windspeed_{ht}m_diff_vectors')
+                sdir = os.path.join(savedir, tm.strftime('%Y%m%d'), f'windspeed_{ht}m_diff_vectors')
             else:
-                sdir = os.path.join(savedir, f'windspeed_{ht}m_diff')
+                sdir = os.path.join(savedir, tm.strftime('%Y%m%d'), f'windspeed_{ht}m_diff')
             save_file = os.path.join(sdir, save_name)
             os.makedirs(sdir, exist_ok=True)
 
@@ -119,13 +129,11 @@ def main(fdir, fdir_ctrl, savedir, plot_vec, plot_turbs):
 
 
 if __name__ == '__main__':
-    file_dir = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210902/'  # server
-    file_dir_ctrl = '/home/lgarzio/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmctrl/20210902/'  # server
-    save_dir = '/www/home/lgarzio/public_html/bpu/windturbs/20210902/'  # server
-    plot_turbines = '/www/home/lgarzio/public_html/bpu/windturbs/turbine_locations_final.csv'  # server
+    file_dir = '/home/coolgroup/ru-wrf/real-time/v4.1_parallel/wrfout_windturbs/constdt/1km_wf2km/processed/20220810'  # server
+    file_dir_ctrl = '/home/coolgroup/ru-wrf/real-time/v4.1_parallel/wrfout_windturbs/constdt/1km_ctrl/processed/20220810'  # server
+    save_dir = '/www/web/rucool/windenergy/ru-wrf/windturbs'  # server
     # file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20210901/'
     # file_dir_ctrl = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmctrl/20210901/'
     # save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/20210901/'
-    # plot_turbines = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/turbine_locations_final.csv'
     plot_vectors = False
-    main(file_dir, file_dir_ctrl, save_dir, plot_vectors, plot_turbines)
+    main(file_dir, file_dir_ctrl, save_dir, plot_vectors)
