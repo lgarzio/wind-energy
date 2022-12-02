@@ -32,7 +32,7 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
 
     # get the date from the first file
     ds0 = xr.open_dataset(files[0])
-    tm = pd.to_datetime(ds0.Time.values[0])
+    dirtm = pd.to_datetime(ds0.Time.values[0])
 
     for fname in files:
         f = fname.split('/')[-1]
@@ -49,17 +49,19 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
 
         for ht in heights:
 
-            save_name = 'windspeed_diff_{}m_{}_H{:03d}.png'.format(ht, tm.strftime('%Y%m%d'), tm.hour)
-
-            if plot_vec:
-                sdir = os.path.join(savedir, tm.strftime('%Y%m%d'), f'windspeed_{ht}m_diff_vectors')
-            else:
-                sdir = os.path.join(savedir, tm.strftime('%Y%m%d'), f'windspeed_{ht}m_diff')
-            save_file = os.path.join(sdir, save_name)
-            os.makedirs(sdir, exist_ok=True)
-
             ds = xr.open_dataset(fname)
             ds_ctrl = xr.open_dataset(fname_ctrl)
+
+            tm = pd.to_datetime(ds.Time.values[0])
+
+            save_name = 'windspeed_diff_{}m_{}_H{:03d}.png'.format(ht, dirtm.strftime('%Y%m%d'), tm.hour)
+
+            if plot_vec:
+                sdir = os.path.join(savedir, dirtm.strftime('%Y%m%d'), f'windspeed_{ht}m_diff_vectors')
+            else:
+                sdir = os.path.join(savedir, dirtm.strftime('%Y%m%d'), f'windspeed_{ht}m_diff')
+            save_file = os.path.join(sdir, save_name)
+            os.makedirs(sdir, exist_ok=True)
 
             if ht == 10:
                 u = np.squeeze(ds['U10'])
