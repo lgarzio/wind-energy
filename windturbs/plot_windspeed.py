@@ -44,7 +44,7 @@ def main(fdir, savedir):
 
             save_name = 'windspeed_{}m_{}_{}_H{:03d}.png'.format(ht, run_type, tm.strftime('%Y%m%d'), tm.hour)
 
-            sdir = os.path.join(savedir, f'windspeed_{ht}m')
+            sdir = os.path.join(savedir, tm.strftime('%Y%m%d'), f'windspeed_{ht}m')
             save_file = os.path.join(sdir, save_name)
             os.makedirs(sdir, exist_ok=True)
 
