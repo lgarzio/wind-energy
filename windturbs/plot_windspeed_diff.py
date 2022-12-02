@@ -30,6 +30,10 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
     color_label = 'Wind Speed Difference (m/s)'
     heights = [160, 10]
 
+    # get the date from the first file
+    ds0 = xr.open_dataset(files[0])
+    tm = pd.to_datetime(ds0.Time.values[0])
+
     for fname in files:
         f = fname.split('/')[-1]
 
@@ -44,9 +48,6 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
             # plot_turbs = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/turbine_locations_final.csv'
 
         for ht in heights:
-
-            ds = xr.open_dataset(fname)
-            tm = pd.to_datetime(ds.Time.values[0])
 
             save_name = 'windspeed_diff_{}m_{}_H{:03d}.png'.format(ht, tm.strftime('%Y%m%d'), tm.hour)
 

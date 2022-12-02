@@ -29,6 +29,10 @@ def main(fdir, savedir):
     yticks = plt_region['windturb']['yticks']
     color_label = 'Wind Power (kW)'
 
+    # get the date from the first file
+    ds0 = xr.open_dataset(files[0])
+    tm = pd.to_datetime(ds0.Time.values[0])
+
     for fname in files:
         run_type = fname.split('/')[-4]
         if 'ctrl' in run_type:
@@ -38,7 +42,6 @@ def main(fdir, savedir):
             #plot_turbs = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/turbine_locations_final.csv'
 
         ds = xr.open_dataset(fname)
-        tm = pd.to_datetime(ds.Time.values[0])
 
         save_name = 'power_{}_{}_H{:03d}.png'.format(run_type, tm.strftime('%Y%m%d'), tm.hour)
 

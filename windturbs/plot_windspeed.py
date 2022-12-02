@@ -29,6 +29,10 @@ def main(fdir, savedir):
     color_label = 'Wind Speed (m/s)'
     heights = [160, 10]
 
+    # get the date from the first file
+    ds0 = xr.open_dataset(files[0])
+    tm = pd.to_datetime(ds0.Time.values[0])
+
     for fname in files:
         run_type = fname.split('/')[-4]
         if 'ctrl' in run_type:
@@ -40,7 +44,6 @@ def main(fdir, savedir):
         for ht in heights:
 
             ds = xr.open_dataset(fname)
-            tm = pd.to_datetime(ds.Time.values[0])
 
             save_name = 'windspeed_{}m_{}_{}_H{:03d}.png'.format(ht, run_type, tm.strftime('%Y%m%d'), tm.hour)
 
