@@ -46,7 +46,7 @@ def main(fdir, savedir):
             ds = xr.open_dataset(fname)
             tm = pd.to_datetime(ds.Time.values[0])
 
-            save_name = 'windspeed_{}m_{}_{}_H{:03d}.png'.format(ht, run_type, dirtm.strftime('%Y%m%d'), tm.hour)
+            save_name = 'windspeed_{}m_{}_{}_H{:03d}.png'.format(ht, run_type, tm.strftime('%Y%m%d'), tm.hour)
 
             sdir = os.path.join(savedir, dirtm.strftime('%Y%m%d'), f'windspeed_{ht}m')
             save_file = os.path.join(sdir, save_name)

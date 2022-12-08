@@ -54,7 +54,7 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
 
             tm = pd.to_datetime(ds.Time.values[0])
 
-            save_name = 'windspeed_diff_{}m_{}_H{:03d}.png'.format(ht, dirtm.strftime('%Y%m%d'), tm.hour)
+            save_name = 'windspeed_diff_{}m_{}_H{:03d}.png'.format(ht, tm.strftime('%Y%m%d'), tm.hour)
 
             if plot_vec:
                 sdir = os.path.join(savedir, dirtm.strftime('%Y%m%d'), f'windspeed_{ht}m_diff_vectors')
