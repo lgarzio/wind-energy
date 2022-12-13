@@ -88,7 +88,8 @@ def main(fdir, savedir):
             kwargs['cmap'] = cmap
             kwargs['clab'] = color_label
             kwargs['levels'] = levels
-            kwargs['extend'] = 'both'
+            kwargs['extend'] = 'top'
+            kwargs['cbar_ticks'] = list(np.arange(0, 9, 1))
             pf.plot_contourf(fig, ax, lon, lat, speed, **kwargs)
 
             qs = 5
