@@ -88,7 +88,7 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
             diff = speed - speed_ctrl
 
             # create a masked array
-            masked_diff = np.ma.masked_inside(diff, -0.5, 0.5)
+            masked_diff = np.ma.masked_inside(diff, -0.1, 0.1)
             # mask = np.logical_and(diff == 0, diff == 0)
             # diff.values[mask] = np.nan
 
@@ -105,8 +105,8 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
             # set color map
             cmap = plt.get_cmap('RdBu_r')
             cmap.set_bad('white')
-            #levels = list(np.arange(-3, 3.5, .5))
-            levels = [-3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
+            levels = list(np.arange(-2, 2.1, .1))
+            #levels = [-3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
 
             kwargs = dict()
             kwargs['ttl'] = '{} {}'.format(color_label, pd.to_datetime(ds.Time.values[0]).strftime('%Y-%m-%d %H:%M'))
@@ -114,7 +114,7 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
             kwargs['clab'] = color_label
             kwargs['levels'] = levels
             kwargs['extend'] = 'both'
-            kwargs['cbar_ticks'] = [-3, -2, -1, 0, 1, 2, 3]
+            #kwargs['cbar_ticks'] = [-3, -2, -1, 0, 1, 2, 3]
             pf.plot_contourf(fig, ax, lon, lat, masked_diff, **kwargs)
 
             if plot_vec:

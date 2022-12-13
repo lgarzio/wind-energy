@@ -80,7 +80,8 @@ def main(fdir, savedir):
 
             # set color map
             cmap = plt.get_cmap('BuPu')
-            levels = list(np.arange(2, 16.5, .5))
+            #levels = list(np.arange(2, 16.5, .5))
+            levels = list(np.arange(0, 8.1, .1))
 
             kwargs = dict()
             kwargs['ttl'] = '{} {}'.format(color_label, pd.to_datetime(ds.Time.values[0]).strftime('%Y-%m-%d %H:%M'))
