@@ -84,7 +84,7 @@ def main(fdir, savedir):
             levels = list(np.arange(0, 8.1, .1))
 
             kwargs = dict()
-            kwargs['ttl'] = 'Wind Speed ({},) {}'.format(ht, pd.to_datetime(ds.Time.values[0]).strftime('%Y-%m-%d %H:%M'))
+            kwargs['ttl'] = 'Wind Speed ({}m) {}'.format(ht, pd.to_datetime(ds.Time.values[0]).strftime('%Y-%m-%d %H:%M'))
             kwargs['cmap'] = cmap
             kwargs['clab'] = color_label
             kwargs['levels'] = levels
