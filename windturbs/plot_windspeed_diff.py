@@ -109,7 +109,7 @@ def main(fdir, fdir_ctrl, savedir, plot_vec):
             #levels = [-3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
 
             kwargs = dict()
-            kwargs['ttl'] = '{} {}'.format(color_label, pd.to_datetime(ds.Time.values[0]).strftime('%Y-%m-%d %H:%M'))
+            kwargs['ttl'] = 'Wind Speed Difference ({}m) {}'.format(ht, pd.to_datetime(ds.Time.values[0]).strftime('%Y-%m-%d %H:%M'))
             kwargs['cmap'] = cmap
             kwargs['clab'] = color_label
             kwargs['levels'] = levels
