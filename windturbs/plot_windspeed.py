@@ -34,7 +34,7 @@ def main(fdir, savedir):
     dirtm = pd.to_datetime(ds0.Time.values[0])
 
     for fname in files:
-        run_type = fname.split('/')[-4]
+        run_type = fname.split('/')[-3]
         if 'ctrl' in run_type:
             plot_turbs = False
         else:
@@ -105,7 +105,7 @@ def main(fdir, savedir):
 
 
 if __name__ == '__main__':
-    file_dir = '/home/coolgroup/ru-wrf/real-time/v4.1_parallel/wrfout_windturbs/constdt/1km_wf2km/processed/20220810'  # 1km_ctrl 1km_wf2km
+    file_dir = '/home/coolgroup/ru-wrf/real-time/v4.1_parallel/processed_windturbs/1km_wf2km/20220814'  # 1km_ctrl 1km_wf2km
     save_dir = '/www/web/rucool/windenergy/ru-wrf/windturbs'  # server
     # file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/wrfout_windturbs/1kmrun/20220810'
     # save_dir = '/Users/garzio/Documents/rucool/bpu/wrf/windturbs/plots/20220810/'
